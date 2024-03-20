@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Navigation;
 using SeeMyServer.Datas;
 using SeeMyServer.Models;
 using SeeMyServer.Pages.Dialogs;
+using SeeMyServer.Methods;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -107,6 +108,20 @@ namespace SeeMyServer.Pages
                 // 加载数据
                 LoadData();
             }
+        }
+        private void SSHSendThread(CMSModel cmsModel)
+        {
+            // 在子线程中执行任务
+            Thread subThread = new Thread(new ThreadStart(() =>
+            {
+                string sshCMD = "";
+                string res = Method.SendSSHCommand(sshCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
+                _dispatcherQueue.TryEnqueue(() =>
+                {
+                    
+                });
+            }));
+            subThread.Start();
         }
     }
 }
