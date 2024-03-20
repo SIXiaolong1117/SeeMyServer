@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SeeMyServer (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "SeeMyServer (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="SeeMyServer.Pages.Dialogs.AddServer"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:SeeMyServer.Pages.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer MinWidth="280">
+        <Grid Width="260">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock
+                x:Uid="AddServerHeader"
+                Grid.Row="0"
+                Grid.Column="0"
+                HorizontalAlignment="Center"
+                FontSize="24" />
+
+            <Grid Grid.Row="1" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  Display Name  -->
+                <TextBox
+                    x:Uid="DisplayName"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="0,4,0,0" />
+
+                <!--  Host or IP  -->
+                <TextBox
+                    x:Uid="HostIP"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0,4,0,0" />
+
+                <!--  Port  -->
+                <TextBox
+                    x:Uid="HostPort"
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="0,4,0,0" />
+            </Grid>
+
+            <Grid
+                Grid.Row="2"
+                Grid.Column="0"
+                Margin="0,24,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                    x:Uid="AddServerAuthenticationHeader"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    FontSize="16" />
+
+                <!--  SSHUser  -->
+                <TextBox
+                    x:Uid="SSHUser"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0,4,0,0" />
+
+                <!--  SSHPasswd  -->
+                <!--
+                <PasswordBox
+                    x:Uid="SSHPasswd"
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="0,4,0,0" />-->
+
+                <Grid Grid.Row="2" Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <!--  SSHKey  -->
+                    <TextBox
+                        x:Uid="SSHKey"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Margin="0,4,0,0" />
+                    <Button
+                        x:Uid="SSHKeyPathButton"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Margin="4,0,0,0"
+                        VerticalAlignment="Bottom" />
+                </Grid>
+            </Grid>
+
+            <TextBlock
+                x:Uid="SSHKeyTips"
+                Grid.Row="4"
+                Grid.Column="0"
+                Margin="0,4,0,0"
+                FontSize="12"
+                Foreground="Gray"
+                TextWrapping="Wrap" />
+
+            <Grid Grid.Row="5" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  OS Type  -->
+                <ComboBox
+                    x:Uid="OSType"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="0,4,0,0"
+                    HorizontalAlignment="Stretch" />
+                <TextBlock
+                    x:Uid="OSTypeTips"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0,4,0,0"
+                    FontSize="12"
+                    Foreground="Gray"
+                    TextWrapping="Wrap" />
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</ContentDialog>
