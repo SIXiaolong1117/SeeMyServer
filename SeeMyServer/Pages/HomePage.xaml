@@ -59,7 +59,81 @@
             Grid.Row="1"
             Grid.Column="0"
             Margin="24,0,24,24"
-            Style="{StaticResource TransparentScrollViewerStyle}" />
+            Style="{StaticResource TransparentScrollViewerStyle}">
+            <ListView
+                x:Name="dataListView"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Padding="0,4,0,4"
+                                Text="{Binding Name}" />
+                            <Grid Grid.Row="1" Grid.Column="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ProgressRing
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Width="60"
+                                    Height="60"
+                                    Background="LightGray"
+                                    IsIndeterminate="False"
+                                    Value="0" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Padding="0,4,0,4"
+                                    Text="{Binding Name}" />
+                                <ProgressRing
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Width="60"
+                                    Height="60"
+                                    Background="LightGray"
+                                    IsIndeterminate="False"
+                                    Value="0" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Padding="0,4,0,4"
+                                    Text="{Binding Name}" />
+                                <ProgressRing
+                                    Grid.Row="0"
+                                    Grid.Column="2"
+                                    Width="60"
+                                    Height="60"
+                                    Background="LightGray"
+                                    IsIndeterminate="False"
+                                    Value="0" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="2"
+                                    Padding="0,4,0,4"
+                                    Text="{Binding Name}" />
+                            </Grid>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </ScrollViewer>
 
         <Grid
             Grid.Row="1"

@@ -41,6 +41,7 @@
 
                 <!--  Display Name  -->
                 <TextBox
+                    x:Name="DisplayNameTextBox"
                     x:Uid="DisplayName"
                     Grid.Row="0"
                     Grid.Column="0"
@@ -48,6 +49,7 @@
 
                 <!--  Host or IP  -->
                 <TextBox
+                    x:Name="HostIPTextBox"
                     x:Uid="HostIP"
                     Grid.Row="1"
                     Grid.Column="0"
@@ -55,6 +57,7 @@
 
                 <!--  Port  -->
                 <TextBox
+                    x:Name="HostPortTextBox"
                     x:Uid="HostPort"
                     Grid.Row="2"
                     Grid.Column="0"
@@ -82,6 +85,7 @@
 
                 <!--  SSHUser  -->
                 <TextBox
+                    x:Name="SSHUserTextBox"
                     x:Uid="SSHUser"
                     Grid.Row="1"
                     Grid.Column="0"
@@ -105,6 +109,7 @@
                     </Grid.ColumnDefinitions>
                     <!--  SSHKey  -->
                     <TextBox
+                        x:Name="SSHKeyTextBox"
                         x:Uid="SSHKey"
                         Grid.Row="0"
                         Grid.Column="0"
@@ -138,6 +143,7 @@
 
                 <!--  OS Type  -->
                 <ComboBox
+                    x:Name="OSTypeTextBox"
                     x:Uid="OSType"
                     Grid.Row="0"
                     Grid.Column="0"
