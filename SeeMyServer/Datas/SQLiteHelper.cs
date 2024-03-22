@@ -217,7 +217,6 @@ namespace SeeMyServer.Datas
                             HostIP = reader.IsDBNull(2) ? "" : reader.GetString(2),
                             HostPort = reader.IsDBNull(3) ? "" : reader.GetString(3),
                             SSHUser = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                            SSHPasswd = reader.IsDBNull(5) ? "" : reader.GetString(5),
                             SSHKey = reader.IsDBNull(6) ? "" : reader.GetString(6),
                             OSType = reader.IsDBNull(7) ? "" : reader.GetString(7)
                         };

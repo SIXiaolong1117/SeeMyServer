@@ -129,6 +129,9 @@
   <data name="AppTitle" xml:space="preserve">
     <value>See My Server</value>
   </data>
+  <data name="CPUUsageText.Text" xml:space="preserve">
+    <value>CPU Usage</value>
+  </data>
   <data name="DialogAdd" xml:space="preserve">
     <value>Add</value>
   </data>

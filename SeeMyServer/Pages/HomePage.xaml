@@ -83,51 +83,66 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
+                                <!--  CPU Usage  -->
                                 <ProgressRing
                                     Grid.Row="0"
                                     Grid.Column="0"
                                     Width="60"
                                     Height="60"
-                                    Background="LightGray"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
                                     IsIndeterminate="False"
-                                    Value="0" />
+                                    Value="{Binding CPUUsage}" />
                                 <TextBlock
+                                    x:Uid="CPUUsageText"
                                     Grid.Row="1"
                                     Grid.Column="0"
-                                    Padding="0,4,0,4"
-                                    Text="{Binding Name}" />
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding CPUUsage}" />
+                                <!--  MEM Usage  -->
                                 <ProgressRing
                                     Grid.Row="0"
                                     Grid.Column="1"
                                     Width="60"
                                     Height="60"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
                                     Background="LightGray"
                                     IsIndeterminate="False"
                                     Value="0" />
-                                <TextBlock
-                                    Grid.Row="1"
-                                    Grid.Column="1"
-                                    Padding="0,4,0,4"
-                                    Text="{Binding Name}" />
+
+                                <!--  Usage  -->
+                                <!--
                                 <ProgressRing
-                                    Grid.Row="0"
+                                    Grid.Row="1"
                                     Grid.Column="2"
                                     Width="60"
                                     Height="60"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
                                     Background="LightGray"
                                     IsIndeterminate="False"
                                     Value="0" />
                                 <TextBlock
-                                    Grid.Row="1"
+                                    Grid.Row="0"
                                     Grid.Column="2"
                                     Padding="0,4,0,4"
-                                    Text="{Binding Name}" />
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding Name}" />-->
                             </Grid>
                         </Grid>
                     </DataTemplate>

@@ -6,13 +6,16 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace SeeMyServer.Models
 {
-    public class CMSModel
+    public class CMSModel : INotifyPropertyChanged
     {
+        private string _cpuUsage;
+
         public int Id { get; set; }
         public string Name { get; set; }
         public string HostIP { get; set; }
@@ -21,5 +24,25 @@ namespace SeeMyServer.Models
         public string SSHPasswd { get; set; }
         public string SSHKey { get; set; }
         public string OSType { get; set; }
+
+        public string CPUUsage
+        {
+            get { return _cpuUsage; }
+            set
+            {
+                if (_cpuUsage != value)
+                {
+                    _cpuUsage = value;
+                    OnPropertyChanged(nameof(CPUUsage));
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }
