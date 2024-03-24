@@ -40,6 +40,7 @@ namespace SeeMyServer.Pages
             // 页面初始化后，加载数据
             LoadData();
             LoadString();
+
         }
         private void LoadString()
         {
@@ -66,21 +67,26 @@ namespace SeeMyServer.Pages
             // 查询数据
             dataList = dbHelper.QueryData();
 
+            // 将数据列表绑定到ListView
+            dataListView.ItemsSource = dataList;
+
             // 初始化占用
             foreach (CMSModel cmsModel in dataList)
             {
                 cmsModel.CPUUsage = "0%";
                 cmsModel.MEMUsage = "0%";
+                cmsModel.NETSent = "0 B/s ↑";
+                cmsModel.NETReceived = "0 B/s ↓";
             }
-
-            // 将数据列表绑定到ListView
-            dataListView.ItemsSource = dataList;
 
             // 创建并配置 DispatcherTimer
             timer = new DispatcherTimer();
             timer.Tick += Timer_Tick;
             // 每隔段时间触发一次
             timer.Interval = TimeSpan.FromSeconds(5);
+
+            // 先执行一次事件处理方法
+            Timer_Tick(null, null);
 
             // 启动计时器
             timer.Start();
@@ -141,7 +147,7 @@ namespace SeeMyServer.Pages
                 {
                     // 会引起 Windows Defender 实时保护的警觉，导致 Antimalware Service 占用高。
                     // CPU 占用（Processor Utility对应任务管理器性能页面的CPU占用，Processor Time对应任务管理器详情信息页面的CPU）
-                    string cpuUsageCMD = "powershell (Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue";
+                    string cpuUsageCMD = "powershell -Command \"(Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue\"";
                     string cpuUsageRes = await Task.Run(() =>
                     {
                         return Method.SendSSHCommand(cpuUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
@@ -152,7 +158,7 @@ namespace SeeMyServer.Pages
                     cpuUsageRes = Math.Min(Math.Max(cpuUsageResValue, 0), 100).ToString();
 
                     // 内存占用
-                    string memUsageCMD = "powershell ((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100)";
+                    string memUsageCMD = "powershell -Command \"((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100)\"";
                     string memUsageRes = await Task.Run(() =>
                     {
                         return Method.SendSSHCommand(memUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
@@ -162,9 +168,60 @@ namespace SeeMyServer.Pages
                     // 将值限制在 0 到 100 之间，并转换回字符串形式
                     memUsageRes = Math.Min(Math.Max(memUsageResValue, 0), 100).ToString();
 
+                    // 网络 发送
+                    string netSentCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Sent/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
+                    string netSentRes = await Task.Run(() =>
+                    {
+                        return Method.SendSSHCommand(netSentCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
+                    });
+                    // 获取命令输出的值并转换为整数
+                    int netSentValue = int.Parse(netSentRes.Split('.')[0]);
+                    if (netSentValue >= 1024)
+                    {
+                        netSentRes = (netSentValue / 1024).ToString() + " KB";
+                    }
+                    else if (netSentValue >= 1024 * 1024)
+                    {
+                        netSentRes = (netSentValue / 1024 / 1024).ToString() + " MB";
+                    }
+                    else if (netSentValue >= 1024 * 1024 * 1024)
+                    {
+                        netSentRes = (netSentValue / 1024 / 1024 / 1024).ToString() + " GB";
+                    }
+                    else
+                    {
+                        netSentRes = netSentValue + " B";
+                    }
+
+                    // 网络 接收
+                    string netReceivedCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Received/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
+                    string netReceivedRes = await Task.Run(() =>
+                    {
+                        return Method.SendSSHCommand(netReceivedCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
+                    });
+                    // 获取命令输出的值并转换为整数
+                    int netReceivedValue = int.Parse(netReceivedRes.Split('.')[0]);
+                    if (netReceivedValue >= 1024)
+                    {
+                        netReceivedRes = (netReceivedValue / 1024).ToString() + " KB";
+                    }
+                    else if (netReceivedValue >= 1024 * 1024)
+                    {
+                        netReceivedRes = (netReceivedValue / 1024 / 1024).ToString() + " MB";
+                    }
+                    else if (netReceivedValue >= 1024 * 1024 * 1024)
+                    {
+                        netReceivedRes = (netReceivedValue / 1024 / 1024 / 1024).ToString() + " GB";
+                    }
+                    else
+                    {
+                        netReceivedRes = netReceivedValue + " B";
+                    }
 
                     cmsModel.CPUUsage = cpuUsageRes + "%";
                     cmsModel.MEMUsage = memUsageRes + "%";
+                    cmsModel.NETSent = netSentRes + " ↑";
+                    cmsModel.NETReceived = netReceivedRes + " ↓";
                 }
             }
 

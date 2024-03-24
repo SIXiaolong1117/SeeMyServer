@@ -16,6 +16,8 @@ namespace SeeMyServer.Models
     {
         private string _cpuUsage;
         private string _memUsage;
+        private string _netReceived;
+        private string _netSent;
 
         public int Id { get; set; }
         public string Name { get; set; }
@@ -47,6 +49,32 @@ namespace SeeMyServer.Models
                 {
                     _memUsage = value;
                     OnPropertyChanged(nameof(MEMUsage));
+                }
+            }
+        }
+
+        public string NETReceived
+        {
+            get { return _netReceived; }
+            set
+            {
+                if (_netReceived != value)
+                {
+                    _netReceived = value;
+                    OnPropertyChanged(nameof(NETReceived));
+                }
+            }
+        }
+
+        public string NETSent
+        {
+            get { return _netSent; }
+            set
+            {
+                if (_netSent != value)
+                {
+                    _netSent = value;
+                    OnPropertyChanged(nameof(NETSent));
                 }
             }
         }
