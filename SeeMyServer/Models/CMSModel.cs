@@ -15,6 +15,7 @@ namespace SeeMyServer.Models
     public class CMSModel : INotifyPropertyChanged
     {
         private string _cpuUsage;
+        private string _memUsage;
 
         public int Id { get; set; }
         public string Name { get; set; }
@@ -34,6 +35,18 @@ namespace SeeMyServer.Models
                 {
                     _cpuUsage = value;
                     OnPropertyChanged(nameof(CPUUsage));
+                }
+            }
+        }
+        public string MEMUsage
+        {
+            get { return _memUsage; }
+            set
+            {
+                if (_memUsage != value)
+                {
+                    _memUsage = value;
+                    OnPropertyChanged(nameof(MEMUsage));
                 }
             }
         }

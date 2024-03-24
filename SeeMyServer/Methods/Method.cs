@@ -23,12 +23,14 @@ namespace SeeMyServer.Methods
                 }
                 else
                 {
-                    return "SSH 客户端初始化失败。";
+                    //return "SSH 客户端初始化失败。";
+                    return "0";
                 }
             }
             catch (Exception ex)
             {
-                return "SSH 操作失败：" + ex.Message;
+                //return "SSH 操作失败：" + ex.Message;
+                return "0";
             }
         }
         // SSH初始化
@@ -65,14 +67,16 @@ namespace SeeMyServer.Methods
 
                     if (!string.IsNullOrEmpty(SSHCommand.Error))
                     {
-                        return "错误：" + SSHCommand.Error;
+                        //return "错误：" + SSHCommand.Error;
+                        return "0";
                     }
                     else
                     {
                         return SSHCommand.Result;
                     }
                 }
-                return "SSH 命令执行失败。";
+                //return "SSH 命令执行失败。";
+                return "0";
             }
             finally
             {

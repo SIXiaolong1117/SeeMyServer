@@ -51,6 +51,13 @@ namespace SeeMyServer.Pages
             // 查询数据
             dataList = dbHelper.QueryData();
 
+            // 初始化占用
+            foreach (CMSModel cmsModel in dataList)
+            {
+                cmsModel.CPUUsage = "0%";
+                cmsModel.MEMUsage = "0%";
+            }
+
             // 将数据列表绑定到ListView
             dataListView.ItemsSource = dataList;
 
@@ -62,56 +69,49 @@ namespace SeeMyServer.Pages
 
             // 启动计时器
             timer.Start();
-
-            //SSHSendThread(dataList);
         }
 
         private async void Timer_Tick(object sender, object e)
         {
+            // 停止计时器
+            //timer.Stop();
+
             foreach (CMSModel cmsModel in dataList)
             {
-                string sshCMD = "powershell (Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue";
-                string res = await Task.Run(() =>
+                if (cmsModel.OSType == "Windows")
                 {
-                    return Method.SendSSHCommand(sshCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
-                });
+                    // 会引起 Windows Defender 实时保护的警觉，导致 Antimalware Service 占用高。
+                    // CPU 占用（Processor Utility对应任务管理器性能页面的CPU占用，Processor Time对应任务管理器详情信息页面的CPU）
+                    string cpuUsageCMD = "powershell (Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue";
+                    string cpuUsageRes = await Task.Run(() =>
+                    {
+                        return Method.SendSSHCommand(cpuUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
+                    });
+                    // 获取命令输出的值并转换为整数
+                    int cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]);
+                    // 将值限制在 0 到 100 之间，并转换回字符串形式
+                    cpuUsageRes = Math.Min(Math.Max(cpuUsageResValue, 0), 100).ToString();
 
-                // 获取命令输出的值并转换为整数
-                int value = int.Parse(res.Split('.')[0]);
-                // 将值限制在 0 到 100 之间，并转换回字符串形式
-                res = Math.Min(Math.Max(value, 0), 100).ToString();
-                cmsModel.CPUUsage = res + "%";
+                    // 内存占用
+                    string memUsageCMD = "powershell ((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100)";
+                    string memUsageRes = await Task.Run(() =>
+                    {
+                        return Method.SendSSHCommand(memUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
+                    });
+                    //// 获取命令输出的值并转换为整数
+                    int memUsageResValue = int.Parse(memUsageRes.Split('.')[0]);
+                    //// 将值限制在 0 到 100 之间，并转换回字符串形式
+                    memUsageRes = Math.Min(Math.Max(memUsageResValue, 0), 100).ToString();
+
+
+                    cmsModel.CPUUsage = cpuUsageRes + "%";
+                    cmsModel.MEMUsage = memUsageRes + "%";
+                }
             }
+
+            // 重新启动计时器
+            //timer.Start();
         }
-
-        //private void LoadData()
-        //{
-        //    // 在子线程中执行任务
-        //    Thread subThread = new Thread(new ThreadStart(() =>
-        //    {
-        //        while (true)
-        //        {
-        //            // 在UI线程上更新
-        //            _dispatcherQueue.TryEnqueue(() =>
-        //            {
-
-        //                // 实例化SQLiteHelper
-        //                SQLiteHelper dbHelper = new SQLiteHelper();
-
-        //                // 查询数据
-        //                List<CMSModel> dataList = dbHelper.QueryData();
-
-        //                // 将数据列表绑定到ListView
-        //                dataListView.ItemsSource = dataList;
-
-        //            });
-
-        //            // 延迟1s
-        //            Thread.Sleep(1000);
-        //        }
-        //    }));
-        //    subThread.Start();
-        //}
 
         // 添加/修改配置按钮点击
         private async void AddConfigButton_Click(object sender, RoutedEventArgs e)
@@ -141,29 +141,6 @@ namespace SeeMyServer.Pages
                 dbHelper.InsertData(initialCMSModelData);
                 // 加载数据
                 LoadData();
-            }
-        }
-        private void SSHSendThread(List<CMSModel> dataList)
-        {
-            foreach (CMSModel cmsModel in dataList)
-            {
-                // 在子线程中执行任务
-                Thread subThread = new Thread(new ThreadStart(() =>
-                {
-                    while (true)
-                    {                        //string sshCMD = "powershell (Get-Counter '\\Processor(_Total)\\% Processor Time').CounterSamples.CookedValue";
-                        string sshCMD = "powershell (Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue";
-                        string res = Method.SendSSHCommand(sshCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
-                        res = res.Split('.')[0];
-                        cmsModel.CPUUsage = res + "%";
-                        //_dispatcherQueue.TryEnqueue(() =>
-                        //{
-
-                        //});
-                        //Thread.Sleep(1000);
-                    }
-                }));
-                subThread.Start();
             }
         }
     }

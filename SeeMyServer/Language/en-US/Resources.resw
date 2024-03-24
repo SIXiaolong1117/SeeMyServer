@@ -171,6 +171,9 @@
   <data name="HostPort.PlaceholderText" xml:space="preserve">
     <value>eg: 22</value>
   </data>
+  <data name="MEMUsageText.Text" xml:space="preserve">
+    <value>MEM Usage</value>
+  </data>
   <data name="OSType.Header" xml:space="preserve">
     <value>OS Type</value>
   </data>
