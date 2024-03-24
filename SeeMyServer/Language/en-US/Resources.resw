@@ -129,11 +129,26 @@
   <data name="AppTitle" xml:space="preserve">
     <value>See My Server</value>
   </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="ConfirmDelete.Text" xml:space="preserve">
+    <value>Confirm delete?</value>
+  </data>
   <data name="CPUUsageText.Text" xml:space="preserve">
     <value>CPU Usage</value>
   </data>
+  <data name="deleteMenuItemText" xml:space="preserve">
+    <value>Delete</value>
+  </data>
   <data name="DialogAdd" xml:space="preserve">
     <value>Add</value>
+  </data>
+  <data name="DialogChange" xml:space="preserve">
+    <value>Change</value>
   </data>
   <data name="DialogClose" xml:space="preserve">
     <value>Close</value>
@@ -143,6 +158,9 @@
   </data>
   <data name="DisplayName.PlaceholderText" xml:space="preserve">
     <value>Display Name</value>
+  </data>
+  <data name="editMenuItemText" xml:space="preserve">
+    <value>Edit</value>
   </data>
   <data name="HomePageAddConfig.Label" xml:space="preserve">
     <value>Add</value>

@@ -36,12 +36,12 @@ namespace SeeMyServer.Pages.Dialogs
             HostPortTextBox.Text = cmsModel.HostPort;
             SSHUserTextBox.Text = cmsModel.SSHUser;
             SSHKeyTextBox.Text = cmsModel.SSHKey;
-            OSTypeComboBox.Text = cmsModel.OSType;
 
             // 添加操作系统类型
             OSTypeComboBox.Items.Add("Windows");
-            OSTypeComboBox.Items.Add("Linux");
-            OSTypeComboBox.SelectedItem = "Linux";
+            OSTypeComboBox.Items.Add("Linux");            
+            OSTypeComboBox.Items.Add("OpenWRT");
+            OSTypeComboBox.SelectedItem = cmsModel.OSType;
         }
 
         private void MyDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -63,7 +63,6 @@ namespace SeeMyServer.Pages.Dialogs
                 // 直接返回选中项作为字符串
                 return comboBox.SelectedItem.ToString();
             }
-
             return "<Unknown OS>"; // 如果没有选中项，则返回空字符串
         }
 

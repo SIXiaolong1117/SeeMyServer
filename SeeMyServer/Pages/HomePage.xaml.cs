@@ -39,6 +39,21 @@ namespace SeeMyServer.Pages
 
             // 页面初始化后，加载数据
             LoadData();
+            LoadString();
+        }
+        private void LoadString()
+        {
+            // 在子线程中执行任务
+            Thread subThread = new Thread(new ThreadStart(() =>
+            {
+                _dispatcherQueue.TryEnqueue(() =>
+                {
+                    ConfirmDelete.Content = resourceLoader.GetString("Confirm");
+
+                    CancelDelete.Content = resourceLoader.GetString("Cancel");
+                });
+            }));
+            subThread.Start();
         }
 
         private List<CMSModel> dataList;
@@ -63,9 +78,9 @@ namespace SeeMyServer.Pages
 
             // 创建并配置 DispatcherTimer
             timer = new DispatcherTimer();
-            // 每隔段时间触发一次
-            timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += Timer_Tick;
+            // 每隔段时间触发一次
+            timer.Interval = TimeSpan.FromSeconds(5);
 
             // 启动计时器
             timer.Start();
@@ -78,7 +93,51 @@ namespace SeeMyServer.Pages
 
             foreach (CMSModel cmsModel in dataList)
             {
-                if (cmsModel.OSType == "Windows")
+                if (cmsModel.OSType == "Linux")
+                {
+                    // CPU 占用
+                    string cpuUsageCMD = "top -bn1 | grep '^%Cpu' | sed 's/^.*://; s/,.*//; s/ *//g'";
+                    string cpuUsageRes = await Task.Run(() =>
+                    {
+                        return Method.SendSSHCommand(cpuUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
+                    });
+                    // 获取命令输出的值并转换为整数
+                    int cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]);
+                    cpuUsageRes = cpuUsageResValue.ToString();
+
+                    // 内存占用
+                    string memUsageCMD = "free -m | awk 'NR==2{printf \"%.1f\", $3/$2*100}'";
+                    string memUsageRes = await Task.Run(() =>
+                    {
+                        return Method.SendSSHCommand(memUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
+                    });
+                    // 获取命令输出的值并转换为整数
+                    int memUsageResValue = int.Parse(memUsageRes.Split('.')[0]);
+                    memUsageRes = memUsageResValue.ToString();
+
+                    cmsModel.CPUUsage = cpuUsageRes + "%";
+                    cmsModel.MEMUsage = memUsageRes + "%";
+                }
+                else if (cmsModel.OSType == "OpenWRT")
+                {
+                    // CPU 占用
+                    string cpuUsageCMD = "top -bn1 | head -n 3 | grep -o 'CPU:.*' | awk '{print $2}'";
+                    string cpuUsageRes = await Task.Run(() =>
+                    {
+                        return Method.SendSSHCommand(cpuUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
+                    });
+
+                    // 内存占用
+                    string memUsageCMD = "top -bn1 | head -n 1 | awk '{used=$2; total=$2+$4; printf \"%.0f\", (used/total)*100}'";
+                    string memUsageRes = await Task.Run(() =>
+                    {
+                        return Method.SendSSHCommand(memUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
+                    });
+
+                    cmsModel.CPUUsage = cpuUsageRes.TrimEnd();
+                    cmsModel.MEMUsage = memUsageRes + "%";
+                }
+                else if (cmsModel.OSType == "Windows")
                 {
                     // 会引起 Windows Defender 实时保护的警觉，导致 Antimalware Service 占用高。
                     // CPU 占用（Processor Utility对应任务管理器性能页面的CPU占用，Processor Time对应任务管理器详情信息页面的CPU）
@@ -98,9 +157,9 @@ namespace SeeMyServer.Pages
                     {
                         return Method.SendSSHCommand(memUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
                     });
-                    //// 获取命令输出的值并转换为整数
+                    // 获取命令输出的值并转换为整数
                     int memUsageResValue = int.Parse(memUsageRes.Split('.')[0]);
-                    //// 将值限制在 0 到 100 之间，并转换回字符串形式
+                    // 将值限制在 0 到 100 之间，并转换回字符串形式
                     memUsageRes = Math.Min(Math.Max(memUsageResValue, 0), 100).ToString();
 
 
@@ -141,6 +200,95 @@ namespace SeeMyServer.Pages
                 dbHelper.InsertData(initialCMSModelData);
                 // 加载数据
                 LoadData();
+            }
+        }
+        private async void EditThisConfig(CMSModel cmsModel)
+        {
+            // 创建一个新的dialog对象
+            AddServer dialog = new AddServer(cmsModel);
+            // 对此dialog对象进行配置
+            dialog.XamlRoot = this.XamlRoot;
+            dialog.Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style;
+            dialog.PrimaryButtonText = resourceLoader.GetString("DialogChange");
+            dialog.CloseButtonText = resourceLoader.GetString("DialogClose");
+            // 默认按钮为PrimaryButton
+            dialog.DefaultButton = ContentDialogButton.Primary;
+
+            // 显示Dialog并等待其关闭
+            ContentDialogResult result = await dialog.ShowAsync();
+
+            // 如果按下了Primary
+            if (result == ContentDialogResult.Primary)
+            {
+                // 实例化SQLiteHelper
+                SQLiteHelper dbHelper = new SQLiteHelper();
+                // 更新数据
+                dbHelper.UpdateData(cmsModel);
+                // 重新加载数据
+                LoadData();
+            }
+        }
+        private void ConfirmDelete_Click(object sender, RoutedEventArgs e)
+        {
+            // 关闭二次确认Flyout
+            confirmationDelFlyout.Hide();
+            // 获取NSModel对象
+            CMSModel selectedModel = (CMSModel)dataListView.SelectedItem;
+            // 实例化SQLiteHelper
+            SQLiteHelper dbHelper = new SQLiteHelper();
+            // 删除数据
+            dbHelper.DeleteData(selectedModel);
+            // 重新加载数据
+            LoadData();
+        }
+        private void CancelDelete_Click(object sender, RoutedEventArgs e)
+        {
+            // 关闭二次确认Flyout
+            confirmationDelFlyout.Hide();
+        }
+        private void OnListViewDoubleTapped(object sender, RoutedEventArgs e)
+        { }
+        private void OnListViewRightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            // 获取右键点击的ListViewItem
+            FrameworkElement listViewItem = (sender as FrameworkElement);
+
+            // 获取右键点击的数据对象（NSModel）
+            CMSModel selectedItem = listViewItem?.DataContext as CMSModel;
+
+            if (selectedItem != null)
+            {
+
+                // 将右键点击的项设置为选中项
+                dataListView.SelectedItem = selectedItem;
+                // 创建ContextMenu
+                MenuFlyout menuFlyout = new MenuFlyout();
+
+                MenuFlyoutItem editMenuItem = new MenuFlyoutItem
+                {
+                    Text = resourceLoader.GetString("editMenuItemText")
+                };
+                editMenuItem.Click += (sender, e) =>
+                {
+                    EditThisConfig(selectedItem);
+                };
+                menuFlyout.Items.Add(editMenuItem);
+
+                MenuFlyoutItem deleteMenuItem = new MenuFlyoutItem
+                {
+                    Text = resourceLoader.GetString("deleteMenuItemText")
+                };
+                deleteMenuItem.Click += (sender, e) =>
+                {
+                    // 弹出二次确认Flyout
+                    confirmationDelFlyout.ShowAt(listViewItem);
+                };
+                menuFlyout.Items.Add(deleteMenuItem);
+
+                Thread.Sleep(10);
+
+                // 在指定位置显示ContextMenu
+                menuFlyout.ShowAt(listViewItem, e.GetPosition(listViewItem));
             }
         }
     }

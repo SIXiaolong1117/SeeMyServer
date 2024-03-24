@@ -41,13 +41,6 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
-            <NavigationView.FooterMenuItems>
-                <NavigationViewItem x:Uid="AboutText" Tag="About">
-                    <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xe946;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-            </NavigationView.FooterMenuItems>
             <Frame x:Name="contentFrame" />
         </NavigationView>
     </Grid>
