@@ -12,20 +12,99 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using Windows.Storage;
+using Windows.ApplicationModel.Resources;
 
 namespace SeeMyServer.Pages
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class SettingsPage : Page
     {
+        // 启用本地设置数据
+        ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+
+        ResourceLoader resourceLoader = new ResourceLoader();
+
         public SettingsPage()
         {
             this.InitializeComponent();
+
+            materialStatusSet();
+        }
+        // 材料ComboBox列表List
+        public List<string> material { get; } = new List<string>()
+        {
+            "Mica",
+            "Mica Alt",
+            "Acrylic"
+        };
+
+        private void materialStatusSet()
+        {
+            // 读取本地设置数据，调整ComboBox状态
+            if (localSettings.Values["materialStatus"] as string == "Mica")
+            {
+                backgroundMaterial.SelectedItem = material[0];
+            }
+            else if (localSettings.Values["materialStatus"] as string == "Mica Alt")
+            {
+                backgroundMaterial.SelectedItem = material[1];
+            }
+            else if (localSettings.Values["materialStatus"] as string == "Acrylic")
+            {
+                backgroundMaterial.SelectedItem = material[2];
+            }
+            else
+            {
+                // 非法输入，设置默认材料为Mica Alt
+                localSettings.Values["materialStatus"] = "Mica Alt";
+                backgroundMaterial.SelectedItem = material[1];
+                // 非法输入，扔出警报
+                //throw new Exception($"Wrong material type: {localSettings.Values["materialStatus"]}");
+            }
+        }
+
+        // 背景材料设置ComboBox改动事件
+        private void backgroundMaterial_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            string materialStatus = e.AddedItems[0].ToString();
+            switch (materialStatus)
+            {
+                case "Mica":
+                    if (localSettings.Values["materialStatus"] as string != "Mica")
+                    {
+                        localSettings.Values["materialStatus"] = "Mica";
+                        Microsoft.Windows.AppLifecycle.AppInstance.Restart("");
+                    }
+                    else
+                    {
+                        localSettings.Values["materialStatus"] = "Mica";
+                    }
+                    break;
+                case "Mica Alt":
+                    if (localSettings.Values["materialStatus"] as string != "Mica Alt")
+                    {
+                        localSettings.Values["materialStatus"] = "Mica Alt";
+                        Microsoft.Windows.AppLifecycle.AppInstance.Restart("");
+                    }
+                    else
+                    {
+                        localSettings.Values["materialStatus"] = "Mica Alt";
+                    }
+                    break;
+                case "Acrylic":
+                    if (localSettings.Values["materialStatus"] as string != "Acrylic")
+                    {
+                        localSettings.Values["materialStatus"] = "Acrylic";
+                        Microsoft.Windows.AppLifecycle.AppInstance.Restart("");
+                    }
+                    else
+                    {
+                        localSettings.Values["materialStatus"] = "Acrylic";
+                    }
+                    break;
+                default:
+                    throw new Exception($"Invalid argument: {materialStatus}");
+            }
         }
     }
 }

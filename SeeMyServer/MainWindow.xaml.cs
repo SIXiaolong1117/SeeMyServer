@@ -1,4 +1,5 @@
 using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -12,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.ApplicationModel;
 using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -29,7 +31,6 @@ namespace SeeMyServer
         SystemBackdropConfiguration m_configurationSource;
         ResourceLoader resourceLoader = new ResourceLoader();
         ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-
         public MainWindow()
         {
             this.InitializeComponent();
@@ -47,7 +48,6 @@ namespace SeeMyServer
 
             AppTitleTextBlock.Text = resourceLoader.GetString("AppTitle");
         }
-
         bool TrySetSystemBackdrop()
         {
             if (Microsoft.UI.Composition.SystemBackdrops.MicaController.IsSupported())

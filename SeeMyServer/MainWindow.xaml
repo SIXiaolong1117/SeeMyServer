@@ -10,32 +10,48 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="32" />
+            <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
+        <Grid
+            x:Name="AppTitleBar"
+            Height="32"
+            Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="LeftPaddingColumn" Width="0" />
+                <ColumnDefinition x:Name="IconColumn" Width="Auto" />
+                <ColumnDefinition x:Name="TitleColumn" Width="Auto" />
+                <ColumnDefinition x:Name="LeftDragColumn" Width="*" />
+                <ColumnDefinition
+                    x:Name="RightDragColumn"
+                    Width="*"
+                    MinWidth="48" />
+                <ColumnDefinition x:Name="RightPaddingColumn" Width="0" />
+            </Grid.ColumnDefinitions>
 
-        <Grid x:Name="AppTitleBar">
             <Image
+                Grid.Column="1"
                 Width="16"
                 Height="16"
-                Margin="8,0"
                 HorizontalAlignment="Left"
                 Source=".\Assets\Square44x44Logo.altform-lightunplated_targetsize-256.png" />
             <TextBlock
                 x:Name="AppTitleTextBlock"
-                Margin="32,0"
+                Grid.Column="2"
                 VerticalAlignment="Center"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 TextWrapping="NoWrap" />
         </Grid>
+
         <NavigationView
             x:Name="NavView"
             Grid.Row="1"
             IsBackButtonVisible="Collapsed"
-            IsSettingsVisible="True"
+            IsBackEnabled="True"
+            IsTitleBarAutoPaddingEnabled="False"
             SelectionChanged="NavigationView_SelectionChanged">
             <NavigationView.MenuItems>
-                <NavigationViewItem x:Name="RemoteTools" Tag="HomePage">
+                <NavigationViewItem x:Uid="SeeMyServer" Tag="HomePage">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8AF;" />
                     </NavigationViewItem.Icon>
