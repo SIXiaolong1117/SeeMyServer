@@ -180,9 +180,6 @@
   <data name="HomePageImportConfig.Label" xml:space="preserve">
     <value>Import</value>
   </data>
-  <data name="HomePagePingRefConfig.Label" xml:space="preserve">
-    <value>Ping</value>
-  </data>
   <data name="HostIP.Header" xml:space="preserve">
     <value>Host</value>
   </data>
