@@ -73,7 +73,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" MinWidth="60" />
                 </Grid.ColumnDefinitions>
                 <FontIcon
                     Grid.Column="0"
@@ -93,40 +93,6 @@
                     VerticalAlignment="Center"
                     ItemsSource="{x:Bind material}"
                     SelectionChanged="backgroundMaterial_SelectionChanged" />
-            </Grid>
-        </Grid>
-
-        <Grid Grid.Row="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <TextBlock
-                x:Name="AboutSetting"
-                x:Uid="AboutSetting"
-                Grid.Row="0"
-                Margin="24,18,0,8" />
-            <Grid
-                Grid.Row="1"
-                Margin="24,0,24,0"
-                Background="#11FFFFFF"
-                BorderBrush="#11FFFFFF"
-                BorderThickness="0"
-                CornerRadius="4">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
             </Grid>
         </Grid>
     </Grid>

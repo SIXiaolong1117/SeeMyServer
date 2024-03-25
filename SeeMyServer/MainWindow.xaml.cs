@@ -178,10 +178,10 @@ namespace SeeMyServer
                 {
                     contentFrame.Navigate(typeof(Pages.HomePage));
                 }
-                //else if ((string)selectedItem.Tag == "About")
-                //{
-                //    contentFrame.Navigate(typeof(Pages.About));
-                //}
+                else if ((string)selectedItem.Tag == "About")
+                {
+                    contentFrame.Navigate(typeof(Pages.About));
+                }
             }
         }
     }

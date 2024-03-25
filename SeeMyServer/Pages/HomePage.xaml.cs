@@ -92,186 +92,99 @@ namespace SeeMyServer.Pages
             timer.Start();
         }
 
-        //private async void Timer_Tick(object sender, object e)
-        //{
-        //    // 停止计时器
-        //    //timer.Stop();
-
-        //    foreach (CMSModel cmsModel in dataList)
-        //    {
-        //        if (cmsModel.OSType == "Linux")
-        //        {
-        //            // CPU 占用
-        //            string cpuUsageCMD = "top -bn1 | grep '^%Cpu' | sed 's/^.*://; s/,.*//; s/ *//g'";
-        //            string cpuUsageRes = await Task.Run(() =>
-        //            {
-        //                return Method.SendSSHCommand(cpuUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
-        //            });
-        //            // 获取命令输出的值并转换为整数
-        //            int cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]);
-        //            cpuUsageRes = cpuUsageResValue.ToString();
-
-        //            // 内存占用
-        //            string memUsageCMD = "free -m | awk 'NR==2{printf \"%.1f\", $3/$2*100}'";
-        //            string memUsageRes = await Task.Run(() =>
-        //            {
-        //                return Method.SendSSHCommand(memUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
-        //            });
-        //            // 获取命令输出的值并转换为整数
-        //            int memUsageResValue = int.Parse(memUsageRes.Split('.')[0]);
-        //            memUsageRes = memUsageResValue.ToString();
-
-        //            cmsModel.CPUUsage = cpuUsageRes + "%";
-        //            cmsModel.MEMUsage = memUsageRes + "%";
-        //        }
-        //        else if (cmsModel.OSType == "OpenWRT")
-        //        {
-        //            // CPU 占用
-        //            string cpuUsageCMD = "top -bn1 | head -n 3 | grep -o 'CPU:.*' | awk '{print $2}'";
-        //            string cpuUsageRes = await Task.Run(() =>
-        //            {
-        //                return Method.SendSSHCommand(cpuUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
-        //            });
-
-        //            // 内存占用
-        //            string memUsageCMD = "top -bn1 | head -n 1 | awk '{used=$2; total=$2+$4; printf \"%.0f\", (used/total)*100}'";
-        //            string memUsageRes = await Task.Run(() =>
-        //            {
-        //                return Method.SendSSHCommand(memUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
-        //            });
-
-        //            cmsModel.CPUUsage = cpuUsageRes.TrimEnd();
-        //            cmsModel.MEMUsage = memUsageRes + "%";
-        //        }
-        //        else if (cmsModel.OSType == "Windows")
-        //        {
-        //            // 会引起 Windows Defender 实时保护的警觉，导致 Antimalware Service 占用高。
-        //            // CPU 占用（Processor Utility对应任务管理器性能页面的CPU占用，Processor Time对应任务管理器详情信息页面的CPU）
-        //            string cpuUsageCMD = "powershell -Command \"(Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue\"";
-        //            string cpuUsageRes = await Task.Run(() =>
-        //            {
-        //                return Method.SendSSHCommand(cpuUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
-        //            });
-        //            // 获取命令输出的值并转换为整数
-        //            int cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]);
-        //            // 将值限制在 0 到 100 之间，并转换回字符串形式
-        //            cpuUsageRes = Math.Min(Math.Max(cpuUsageResValue, 0), 100).ToString();
-
-        //            // 内存占用
-        //            string memUsageCMD = "powershell -Command \"((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100)\"";
-        //            string memUsageRes = await Task.Run(() =>
-        //            {
-        //                return Method.SendSSHCommand(memUsageCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
-        //            });
-        //            // 获取命令输出的值并转换为整数
-        //            int memUsageResValue = int.Parse(memUsageRes.Split('.')[0]);
-        //            // 将值限制在 0 到 100 之间，并转换回字符串形式
-        //            memUsageRes = Math.Min(Math.Max(memUsageResValue, 0), 100).ToString();
-
-        //            // 网络 发送
-        //            string netSentCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Sent/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
-        //            string netSentRes = await Task.Run(() =>
-        //            {
-        //                return Method.SendSSHCommand(netSentCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
-        //            });
-        //            // 获取命令输出的值并转换为整数
-        //            int netSentValue = int.Parse(netSentRes.Split('.')[0]);
-        //            if (netSentValue >= 1024)
-        //            {
-        //                netSentRes = (netSentValue / 1024).ToString() + " KB";
-        //            }
-        //            else if (netSentValue >= 1024 * 1024)
-        //            {
-        //                netSentRes = (netSentValue / 1024 / 1024).ToString() + " MB";
-        //            }
-        //            else if (netSentValue >= 1024 * 1024 * 1024)
-        //            {
-        //                netSentRes = (netSentValue / 1024 / 1024 / 1024).ToString() + " GB";
-        //            }
-        //            else
-        //            {
-        //                netSentRes = netSentValue + " B";
-        //            }
-
-        //            // 网络 接收
-        //            string netReceivedCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Received/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
-        //            string netReceivedRes = await Task.Run(() =>
-        //            {
-        //                return Method.SendSSHCommand(netReceivedCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
-        //            });
-        //            // 获取命令输出的值并转换为整数
-        //            int netReceivedValue = int.Parse(netReceivedRes.Split('.')[0]);
-        //            if (netReceivedValue >= 1024)
-        //            {
-        //                netReceivedRes = (netReceivedValue / 1024).ToString() + " KB";
-        //            }
-        //            else if (netReceivedValue >= 1024 * 1024)
-        //            {
-        //                netReceivedRes = (netReceivedValue / 1024 / 1024).ToString() + " MB";
-        //            }
-        //            else if (netReceivedValue >= 1024 * 1024 * 1024)
-        //            {
-        //                netReceivedRes = (netReceivedValue / 1024 / 1024 / 1024).ToString() + " GB";
-        //            }
-        //            else
-        //            {
-        //                netReceivedRes = netReceivedValue + " B";
-        //            }
-
-        //            cmsModel.CPUUsage = cpuUsageRes + "%";
-        //            cmsModel.MEMUsage = memUsageRes + "%";
-        //            cmsModel.NETSent = netSentRes + " ↑";
-        //            cmsModel.NETReceived = netReceivedRes + " ↓";
-        //        }
-        //    }
-
-        //    // 重新启动计时器
-        //    //timer.Start();
-        //}
-
+        // Linux 信息更新
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
-            // CPU 占用
+            // 定义异步任务
+            Task<string> cpuTask = GetLinuxCPUUsageAsync(cmsModel);
+            Task<string> memTask = GetLinuxMemoryUsageAsync(cmsModel);
+
+            // 同时执行异步任务
+            await Task.WhenAll(cpuTask, memTask);
+
+            // 处理获取到的数据
+            cmsModel.CPUUsage = cpuTask.Result;
+            cmsModel.MEMUsage = memTask.Result;
+        }
+        private async Task<string> GetLinuxCPUUsageAsync(CMSModel cmsModel)
+        {
             string cpuUsageCMD = "top -bn1 | grep '^%Cpu' | sed 's/^.*://; s/,.*//; s/ *//g'";
             string cpuUsageRes = await SendSSHCommandAsync(cpuUsageCMD, cmsModel);
             int cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]);
-            cmsModel.CPUUsage = cpuUsageResValue.ToString() + "%";
+            return cpuUsageResValue.ToString() + "%";
+        }
 
-            // 内存占用
+        private async Task<string> GetLinuxMemoryUsageAsync(CMSModel cmsModel)
+        {
             string memUsageCMD = "free -m | awk 'NR==2{printf \"%.1f\", $3/$2*100}'";
             string memUsageRes = await SendSSHCommandAsync(memUsageCMD, cmsModel);
             int memUsageResValue = int.Parse(memUsageRes.Split('.')[0]);
-            cmsModel.MEMUsage = memUsageResValue.ToString() + "%";
+            return memUsageResValue.ToString() + "%";
         }
 
+        // OpenWRT 信息更新
         private async Task UpdateOpenWRTCMSModelAsync(CMSModel cmsModel)
         {
-            // CPU 占用
+            // 定义异步任务
+            Task<string> cpuTask = GetOpenWRTCPUUsageAsync(cmsModel);
+            Task<string> memTask = GetOpenWRTMemoryUsageAsync(cmsModel);
+
+            // 同时执行异步任务
+            await Task.WhenAll(cpuTask, memTask);
+
+            // 处理获取到的数据
+            cmsModel.CPUUsage = cpuTask.Result;
+            cmsModel.MEMUsage = memTask.Result;
+        }
+        private async Task<string> GetOpenWRTCPUUsageAsync(CMSModel cmsModel)
+        {
             string cpuUsageCMD = "top -bn1 | head -n 3 | grep -o 'CPU:.*' | awk '{print $2}'";
             string cpuUsageRes = await SendSSHCommandAsync(cpuUsageCMD, cmsModel);
-            cmsModel.CPUUsage = cpuUsageRes.TrimEnd();
-
-            // 内存占用
-            string memUsageCMD = "top -bn1 | head -n 1 | awk '{used=$2; total=$2+$4; printf \"%.0f\", (used/total)*100}'";
-            string memUsageRes = await SendSSHCommandAsync(memUsageCMD, cmsModel);
-            cmsModel.MEMUsage = memUsageRes + "%";
+            return cpuUsageRes.TrimEnd();
         }
 
+        private async Task<string> GetOpenWRTMemoryUsageAsync(CMSModel cmsModel)
+        {
+            string memUsageCMD = "top -bn1 | head -n 1 | awk '{used=$2; total=$2+$4; printf \"%.0f\", (used/total)*100}'";
+            string memUsageRes = await SendSSHCommandAsync(memUsageCMD, cmsModel);
+            return memUsageRes + "%";
+        }
+
+        // Windows 信息更新
         private async Task UpdateWindowsCMSModelAsync(CMSModel cmsModel)
         {
-            // CPU 占用
+            // 定义异步任务
+            Task<string> cpuTask = GetWindowsCPUUsageAsync(cmsModel);
+            Task<string> memTask = GetWindowsMemoryUsageAsync(cmsModel);
+            Task<string> netSentTask = GetWindowsNetSentAsync(cmsModel);
+            Task<string> netReceivedTask = GetWindowsNetReceivedAsync(cmsModel);
+
+            // 同时执行异步任务
+            await Task.WhenAll(cpuTask, memTask, netSentTask, netReceivedTask);
+
+            // 处理获取到的数据
+            cmsModel.CPUUsage = cpuTask.Result;
+            cmsModel.MEMUsage = memTask.Result;
+            cmsModel.NETSent = netSentTask.Result;
+            cmsModel.NETReceived = netReceivedTask.Result;
+        }
+        private async Task<string> GetWindowsCPUUsageAsync(CMSModel cmsModel)
+        {
             string cpuUsageCMD = "powershell -Command \"(Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue\"";
             string cpuUsageRes = await SendSSHCommandAsync(cpuUsageCMD, cmsModel);
             int cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]);
-            cmsModel.CPUUsage = Math.Min(Math.Max(cpuUsageResValue, 0), 100).ToString() + "%";
+            return Math.Min(Math.Max(cpuUsageResValue, 0), 100).ToString() + "%";
+        }
 
-            // 内存占用
+        private async Task<string> GetWindowsMemoryUsageAsync(CMSModel cmsModel)
+        {
             string memUsageCMD = "powershell -Command \"((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100)\"";
             string memUsageRes = await SendSSHCommandAsync(memUsageCMD, cmsModel);
             int memUsageResValue = int.Parse(memUsageRes.Split('.')[0]);
-            cmsModel.MEMUsage = Math.Min(Math.Max(memUsageResValue, 0), 100).ToString() + "%";
-
-            // 网络 发送
+            return Math.Min(Math.Max(memUsageResValue, 0), 100).ToString() + "%";
+        }
+        private async Task<string> GetWindowsNetSentAsync(CMSModel cmsModel)
+        {
             string netSentCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Sent/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
             string netSentRes = await Task.Run(() =>
             {
@@ -295,9 +208,11 @@ namespace SeeMyServer.Pages
             {
                 netSentRes = netSentValue + " B";
             }
-            cmsModel.NETSent = netSentRes + "/s ↑";
+            return netSentRes + "/s ↑";
+        }
 
-            // 网络 接收
+        private async Task<string> GetWindowsNetReceivedAsync(CMSModel cmsModel)
+        {
             string netReceivedCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Received/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
             string netReceivedRes = await Task.Run(() =>
             {
@@ -321,7 +236,7 @@ namespace SeeMyServer.Pages
             {
                 netReceivedRes = netReceivedValue + " B";
             }
-            cmsModel.NETReceived = netReceivedRes + "/s ↓";
+            return netReceivedRes + "/s ↓";
         }
 
         private async Task<string> SendSSHCommandAsync(string command, CMSModel cmsModel)

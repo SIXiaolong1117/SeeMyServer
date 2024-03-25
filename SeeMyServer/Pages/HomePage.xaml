@@ -100,9 +100,8 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" MinWidth="100" />
+                                    <ColumnDefinition Width="*" MinWidth="100" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock
                                     Grid.Row="0"
@@ -111,7 +110,7 @@
                                     Text="{Binding Name}" />
                                 <TextBlock
                                     Grid.Row="0"
-                                    Grid.Column="2"
+                                    Grid.Column="1"
                                     Padding="0,4,0,4"
                                     HorizontalAlignment="Right"
                                     Text="{Binding OSType}" />
@@ -122,9 +121,9 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" MinWidth="100" />
+                                    <ColumnDefinition Width="Auto" MinWidth="100" />
+                                    <ColumnDefinition Width="*" MinWidth="100" />
                                 </Grid.ColumnDefinitions>
                                 <!--  CPU Usage  -->
                                 <Grid
@@ -209,20 +208,39 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock
+                                    <Grid
                                         Grid.Row="0"
                                         Grid.Column="0"
-                                        Padding="0,4,0,4"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Text="{Binding NETSent}" />
+                                        Width="60"
+                                        Height="60">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Grid.Column="0"
+                                            Padding="0,4,0,4"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding NETSent}" />
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Grid.Column="0"
+                                            Padding="0,4,0,4"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding NETReceived}" />
+                                    </Grid>
                                     <TextBlock
+                                        x:Uid="NETUsageText"
                                         Grid.Row="1"
                                         Grid.Column="0"
-                                        Padding="0,4,0,4"
                                         HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Text="{Binding NETReceived}" />
+                                        VerticalAlignment="Center" />
                                 </Grid>
                             </Grid>
                         </Grid>
