@@ -267,6 +267,7 @@
                 x:Uid="HomePageImportConfig"
                 Grid.Row="0"
                 Grid.Column="1"
+                Click="ImportConfig_Click"
                 Icon="Import" />
         </CommandBar>
     </Grid>

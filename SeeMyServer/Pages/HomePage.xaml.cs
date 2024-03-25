@@ -81,11 +81,12 @@ namespace SeeMyServer.Pages
                 cmsModel.NETReceived = "0 B/s ↓";
             }
 
-            // 创建并配置 DispatcherTimer
+            // 创建并配置DispatcherTimer
             timer = new DispatcherTimer();
             timer.Tick += Timer_Tick;
+
             // 每隔段时间触发一次
-            timer.Interval = TimeSpan.FromSeconds(3);
+            timer.Interval = TimeSpan.FromSeconds(5);
 
             // 先执行一次事件处理方法
             Timer_Tick(null, null);
@@ -380,6 +381,23 @@ namespace SeeMyServer.Pages
                 LoadData();
             }
         }
+        // 导入配置按钮点击
+        private async void ImportConfig_Click(object sender, RoutedEventArgs e)
+        {
+            HomePageImportConfig.IsEnabled = false;
+            // 实例化SQLiteHelper
+            SQLiteHelper dbHelper = new SQLiteHelper();
+            // 获取导入的数据
+            CMSModel cmsModel = await Method.ImportConfig();
+            if (cmsModel != null)
+            {
+                // 插入新数据
+                dbHelper.InsertData(cmsModel);
+                // 重新加载数据
+                LoadData();
+            }
+            HomePageImportConfig.IsEnabled = true;
+        }
         private async void EditThisConfig(CMSModel cmsModel)
         {
             // 创建一个新的dialog对象
@@ -424,6 +442,10 @@ namespace SeeMyServer.Pages
             // 关闭二次确认Flyout
             confirmationDelFlyout.Hide();
         }
+        private async void ExportConfigFunction(CMSModel cmsModel)
+        {
+            string result = await Method.ExportConfig(cmsModel);
+        }
         private void OnListViewDoubleTapped(object sender, RoutedEventArgs e)
         { }
         private void OnListViewRightTapped(object sender, RightTappedRoutedEventArgs e)
@@ -462,6 +484,20 @@ namespace SeeMyServer.Pages
                     confirmationDelFlyout.ShowAt(listViewItem);
                 };
                 menuFlyout.Items.Add(deleteMenuItem);
+
+                // 添加分割线
+                MenuFlyoutSeparator separator = new MenuFlyoutSeparator();
+                menuFlyout.Items.Add(separator);
+
+                MenuFlyoutItem exportMenuItem = new MenuFlyoutItem
+                {
+                    Text = resourceLoader.GetString("exportMenuItemText")
+                };
+                exportMenuItem.Click += (sender, e) =>
+                {
+                    ExportConfigFunction(selectedItem);
+                };
+                menuFlyout.Items.Add(exportMenuItem);
 
                 Thread.Sleep(10);
 

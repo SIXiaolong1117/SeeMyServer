@@ -62,7 +62,7 @@
             <Grid
                 Grid.Row="1"
                 Margin="24,0,24,0"
-                Padding="16"
+                Padding="28,16,28,16"
                 Background="#11FFFFFF"
                 BorderBrush="#11FFFFFF"
                 BorderThickness="0"

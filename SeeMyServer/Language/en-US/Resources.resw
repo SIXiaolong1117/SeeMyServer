@@ -180,6 +180,9 @@
   <data name="editMenuItemText" xml:space="preserve">
     <value>Edit</value>
   </data>
+  <data name="exportMenuItemText" xml:space="preserve">
+    <value>Export</value>
+  </data>
   <data name="FeedbackBugs.Content" xml:space="preserve">
     <value>Feedback bugs</value>
   </data>
