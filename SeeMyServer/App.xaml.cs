@@ -1,20 +1,5 @@
 ﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml.Shapes;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.ApplicationModel;
-using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 
 namespace SeeMyServer
 {
@@ -32,7 +17,7 @@ namespace SeeMyServer
             IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(m_window);
             SetWindowSize(hwnd, 400, 600);
 
-            m_window.Activate();           
+            m_window.Activate();
         }
 
         private void SetWindowSize(IntPtr hwnd, int width, int height)
@@ -46,6 +31,6 @@ namespace SeeMyServer
                                         0, 0, width, height,
                                         PInvoke.User32.SetWindowPosFlags.SWP_NOMOVE);
         }
-        public static Window m_window;
+        public static MainWindow m_window;
     }
 }

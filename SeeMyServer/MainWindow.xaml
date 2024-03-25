@@ -48,7 +48,8 @@
         <NavigationView
             x:Name="NavView"
             Grid.Row="1"
-            IsBackButtonVisible="Collapsed"
+            BackRequested="BackButton_Click"
+            IsBackButtonVisible="Visible"
             IsBackEnabled="True"
             IsTitleBarAutoPaddingEnabled="False"
             SelectionChanged="NavigationView_SelectionChanged">

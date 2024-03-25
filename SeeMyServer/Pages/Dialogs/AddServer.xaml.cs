@@ -1,19 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using SeeMyServer.Models;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection.PortableExecutable;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Storage.Pickers;
 
 
@@ -40,7 +28,7 @@ namespace SeeMyServer.Pages.Dialogs
 
             // 添加操作系统类型
             OSTypeComboBox.Items.Add("Windows");
-            OSTypeComboBox.Items.Add("Linux");            
+            OSTypeComboBox.Items.Add("Linux");
             OSTypeComboBox.Items.Add("OpenWRT");
             OSTypeComboBox.SelectedItem = cmsModel.OSType;
         }

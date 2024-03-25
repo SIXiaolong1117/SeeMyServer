@@ -1,24 +1,13 @@
 using Microsoft.UI.Composition.SystemBackdrops;
-using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.ApplicationModel;
 using Windows.ApplicationModel.Resources;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Storage;
 using WinRT;
+using System;
+using Microsoft.UI.Xaml.Navigation;
+using SeeMyServer.Pages;
 
 namespace SeeMyServer
 {
@@ -169,20 +158,62 @@ namespace SeeMyServer
         {
             if (args.IsSettingsSelected)
             {
-                contentFrame.Navigate(typeof(Pages.SettingsPage));
+                contentFrame.Navigate(typeof(SettingsPage));
             }
             else
             {
-                var selectedItem = (NavigationViewItem)args.SelectedItem;
-                if ((string)selectedItem.Tag == "HomePage")
+                var selectedItem = args.SelectedItem as NavigationViewItem;
+                if (selectedItem != null)
                 {
-                    contentFrame.Navigate(typeof(Pages.HomePage));
-                }
-                else if ((string)selectedItem.Tag == "About")
-                {
-                    contentFrame.Navigate(typeof(Pages.About));
+                    switch (selectedItem.Tag.ToString())
+                    {
+                        case "HomePage":
+                            contentFrame.Navigate(typeof(HomePage));
+                            break;
+                        case "About":
+                            contentFrame.Navigate(typeof(About));
+                            break;
+                    }
                 }
             }
+        }
+        public void NavigateToPage(Type pageType)
+        {
+            contentFrame.Navigate(pageType);
+        }
+        private void BackButton_Click(NavigationView sender, NavigationViewBackRequestedEventArgs args)
+        {
+            if (contentFrame.CanGoBack)
+            {
+                contentFrame.GoBack();
+
+                // 更新选中的导航项
+                var selectedItem = FindSelectedItemByTag(contentFrame.CurrentSourcePageType.Name);
+                if (selectedItem != null)
+                {
+                    NavView.SelectedItem = selectedItem;
+                }
+            }
+        }
+        private NavigationViewItem FindSelectedItemByTag(string tag)
+        {
+            foreach (NavigationViewItem item in NavView.MenuItems)
+            {
+                if (item.Tag.ToString() == tag)
+                {
+                    return item;
+                }
+            }
+
+            foreach (NavigationViewItem item in NavView.FooterMenuItems)
+            {
+                if (item.Tag.ToString() == tag)
+                {
+                    return item;
+                }
+            }
+
+            return null;
         }
     }
 

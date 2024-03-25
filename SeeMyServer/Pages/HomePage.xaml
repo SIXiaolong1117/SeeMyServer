@@ -83,7 +83,8 @@
                         <Grid
                             Background="Transparent"
                             DoubleTapped="OnListViewDoubleTapped"
-                            RightTapped="OnListViewRightTapped">
+                            RightTapped="OnListViewRightTapped"
+                            Tapped="OnListViewTapped">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />

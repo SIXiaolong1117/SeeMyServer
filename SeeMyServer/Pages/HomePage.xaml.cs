@@ -1,28 +1,16 @@
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using SeeMyServer.Datas;
+using SeeMyServer.Methods;
 using SeeMyServer.Models;
 using SeeMyServer.Pages.Dialogs;
-using SeeMyServer.Methods;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
-using Windows.ApplicationModel.Resources;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Microsoft.UI.Dispatching;
-using System.Diagnostics.Metrics;
 using System.Threading.Tasks;
-using System.Numerics;
-using System.Diagnostics;
+using Windows.ApplicationModel.Resources;
 
 namespace SeeMyServer.Pages
 {
@@ -326,6 +314,13 @@ namespace SeeMyServer.Pages
                 // 在指定位置显示ContextMenu
                 menuFlyout.ShowAt(listViewItem, e.GetPosition(listViewItem));
             }
+        }
+        // 处理左键单击事件的代码
+        private void OnListViewTapped(object sender, TappedRoutedEventArgs e)
+        {
+            // 导航到页面
+            var mainWindow = Window.Current as MainWindow;
+            App.m_window.NavigateToPage(typeof(DetailPage));
         }
     }
 }

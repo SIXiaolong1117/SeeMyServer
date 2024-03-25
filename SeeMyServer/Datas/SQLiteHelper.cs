@@ -1,10 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
+using SeeMyServer.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SeeMyServer.Models;
 
 namespace SeeMyServer.Datas
 {
