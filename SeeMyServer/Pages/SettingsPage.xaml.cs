@@ -14,6 +14,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.ApplicationModel.Resources;
+using Windows.Globalization;
 
 namespace SeeMyServer.Pages
 {
@@ -29,6 +30,7 @@ namespace SeeMyServer.Pages
             this.InitializeComponent();
 
             materialStatusSet();
+            languageStatusSet();
         }
         // 材料ComboBox列表List
         public List<string> material { get; } = new List<string>()
@@ -37,6 +39,42 @@ namespace SeeMyServer.Pages
             "Mica Alt",
             "Acrylic"
         };
+
+        public List<string> language { get; } = new List<string>()
+        {
+            "简体中文（中国）",
+            "English (US)"
+        };
+
+        private void languageStatusSet()
+        {
+            if (!languageStatusSetList())
+            {
+                // 未设置
+                localSettings.Values["languageChange"] = Windows.Globalization.Language.CurrentInputMethodLanguageTag;
+                // 非法输入，扔出警报
+                //throw new Exception(Windows.Globalization.Language.CurrentInputMethodLanguageTag);
+                languageStatusSetList();
+            }
+        }
+        private bool languageStatusSetList()
+        {
+            // 读取本地设置数据，调整ComboBox状态
+            if (localSettings.Values["languageChange"] as string == "zh-Hans-CN")
+            {
+                languageChange.SelectedItem = language[0];
+                return true;
+            }
+            else if (localSettings.Values["languageChange"] as string == "en-US")
+            {
+                languageChange.SelectedItem = language[1];
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
         private void materialStatusSet()
         {
@@ -104,6 +142,42 @@ namespace SeeMyServer.Pages
                     break;
                 default:
                     throw new Exception($"Invalid argument: {materialStatus}");
+            }
+        }
+
+        private void languageChange_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            string languageStatus = e.AddedItems[0].ToString();
+            switch (languageStatus)
+            {
+                case "简体中文（中国）":
+                    if (localSettings.Values["languageChange"] as string != "zh-Hans-CN")
+                    {
+                        localSettings.Values["languageChange"] = "zh-Hans-CN";
+                        ApplicationLanguages.PrimaryLanguageOverride = localSettings.Values["languageChange"] as string;
+                        Windows.ApplicationModel.Resources.Core.ResourceContext.SetGlobalQualifierValue("Language", localSettings.Values["languageChange"] as string);
+                        Microsoft.Windows.AppLifecycle.AppInstance.Restart("");
+                    }
+                    else
+                    {
+                        localSettings.Values["languageChange"] = "zh-Hans-CN";
+                    }
+                    break;
+                case "English (US)":
+                    if (localSettings.Values["languageChange"] as string != "en-US")
+                    {
+                        localSettings.Values["languageChange"] = "en-US";
+                        ApplicationLanguages.PrimaryLanguageOverride = localSettings.Values["languageChange"] as string;
+                        Windows.ApplicationModel.Resources.Core.ResourceContext.SetGlobalQualifierValue("Language", localSettings.Values["languageChange"] as string);
+                        Microsoft.Windows.AppLifecycle.AppInstance.Restart("");
+                    }
+                    else
+                    {
+                        localSettings.Values["languageChange"] = "en-US";
+                    }
+                    break;
+                default:
+                    throw new Exception($"Invalid argument: {languageChange}");
             }
         }
     }

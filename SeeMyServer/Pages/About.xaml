@@ -12,7 +12,7 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -30,103 +30,202 @@
             HorizontalAlignment="Center"
             FontSize="24" />
 
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <TextBlock
-                x:Name="AboutCMS"
-                x:Uid="AboutCMS"
-                Grid.Row="0"
-                Margin="24,18,0,8" />
-
-            <Grid
-                Grid.Row="1"
-                Margin="24,0,24,0"
-                Padding="28,16,28,16"
-                Background="#11FFFFFF"
-                BorderBrush="#11FFFFFF"
-                BorderThickness="0"
-                CornerRadius="4">
+        <ScrollViewer Grid.Row="1" Padding="0,0,0,24">
+            <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Grid Grid.Column="0">
+                <TextBlock
+                    x:Name="AboutCMS"
+                    x:Uid="AboutCMS"
+                    Grid.Row="0"
+                    Margin="24,18,0,8" />
+
+                <Grid
+                    Grid.Row="1"
+                    Margin="24,0,24,0"
+                    Padding="28,16,28,16"
+                    Background="#11FFFFFF"
+                    BorderBrush="#11FFFFFF"
+                    BorderThickness="0"
+                    CornerRadius="4,4,0,0">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            x:Name="AboutCMSRight"
+                            x:Uid="AboutCMSRight"
+                            Grid.Row="0" />
+                        <TextBlock
+                            x:Name="AboutCMSRightTip"
+                            x:Uid="AboutCMSRightTip"
+                            Grid.Row="1"
+                            FontSize="12"
+                            Foreground="DarkGray" />
+                    </Grid>
+                    <TextBlock
+                        x:Name="APPVersion"
+                        Grid.Column="1"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        Foreground="DarkGray" />
+                </Grid>
+
+
+                <Grid
+                    Grid.Row="2"
+                    Margin="24,1,24,0"
+                    Padding="16"
+                    Background="#11FFFFFF"
+                    BorderBrush="#11FFFFFF"
+                    BorderThickness="0"
+                    CornerRadius="0,0,4,4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock
-                        x:Name="AboutCMSRight"
-                        x:Uid="AboutCMSRight"
-                        Grid.Row="0" />
-                    <TextBlock
-                        x:Name="AboutCMSRightTip"
-                        x:Uid="AboutCMSRightTip"
+                    <HyperlinkButton
+                        x:Name="FeedbackBugs"
+                        x:Uid="FeedbackBugs"
                         Grid.Row="1"
-                        FontSize="12"
-                        Foreground="DarkGray" />
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Content="Github Issues"
+                        NavigateUri="https://github.com/Direct5dom/SeeMyServer_Issues/issues" />
+                    <HyperlinkButton
+                        x:Name="PRIVACYLink"
+                        x:Uid="PRIVACYLink"
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Content="Github Issues"
+                        NavigateUri="https://github.com/Direct5dom/SeeMyServer_Issues/issues" />
                 </Grid>
+
                 <TextBlock
-                    x:Name="APPVersion"
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    FontSize="14"
-                    Foreground="DarkGray" />
+                    x:Name="AboutAuthor"
+                    x:Uid="AboutAuthor"
+                    Grid.Row="3"
+                    Margin="24,18,0,8" />
+
+                <Grid
+                    Grid.Row="4"
+                    Margin="24,1,24,0"
+                    Padding="16"
+                    Background="#11FFFFFF"
+                    BorderBrush="#11FFFFFF"
+                    BorderThickness="0"
+                    CornerRadius="4,4,4,4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <PersonPicture
+                        Grid.Row="0"
+                        Margin="0,0,8,0"
+                        HorizontalAlignment="Right"
+                        DisplayName="SI Xiaolong"
+                        ProfilePicture="https://avatars.githubusercontent.com/u/59590732?v=4" />
+                    <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <HyperlinkButton
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Content="司晓龙 (SI Xiaolong)"
+                            NavigateUri="https://about.sixiaolong.win/" />
+                        <HyperlinkButton
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Content="Github"
+                            NavigateUri="https://github.com/Direct5dom" />
+                        <HyperlinkButton
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Content="Twitter"
+                            NavigateUri="https://twitter.com/SI_Xiaolong" />
+                        <HyperlinkButton
+                            x:Uid="AboutHelp"
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            NavigateUri="https://about.sixiaolong.win/Project/See-My-Server.html" />
+                    </Grid>
+                </Grid>
+
+                <TextBlock
+                    x:Name="AboutReferences"
+                    x:Uid="AboutReference"
+                    Grid.Row="5"
+                    Margin="24,18,0,8" />
+
+                <Grid
+                    Grid.Row="6"
+                    Margin="24,1,24,0"
+                    Padding="16"
+                    Background="#11FFFFFF"
+                    BorderBrush="#11FFFFFF"
+                    BorderThickness="0"
+                    CornerRadius="4,4,4,4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <HyperlinkButton
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Content="WindowsAppSDK"
+                        NavigateUri="https://aka.ms/windowsappsdk" />
+                </Grid>
             </Grid>
-
-
-            <Grid
-                Grid.Row="2"
-                Margin="24,8,24,0"
-                Padding="16"
-                Background="#11FFFFFF"
-                BorderBrush="#11FFFFFF"
-                BorderThickness="0"
-                CornerRadius="4">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <HyperlinkButton
-                    x:Name="FeedbackBugs"
-                    x:Uid="FeedbackBugs"
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Content="Github Issues"
-                    NavigateUri="https://github.com/Direct5dom/SeeMyServer_Issues/issues" />
-                <HyperlinkButton
-                    x:Name="PRIVACYLink"
-                    x:Uid="PRIVACYLink"
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Content="Github Issues"
-                    NavigateUri="https://github.com/Direct5dom/SeeMyServer_Issues/issues" />
-            </Grid>
-
-        </Grid>
+        </ScrollViewer>
     </Grid>
 </Page>

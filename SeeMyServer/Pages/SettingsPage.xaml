@@ -64,9 +64,8 @@
                 Margin="24,0,24,0"
                 Padding="28,16,28,16"
                 Background="#11FFFFFF"
-                BorderBrush="#11FFFFFF"
                 BorderThickness="0"
-                CornerRadius="4">
+                CornerRadius="4,4,0,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
@@ -93,6 +92,40 @@
                     VerticalAlignment="Center"
                     ItemsSource="{x:Bind material}"
                     SelectionChanged="backgroundMaterial_SelectionChanged" />
+            </Grid>
+            <Grid
+                Grid.Row="2"
+                Margin="24,1,24,0"
+                Padding="28,16,28,16"
+                Background="#11FFFFFF"
+                BorderThickness="0"
+                CornerRadius="0,0,4,4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" MinWidth="60" />
+                </Grid.ColumnDefinitions>
+                <FontIcon
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontFamily="Segoe Fluent Icons"
+                    Glyph="&#xF2B7;" />
+                <TextBlock
+                    x:Name="LanguageSetting"
+                    x:Uid="LanguageSetting"
+                    Grid.Column="1"
+                    Margin="16,0,0,0"
+                    VerticalAlignment="Center" />
+                <ComboBox
+                    x:Name="languageChange"
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    ItemsSource="{x:Bind language}"
+                    SelectionChanged="languageChange_SelectionChanged" />
             </Grid>
         </Grid>
     </Grid>

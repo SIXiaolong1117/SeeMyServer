@@ -33,7 +33,9 @@
                 Grid.Column="1"
                 Width="16"
                 Height="16"
+                Margin="16,0,8,0"
                 HorizontalAlignment="Left"
+                VerticalAlignment="Center"
                 Source=".\Assets\Square44x44Logo.altform-lightunplated_targetsize-256.png" />
             <TextBlock
                 x:Name="AppTitleTextBlock"
@@ -53,12 +55,12 @@
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Uid="SeeMyServer" Tag="HomePage">
                     <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8AF;" />
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE95E;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
-                <NavigationViewItem Content="About" Tag="About">
+                <NavigationViewItem x:Uid="About" Tag="About">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xe946;" />
                     </NavigationViewItem.Icon>

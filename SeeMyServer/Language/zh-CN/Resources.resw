@@ -118,162 +118,162 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="About.Content" xml:space="preserve">
-    <value>About</value>
+    <value>关于</value>
   </data>
   <data name="AboutAuthor.Text" xml:space="preserve">
-    <value>Author</value>
+    <value>作者</value>
   </data>
   <data name="AboutCMS.Text" xml:space="preserve">
-    <value>About</value>
+    <value>关于</value>
   </data>
   <data name="AboutCMSRight.Text" xml:space="preserve">
     <value>See My Server</value>
   </data>
   <data name="AboutCMSRightTip.Text" xml:space="preserve">
-    <value>© 2024 SI Xiaolong. All rights reserved.</value>
+    <value>© 2024 SI Xiaolong。保留所有权利。</value>
   </data>
   <data name="AboutHeader.Text" xml:space="preserve">
-    <value>About</value>
+    <value>关于</value>
   </data>
   <data name="AboutHelp.Content" xml:space="preserve">
-    <value>Help</value>
+    <value>帮助</value>
   </data>
   <data name="AboutReference.Text" xml:space="preserve">
-    <value>Dependencies</value>
+    <value>依赖</value>
   </data>
   <data name="AboutSetting.Text" xml:space="preserve">
-    <value>About</value>
+    <value>关于</value>
   </data>
   <data name="AboutText.Content" xml:space="preserve">
-    <value>About</value>
+    <value>关于</value>
   </data>
   <data name="AddServerAuthenticationHeader.Text" xml:space="preserve">
-    <value>Authentication</value>
+    <value>身份验证</value>
   </data>
   <data name="AddServerHeader.Text" xml:space="preserve">
-    <value>Add Server</value>
+    <value>添加服务器</value>
   </data>
   <data name="AppearanceSetting.Text" xml:space="preserve">
-    <value>Appearance &amp; behavior</value>
+    <value>外观与行为</value>
   </data>
   <data name="AppTitle" xml:space="preserve">
     <value>See My Server</value>
   </data>
   <data name="Cancel" xml:space="preserve">
-    <value>Cancel</value>
+    <value>取消</value>
   </data>
   <data name="Confirm" xml:space="preserve">
-    <value>Confirm</value>
+    <value>确认</value>
   </data>
   <data name="ConfirmDelete.Text" xml:space="preserve">
-    <value>Confirm delete?</value>
+    <value>确认删除？</value>
   </data>
   <data name="CPUUsageText.Text" xml:space="preserve">
     <value>CPU</value>
   </data>
   <data name="deleteMenuItemText" xml:space="preserve">
-    <value>Delete</value>
+    <value>删除</value>
   </data>
   <data name="DialogAdd" xml:space="preserve">
-    <value>Add</value>
+    <value>添加</value>
   </data>
   <data name="DialogChange" xml:space="preserve">
-    <value>Change</value>
+    <value>更改</value>
   </data>
   <data name="DialogClose" xml:space="preserve">
-    <value>Close</value>
+    <value>关闭</value>
   </data>
   <data name="DisplayName.Header" xml:space="preserve">
-    <value>Name</value>
+    <value>名称</value>
   </data>
   <data name="DisplayName.PlaceholderText" xml:space="preserve">
-    <value>Display Name</value>
+    <value>显示名称</value>
   </data>
   <data name="editMenuItemText" xml:space="preserve">
-    <value>Edit</value>
+    <value>编辑</value>
   </data>
   <data name="exportMenuItemText" xml:space="preserve">
-    <value>Export</value>
+    <value>导出</value>
   </data>
   <data name="FeedbackBugs.Content" xml:space="preserve">
-    <value>Feedback bugs</value>
+    <value>反馈问题</value>
   </data>
   <data name="HomePageAddConfig.Label" xml:space="preserve">
-    <value>Add</value>
+    <value>添加</value>
   </data>
   <data name="HomePageHeader.Text" xml:space="preserve">
-    <value>Server</value>
+    <value>服务器</value>
   </data>
   <data name="HomePageImportConfig.Label" xml:space="preserve">
-    <value>Import</value>
+    <value>导入</value>
   </data>
   <data name="HostIP.Header" xml:space="preserve">
-    <value>Host</value>
+    <value>主机</value>
   </data>
   <data name="HostIP.PlaceholderText" xml:space="preserve">
-    <value>Domain or IP</value>
+    <value>域名或 IP</value>
   </data>
   <data name="HostPort.Header" xml:space="preserve">
-    <value>Port</value>
+    <value>端口</value>
   </data>
   <data name="HostPort.PlaceholderText" xml:space="preserve">
-    <value>eg: 22</value>
+    <value>例如：22</value>
   </data>
   <data name="LanguageSetting.Text" xml:space="preserve">
-    <value>Language</value>
+    <value>语言</value>
   </data>
   <data name="MEMUsageText.Text" xml:space="preserve">
-    <value>MEM</value>
+    <value>内存</value>
   </data>
   <data name="NETUsageText.Text" xml:space="preserve">
-    <value>NET</value>
+    <value>网络</value>
   </data>
   <data name="OSType.Header" xml:space="preserve">
-    <value>OS Type</value>
+    <value>操作系统类型</value>
   </data>
   <data name="OSType.PlaceholderText" xml:space="preserve">
-    <value>Choose your OS type</value>
+    <value>选择您的操作系统类型</value>
   </data>
   <data name="OSTypeTips.Text" xml:space="preserve">
-    <value>Supports Windows and most Linux distributions.</value>
+    <value>支持 Windows 和大多数 Linux 发行版。</value>
   </data>
   <data name="PRIVACYLink.Content" xml:space="preserve">
-    <value>PRIVACY</value>
+    <value>隐私政策</value>
   </data>
   <data name="SeeMyServer.Content" xml:space="preserve">
-    <value>Server</value>
+    <value>服务器</value>
   </data>
   <data name="SettingsHeader.Text" xml:space="preserve">
-    <value>Settings</value>
+    <value>设置</value>
   </data>
   <data name="SSHKey.Header" xml:space="preserve">
-    <value>SSH Key</value>
+    <value>SSH 密钥</value>
   </data>
   <data name="SSHKey.PlaceholderText" xml:space="preserve">
-    <value>SSH Key Path</value>
+    <value>SSH 密钥路径</value>
   </data>
   <data name="SSHKeyPathButton.Content" xml:space="preserve">
-    <value>Select...</value>
+    <value>选择...</value>
   </data>
   <data name="SSHKeyTips.Text" xml:space="preserve">
-    <value>Only RSA and DSA private keys in OpenSSH and ssh.com formats are supported.</value>
+    <value>仅支持 OpenSSH 和 ssh.com 格式的 RSA 和 DSA 私钥。</value>
   </data>
   <data name="SSHPasswd.Header" xml:space="preserve">
-    <value>Password</value>
+    <value>密码</value>
   </data>
   <data name="SSHPasswd.PlaceholderText" xml:space="preserve">
-    <value>eg: Password</value>
+    <value>例如：密码</value>
   </data>
   <data name="SSHUser.Header" xml:space="preserve">
-    <value>User</value>
+    <value>用户</value>
   </data>
   <data name="SSHUser.PlaceholderText" xml:space="preserve">
-    <value>eg: root</value>
+    <value>例如：root</value>
   </data>
   <data name="ThemeSetting.Text" xml:space="preserve">
-    <value>App theme</value>
+    <value>应用主题</value>
   </data>
   <data name="ThemeSettingTips.Text" xml:space="preserve">
-    <value>Select which app theme to display</value>
+    <value>选择要显示的应用主题</value>
   </data>
 </root>

@@ -28,10 +28,11 @@ namespace SeeMyServer
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             m_window = new MainWindow();
-            m_window.Activate();
 
             IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(m_window);
             SetWindowSize(hwnd, 400, 600);
+
+            m_window.Activate();           
         }
 
         private void SetWindowSize(IntPtr hwnd, int width, int height)
