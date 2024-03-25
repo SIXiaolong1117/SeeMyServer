@@ -15,7 +15,7 @@
   <mp:PhoneIdentity PhoneProductId="f264ac4a-3bea-4e7d-b22a-5149a0456c29" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>SeeMyServer</DisplayName>
+    <DisplayName>See My Server</DisplayName>
     <PublisherDisplayName>SI Xiaolong</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -34,7 +34,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="SeeMyServer"
+        DisplayName="See My Server"
         Description="SeeMyServer"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"

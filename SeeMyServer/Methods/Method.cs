@@ -11,6 +11,8 @@ using Windows.Storage;
 using SeeMyServer.Models;
 using Newtonsoft.Json;
 using Windows.Storage.Provider;
+using System.Diagnostics;
+using System.Numerics;
 
 namespace SeeMyServer.Methods
 {
@@ -241,6 +243,198 @@ namespace SeeMyServer.Methods
                 // 未选择JSON文件。
                 return null;
             }
+        }
+        private static async Task<string> SendSSHCommandAsync(string command, CMSModel cmsModel)
+        {
+            return await Task.Run(() =>
+            {
+                return SendSSHCommand(command, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
+            });
+        }
+
+
+
+        public static async Task<string> GetLinuxCPUUsageAsync(CMSModel cmsModel)
+        {
+            string cpuUsageCMD = "top -bn1 | grep '^%Cpu' | sed 's/^.*://; s/,.*//; s/ *//g'";
+            string cpuUsageRes = await SendSSHCommandAsync(cpuUsageCMD, cmsModel);
+            int cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]);
+            return cpuUsageResValue.ToString() + "%";
+        }
+        public static async Task<string> GetLinuxMemoryUsageAsync(CMSModel cmsModel)
+        {
+            string memUsageCMD = "free -m | awk 'NR==2{printf \"%.1f\", $3/$2*100}'";
+            string memUsageRes = await SendSSHCommandAsync(memUsageCMD, cmsModel);
+            int memUsageResValue = int.Parse(memUsageRes.Split('.')[0]);
+            return memUsageResValue.ToString() + "%";
+        }
+        public static async Task<string> GetLinuxNetSentAsync(CMSModel cmsModel)
+        {
+            // 获取的是发送数据总量
+            string netSentCMD = "ifconfig eth0 | grep 'RX bytes\\|TX bytes' | awk '{print $6}' | sed 's/.*bytes://'";
+
+            // 创建 Stopwatch 实例
+            Stopwatch stopwatch = new Stopwatch();
+
+            string result0s = await SendSSHCommandAsync(netSentCMD, cmsModel);
+            // 开始计时
+            stopwatch.Start();
+            string result1s = await SendSSHCommandAsync(netSentCMD, cmsModel);
+            // 停止计时
+            stopwatch.Stop();
+            // 获取经过的时间
+            BigInteger elapsedTime = new BigInteger(stopwatch.ElapsedMilliseconds);
+
+            // 解析结果为 BigInteger
+            BigInteger netSentValue0s = BigInteger.Parse(result0s);
+            BigInteger netSentValue1s = BigInteger.Parse(result1s);
+            BigInteger netSentValue = (netSentValue1s - netSentValue0s) * 1000 / elapsedTime;
+            string netSentRes;
+            if (netSentValue >= (1024 * 1024 * 1024))
+            {
+                netSentRes = (netSentValue / 1024 / 1024 / 1024).ToString() + " GB";
+            }
+            else if (netSentValue >= (1024 * 1024))
+            {
+                netSentRes = (netSentValue / 1024 / 1024).ToString() + " MB";
+            }
+            else if (netSentValue >= 1024)
+            {
+                netSentRes = (netSentValue / 1024).ToString() + " KB";
+            }
+            else
+            {
+                netSentRes = netSentValue + " B";
+            }
+            return netSentRes + "/s ↑";
+        }
+        public static async Task<string> GetLinuxNetReceivedAsync(CMSModel cmsModel)
+        {
+            string netReceivedCMD = "ifconfig eth0 | grep 'RX bytes\\|TX bytes' | awk '{print $2}' | sed 's/.*bytes://'";
+
+            // 创建 Stopwatch 实例
+            Stopwatch stopwatch = new Stopwatch();
+
+            string result0s = await SendSSHCommandAsync(netReceivedCMD, cmsModel);
+            // 开始计时
+            stopwatch.Start();
+            string result1s = await SendSSHCommandAsync(netReceivedCMD, cmsModel);
+            // 停止计时
+            stopwatch.Stop();
+            // 获取经过的时间
+            BigInteger elapsedTime = new BigInteger(stopwatch.ElapsedMilliseconds);
+
+            // 解析结果为 BigInteger
+            BigInteger netReceivedValue0s = BigInteger.Parse(result0s);
+            BigInteger netReceivedValue1s = BigInteger.Parse(result1s);
+            BigInteger netReceivedValue = (netReceivedValue1s - netReceivedValue0s) * 1000 / elapsedTime;
+            string netReceivedRes;
+            if (netReceivedValue >= 1024 * 1024 * 1024)
+            {
+                netReceivedRes = (netReceivedValue / 1024 / 1024 / 1024).ToString() + " GB";
+            }
+            else if (netReceivedValue >= 1024 * 1024)
+            {
+                netReceivedRes = (netReceivedValue / 1024 / 1024).ToString() + " MB";
+            }
+            else if (netReceivedValue >= 1024)
+            {
+                netReceivedRes = (netReceivedValue / 1024).ToString() + " KB";
+            }
+            else
+            {
+                netReceivedRes = netReceivedValue + " B";
+            }
+            return netReceivedRes + "/s ↓";
+        }
+
+
+
+
+
+        public static async Task<string> GetOpenWRTCPUUsageAsync(CMSModel cmsModel)
+        {
+            string cpuUsageCMD = "top -bn1 | head -n 3 | grep -o 'CPU:.*' | awk '{print $2}'";
+            string cpuUsageRes = await SendSSHCommandAsync(cpuUsageCMD, cmsModel);
+            return cpuUsageRes.TrimEnd();
+        }
+
+        public static async Task<string> GetOpenWRTMemoryUsageAsync(CMSModel cmsModel)
+        {
+            string memUsageCMD = "top -bn1 | head -n 1 | awk '{used=$2; total=$2+$4; printf \"%.0f\", (used/total)*100}'";
+            string memUsageRes = await SendSSHCommandAsync(memUsageCMD, cmsModel);
+            return memUsageRes + "%";
+        }
+
+
+
+
+
+
+
+        public static async Task<string> GetWindowsCPUUsageAsync(CMSModel cmsModel)
+        {
+            string cpuUsageCMD = "powershell -Command \"(Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue\"";
+            string cpuUsageRes = await SendSSHCommandAsync(cpuUsageCMD, cmsModel);
+            int cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]);
+            return Math.Min(Math.Max(cpuUsageResValue, 0), 100).ToString() + "%";
+        }
+
+        public static async Task<string> GetWindowsMemoryUsageAsync(CMSModel cmsModel)
+        {
+            string memUsageCMD = "powershell -Command \"((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100)\"";
+            string memUsageRes = await SendSSHCommandAsync(memUsageCMD, cmsModel);
+            int memUsageResValue = int.Parse(memUsageRes.Split('.')[0]);
+            return Math.Min(Math.Max(memUsageResValue, 0), 100).ToString() + "%";
+        }
+        public static async Task<string> GetWindowsNetSentAsync(CMSModel cmsModel)
+        {
+            string netSentCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Sent/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
+            string netSentRes = await SendSSHCommandAsync(netSentCMD, cmsModel);
+            // 获取命令输出的值并转换为整数
+            int netSentValue = int.Parse(netSentRes.Split('.')[0]);
+            if (netSentValue >= (1024 * 1024 * 1024))
+            {
+                netSentRes = (netSentValue / 1024 / 1024 / 1024).ToString() + " GB";
+            }
+            else if (netSentValue >= (1024 * 1024))
+            {
+                netSentRes = (netSentValue / 1024 / 1024).ToString() + " MB";
+            }
+            else if (netSentValue >= 1024)
+            {
+                netSentRes = (netSentValue / 1024).ToString() + " KB";
+            }
+            else
+            {
+                netSentRes = netSentValue + " B";
+            }
+            return netSentRes + "/s ↑";
+        }
+
+        public static async Task<string> GetWindowsNetReceivedAsync(CMSModel cmsModel)
+        {
+            string netReceivedCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Received/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
+            string netReceivedRes = await SendSSHCommandAsync(netReceivedCMD, cmsModel);
+            // 获取命令输出的值并转换为整数
+            int netReceivedValue = int.Parse(netReceivedRes.Split('.')[0]);
+            if (netReceivedValue >= 1024 * 1024 * 1024)
+            {
+                netReceivedRes = (netReceivedValue / 1024 / 1024 / 1024).ToString() + " GB";
+            }
+            else if (netReceivedValue >= 1024 * 1024)
+            {
+                netReceivedRes = (netReceivedValue / 1024 / 1024).ToString() + " MB";
+            }
+            else if (netReceivedValue >= 1024)
+            {
+                netReceivedRes = (netReceivedValue / 1024).ToString() + " KB";
+            }
+            else
+            {
+                netReceivedRes = netReceivedValue + " B";
+            }
+            return netReceivedRes + "/s ↓";
         }
     }
 }
