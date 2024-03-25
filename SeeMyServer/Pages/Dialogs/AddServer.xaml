@@ -119,7 +119,8 @@
                         Grid.Row="0"
                         Grid.Column="1"
                         Margin="4,0,0,0"
-                        VerticalAlignment="Bottom" />
+                        VerticalAlignment="Bottom"
+                        Click="SelectSSHKeyPath_Click" />
                 </Grid>
             </Grid>
 
