@@ -211,7 +211,6 @@
                                     <Grid
                                         Grid.Row="0"
                                         Grid.Column="0"
-                                        Width="60"
                                         Height="60">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto" />

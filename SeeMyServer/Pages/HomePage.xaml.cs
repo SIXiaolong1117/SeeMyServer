@@ -21,6 +21,8 @@ using Windows.Foundation.Collections;
 using Microsoft.UI.Dispatching;
 using System.Diagnostics.Metrics;
 using System.Threading.Tasks;
+using System.Numerics;
+using System.Diagnostics;
 
 namespace SeeMyServer.Pages
 {
@@ -83,7 +85,7 @@ namespace SeeMyServer.Pages
             timer = new DispatcherTimer();
             timer.Tick += Timer_Tick;
             // 每隔段时间触发一次
-            timer.Interval = TimeSpan.FromSeconds(5);
+            timer.Interval = TimeSpan.FromSeconds(3);
 
             // 先执行一次事件处理方法
             Timer_Tick(null, null);
@@ -98,13 +100,17 @@ namespace SeeMyServer.Pages
             // 定义异步任务
             Task<string> cpuTask = GetLinuxCPUUsageAsync(cmsModel);
             Task<string> memTask = GetLinuxMemoryUsageAsync(cmsModel);
+            Task<string> netSentTask = GetLinuxNetSentAsync(cmsModel);
+            Task<string> netReceivedTask = GetLinuxNetReceivedAsync(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(cpuTask, memTask);
+            await Task.WhenAll(cpuTask, memTask, netSentTask, netReceivedTask);
 
             // 处理获取到的数据
             cmsModel.CPUUsage = cpuTask.Result;
             cmsModel.MEMUsage = memTask.Result;
+            cmsModel.NETSent = netSentTask.Result;
+            cmsModel.NETReceived = netReceivedTask.Result;
         }
         private async Task<string> GetLinuxCPUUsageAsync(CMSModel cmsModel)
         {
@@ -113,13 +119,91 @@ namespace SeeMyServer.Pages
             int cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]);
             return cpuUsageResValue.ToString() + "%";
         }
-
         private async Task<string> GetLinuxMemoryUsageAsync(CMSModel cmsModel)
         {
             string memUsageCMD = "free -m | awk 'NR==2{printf \"%.1f\", $3/$2*100}'";
             string memUsageRes = await SendSSHCommandAsync(memUsageCMD, cmsModel);
             int memUsageResValue = int.Parse(memUsageRes.Split('.')[0]);
             return memUsageResValue.ToString() + "%";
+        }
+        private async Task<string> GetLinuxNetSentAsync(CMSModel cmsModel)
+        {
+            // 获取的是发送数据总量
+            string netSentCMD = "ifconfig eth0 | grep 'RX bytes\\|TX bytes' | awk '{print $6}' | sed 's/.*bytes://'";
+
+            // 创建 Stopwatch 实例
+            Stopwatch stopwatch = new Stopwatch();
+
+            string result0s = await SendSSHCommandAsync(netSentCMD, cmsModel);
+            // 开始计时
+            stopwatch.Start();
+            string result1s = await SendSSHCommandAsync(netSentCMD, cmsModel);
+            // 停止计时
+            stopwatch.Stop();
+            // 获取经过的时间
+            BigInteger elapsedTime = new BigInteger(stopwatch.ElapsedMilliseconds);
+
+            // 解析结果为 BigInteger
+            BigInteger netSentValue0s = BigInteger.Parse(result0s);
+            BigInteger netSentValue1s = BigInteger.Parse(result1s);
+            BigInteger netSentValue = (netSentValue1s - netSentValue0s) * 1000 / elapsedTime;
+            string netSentRes;
+            if (netSentValue >= (1024 * 1024 * 1024))
+            {
+                netSentRes = (netSentValue / 1024 / 1024 / 1024).ToString() + " GB";
+            }
+            else if (netSentValue >= (1024 * 1024))
+            {
+                netSentRes = (netSentValue / 1024 / 1024).ToString() + " MB";
+            }
+            else if (netSentValue >= 1024)
+            {
+                netSentRes = (netSentValue / 1024).ToString() + " KB";
+            }
+            else
+            {
+                netSentRes = netSentValue + " B";
+            }
+            return netSentRes + "/s ↑";
+        }
+        private async Task<string> GetLinuxNetReceivedAsync(CMSModel cmsModel)
+        {
+            string netReceivedCMD = "ifconfig eth0 | grep 'RX bytes\\|TX bytes' | awk '{print $2}' | sed 's/.*bytes://'";
+
+            // 创建 Stopwatch 实例
+            Stopwatch stopwatch = new Stopwatch();
+
+            string result0s = await SendSSHCommandAsync(netReceivedCMD, cmsModel);
+            // 开始计时
+            stopwatch.Start();
+            string result1s = await SendSSHCommandAsync(netReceivedCMD, cmsModel);
+            // 停止计时
+            stopwatch.Stop();
+            // 获取经过的时间
+            BigInteger elapsedTime = new BigInteger(stopwatch.ElapsedMilliseconds);
+
+            // 解析结果为 BigInteger
+            BigInteger netReceivedValue0s = BigInteger.Parse(result0s);
+            BigInteger netReceivedValue1s = BigInteger.Parse(result1s);
+            BigInteger netReceivedValue = (netReceivedValue1s - netReceivedValue0s) * 1000 / elapsedTime;
+            string netReceivedRes;
+            if (netReceivedValue >= 1024 * 1024 * 1024)
+            {
+                netReceivedRes = (netReceivedValue / 1024 / 1024 / 1024).ToString() + " GB";
+            }
+            else if (netReceivedValue >= 1024 * 1024)
+            {
+                netReceivedRes = (netReceivedValue / 1024 / 1024).ToString() + " MB";
+            }
+            else if (netReceivedValue >= 1024)
+            {
+                netReceivedRes = (netReceivedValue / 1024).ToString() + " KB";
+            }
+            else
+            {
+                netReceivedRes = netReceivedValue + " B";
+            }
+            return netReceivedRes + "/s ↓";
         }
 
         // OpenWRT 信息更新
@@ -128,13 +212,18 @@ namespace SeeMyServer.Pages
             // 定义异步任务
             Task<string> cpuTask = GetOpenWRTCPUUsageAsync(cmsModel);
             Task<string> memTask = GetOpenWRTMemoryUsageAsync(cmsModel);
+            // OpenWRT也可以用ifconfig查询网速
+            Task<string> netSentTask = GetLinuxNetSentAsync(cmsModel);
+            Task<string> netReceivedTask = GetLinuxNetReceivedAsync(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(cpuTask, memTask);
+            await Task.WhenAll(cpuTask, memTask, netSentTask, netReceivedTask);
 
             // 处理获取到的数据
             cmsModel.CPUUsage = cpuTask.Result;
             cmsModel.MEMUsage = memTask.Result;
+            cmsModel.NETSent = netSentTask.Result;
+            cmsModel.NETReceived = netReceivedTask.Result;
         }
         private async Task<string> GetOpenWRTCPUUsageAsync(CMSModel cmsModel)
         {
@@ -186,23 +275,20 @@ namespace SeeMyServer.Pages
         private async Task<string> GetWindowsNetSentAsync(CMSModel cmsModel)
         {
             string netSentCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Sent/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
-            string netSentRes = await Task.Run(() =>
-            {
-                return Method.SendSSHCommand(netSentCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
-            });
+            string netSentRes = await SendSSHCommandAsync(netSentCMD, cmsModel);
             // 获取命令输出的值并转换为整数
             int netSentValue = int.Parse(netSentRes.Split('.')[0]);
-            if (netSentValue >= 1024)
+            if (netSentValue >= (1024 * 1024 * 1024))
             {
-                netSentRes = (netSentValue / 1024).ToString() + " KB";
+                netSentRes = (netSentValue / 1024 / 1024 / 1024).ToString() + " GB";
             }
-            else if (netSentValue >= 1024 * 1024)
+            else if (netSentValue >= (1024 * 1024))
             {
                 netSentRes = (netSentValue / 1024 / 1024).ToString() + " MB";
             }
-            else if (netSentValue >= 1024 * 1024 * 1024)
+            else if (netSentValue >= 1024)
             {
-                netSentRes = (netSentValue / 1024 / 1024 / 1024).ToString() + " GB";
+                netSentRes = (netSentValue / 1024).ToString() + " KB";
             }
             else
             {
@@ -214,23 +300,20 @@ namespace SeeMyServer.Pages
         private async Task<string> GetWindowsNetReceivedAsync(CMSModel cmsModel)
         {
             string netReceivedCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Received/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
-            string netReceivedRes = await Task.Run(() =>
-            {
-                return Method.SendSSHCommand(netReceivedCMD, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
-            });
+            string netReceivedRes = await SendSSHCommandAsync(netReceivedCMD, cmsModel);
             // 获取命令输出的值并转换为整数
             int netReceivedValue = int.Parse(netReceivedRes.Split('.')[0]);
-            if (netReceivedValue >= 1024)
+            if (netReceivedValue >= 1024 * 1024 * 1024)
             {
-                netReceivedRes = (netReceivedValue / 1024).ToString() + " KB";
+                netReceivedRes = (netReceivedValue / 1024 / 1024 / 1024).ToString() + " GB";
             }
             else if (netReceivedValue >= 1024 * 1024)
             {
                 netReceivedRes = (netReceivedValue / 1024 / 1024).ToString() + " MB";
             }
-            else if (netReceivedValue >= 1024 * 1024 * 1024)
+            else if (netReceivedValue >= 1024)
             {
-                netReceivedRes = (netReceivedValue / 1024 / 1024 / 1024).ToString() + " GB";
+                netReceivedRes = (netReceivedValue / 1024).ToString() + " KB";
             }
             else
             {
