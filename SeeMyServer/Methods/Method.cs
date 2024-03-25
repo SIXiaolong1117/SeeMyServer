@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Renci.SshNet;
@@ -12,6 +14,7 @@ namespace SeeMyServer.Methods
         // SSH执行
         public static string SendSSHCommand(string sshCommand, string sshHost, string sshPort, string sshUser, string sshPasswd, string sshKey, string privateKeyIsOpen)
         {
+            sshHost = DomainToIp(sshHost, "IPv4").ToString();
             try
             {
                 bool usePrivateKey = string.Equals(privateKeyIsOpen, "True", StringComparison.OrdinalIgnoreCase);
@@ -82,6 +85,52 @@ namespace SeeMyServer.Methods
             {
                 sshClient.Disconnect();
                 sshClient.Dispose();
+            }
+        }
+        // 获取域名对应的IP
+        public static IPAddress DomainToIp(string domain, string ipVersion)
+        {
+            IPAddress ipAddress;
+            if (IPAddress.TryParse(domain, out ipAddress))
+            {
+                // 是IP
+                if ((ipVersion == "IPv4" && ipAddress.AddressFamily == AddressFamily.InterNetwork) ||
+                    (ipVersion == "IPv6" && ipAddress.AddressFamily == AddressFamily.InterNetworkV6))
+                {
+                    return ipAddress;
+                }
+                else
+                {
+                    throw new ArgumentException("IP version mismatch");
+                }
+            }
+            else
+            {
+                // 是域名或其他输入
+                IPAddress[] addressList = Dns.GetHostEntry(domain).AddressList;
+
+                if (ipVersion == "IPv4")
+                {
+                    foreach (IPAddress address in addressList)
+                    {
+                        if (address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            return address;
+                        }
+                    }
+                }
+                else if (ipVersion == "IPv6")
+                {
+                    foreach (IPAddress address in addressList)
+                    {
+                        if (address.AddressFamily == AddressFamily.InterNetworkV6)
+                        {
+                            return address;
+                        }
+                    }
+                }
+
+                throw new ArgumentException("No matching IP address found");
             }
         }
     }
