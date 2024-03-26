@@ -269,7 +269,15 @@ namespace SeeMyServer.Methods
             Match cpuMatch = Regex.Match(UsageRes, cpuPattern);
             Match memMatch = Regex.Match(UsageRes, memPattern);
 
-            int cpuUsageResValue = int.Parse(cpuMatch.Groups[1].Value.Split('.')[0]);
+            int cpuUsageResValue;
+            try
+            {
+                cpuUsageResValue = int.Parse(cpuMatch.Groups[1].Value.Split('.')[0]);
+            }
+            catch
+            {
+                throw new Exception($"Invalid argument: {cpuMatch.Groups[1].Value.Split('.')[0]}");
+            }
             float memUsageResTotalValue = float.Parse(memMatch.Groups[1].Value);
             float memUsageResUsedValue = float.Parse(memMatch.Groups[3].Value);
             float memUsageResValue = (memUsageResUsedValue / memUsageResTotalValue) * 100;
@@ -326,25 +334,39 @@ namespace SeeMyServer.Methods
                 return new string[] { "0B/s ↑", "0B/s ↑" };
             }
         }
-        private static string NetUnitConversion(BigInteger netValue)
+        public static async Task<string> GetLinuxHostName(CMSModel cmsModel)
         {
-            if (netValue >= (1024 * 1024 * 1024))
-            {
-                return (netValue / 1024 / 1024 / 1024).ToString() + " GB";
-            }
-            else if (netValue >= (1024 * 1024))
-            {
-                return (netValue / 1024 / 1024).ToString() + " MB";
-            }
-            else if (netValue >= 1024)
-            {
-                return (netValue / 1024).ToString() + " KB";
-            }
-            else
-            {
-                return netValue + " B";
-            }
+            string CMD = "hostname";
+            CMD = await SendSSHCommandAsync(CMD, cmsModel);
+
+            return CMD.Split('\n')[0];
         }
+        public static async Task<string> GetLinuxUpTime(CMSModel cmsModel)
+        {
+            string CMD = "uptime | awk '{print $3 \" \" $4}'";
+            CMD = await SendSSHCommandAsync(CMD, cmsModel);
+
+            return CMD.Split(',')[0];
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
 
 
 
@@ -379,6 +401,16 @@ namespace SeeMyServer.Methods
                 return new string[] { "0%", "0%" };
             }
         }
+        public static async Task<string> GetOpenWRTHostName(CMSModel cmsModel)
+        {
+            string CMD = "uci get system.@system[0].hostname";
+            CMD = await SendSSHCommandAsync(CMD, cmsModel);
+
+            return CMD.Split('\n')[0];
+        }
+
+
+
 
 
 
@@ -449,6 +481,26 @@ namespace SeeMyServer.Methods
                 netReceivedRes = netReceivedValue + " B";
             }
             return netReceivedRes + "/s ↓";
+        }
+
+        private static string NetUnitConversion(BigInteger netValue)
+        {
+            if (netValue >= (1024 * 1024 * 1024))
+            {
+                return (netValue / 1024 / 1024 / 1024).ToString() + " GB";
+            }
+            else if (netValue >= (1024 * 1024))
+            {
+                return (netValue / 1024 / 1024).ToString() + " MB";
+            }
+            else if (netValue >= 1024)
+            {
+                return (netValue / 1024).ToString() + " KB";
+            }
+            else
+            {
+                return netValue + " B";
+            }
         }
     }
 }

@@ -141,6 +141,15 @@
   <data name="AboutReference.Text" xml:space="preserve">
     <value>Dependencies</value>
   </data>
+  <data name="AboutServer.Text" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="AboutServerHostName.Text" xml:space="preserve">
+    <value>Host Name</value>
+  </data>
+  <data name="AboutServerUpTime.Text" xml:space="preserve">
+    <value>Up Time</value>
+  </data>
   <data name="AboutSetting.Text" xml:space="preserve">
     <value>About</value>
   </data>

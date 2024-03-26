@@ -8,6 +8,8 @@ namespace SeeMyServer.Models
         private string _memUsage;
         private string _netReceived;
         private string _netSent;
+        private string _hostName;
+        private string _upTime;
 
         public int Id { get; set; }
         public string Name { get; set; }
@@ -65,6 +67,32 @@ namespace SeeMyServer.Models
                 {
                     _netSent = value;
                     OnPropertyChanged(nameof(NETSent));
+                }
+            }
+        }
+
+        public string HostName
+        {
+            get { return _hostName; }
+            set
+            {
+                if (_hostName != value)
+                {
+                    _hostName = value;
+                    OnPropertyChanged(nameof(HostName));
+                }
+            }
+        }
+
+        public string UpTime
+        {
+            get { return _upTime; }
+            set
+            {
+                if (_upTime != value)
+                {
+                    _upTime = value;
+                    OnPropertyChanged(nameof(UpTime));
                 }
             }
         }

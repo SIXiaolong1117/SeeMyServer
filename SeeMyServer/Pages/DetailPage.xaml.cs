@@ -70,12 +70,16 @@ namespace SeeMyServer.Pages
             // 定义异步任务
             string[] usages = await Method.GetLinuxUsageAsync(cmsModel);
             string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
+            string HostName = await Method.GetLinuxHostName(cmsModel);
+            string UpTime = await Method.GetLinuxUpTime(cmsModel);
 
             // 处理获取到的数据
             cmsModel.CPUUsage = usages[0];
             cmsModel.MEMUsage = usages[1];
             cmsModel.NETReceived = netUsages[0];
             cmsModel.NETSent = netUsages[1];
+            cmsModel.HostName = HostName;
+            cmsModel.UpTime = UpTime;
         }
 
         // OpenWRT 信息更新
@@ -83,14 +87,18 @@ namespace SeeMyServer.Pages
         {
             // 定义异步任务
             string[] usages = await Method.GetOpenWRTCPUUsageAsync(cmsModel);
-            // OpenWRT也可以用ifconfig查询网速
+            string HostName = await Method.GetOpenWRTHostName(cmsModel);
+            // OpenWRT也可以用部分Linux命令
             string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
+            string UpTime = await Method.GetLinuxUpTime(cmsModel);
 
             // 处理获取到的数据
             cmsModel.CPUUsage = usages[0];
             cmsModel.MEMUsage = usages[1];
             cmsModel.NETReceived = netUsages[0];
             cmsModel.NETSent = netUsages[1];
+            cmsModel.HostName = HostName;
+            cmsModel.UpTime = UpTime;
         }
 
         // Windows 信息更新
