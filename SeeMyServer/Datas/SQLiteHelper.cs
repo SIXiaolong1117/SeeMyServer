@@ -224,5 +224,37 @@ namespace SeeMyServer.Datas
 
             return entries;
         }
+        public CMSModel GetDataById(int id)
+        {
+            CMSModel entry = null;
+
+            using (SqliteConnection connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+
+                var queryCommand = connection.CreateCommand();
+                queryCommand.CommandText = "SELECT * FROM CMSTable WHERE Id = @Id";
+                queryCommand.Parameters.AddWithValue("@Id", id);
+
+                using (SqliteDataReader reader = queryCommand.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        entry = new CMSModel
+                        {
+                            Id = reader.GetInt32(0),
+                            Name = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                            HostIP = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                            HostPort = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                            SSHUser = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                            SSHKey = reader.IsDBNull(6) ? "" : reader.GetString(6),
+                            OSType = reader.IsDBNull(7) ? "" : reader.GetString(7)
+                        };
+                    }
+                }
+            }
+
+            return entry;
+        }
     }
 }

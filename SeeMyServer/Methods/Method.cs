@@ -7,10 +7,13 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Windows.Devices.Power;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Provider;
+using static PInvoke.User32;
 
 namespace SeeMyServer.Methods
 {
@@ -252,24 +255,38 @@ namespace SeeMyServer.Methods
 
 
 
-        public static async Task<string> GetLinuxCPUUsageAsync(CMSModel cmsModel)
+        public static async Task<string[]> GetLinuxUsageAsync(CMSModel cmsModel)
         {
-            string cpuUsageCMD = "top -bn1 | grep '^%Cpu' | sed 's/^.*://; s/,.*//; s/ *//g'";
-            string cpuUsageRes = await SendSSHCommandAsync(cpuUsageCMD, cmsModel);
-            int cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]);
-            return cpuUsageResValue.ToString() + "%";
+            string UsageCMD = "top -bn1";
+            string UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
+
+            // 定义正则表达式模式 匹配CPU占用
+            string cpuPattern = @"%Cpu\(s\):\s+([\d\.]+)\s+us,\s+([\d\.]+)\s+sy,\s+([\d\.]+)\s+ni,\s+([\d\.]+)\s+id,\s+([\d\.]+)\s+wa,\s+([\d\.]+)\s+hi,\s+([\d\.]+)\s+si,\s+([\d\.]+)\s+st";
+            // 定义正则表达式模式 匹配MEM占用
+            string memPattern = @"GiB\s+Mem\s+:\s+([\d\.]+)\s+total,\s+([\d\.]+)\s+free,\s+([\d\.]+)\s+used,\s+([\d\.]+)\s+buff/cache";
+
+            // 匹配输入字符串中的模式
+            Match cpuMatch = Regex.Match(UsageRes, cpuPattern);
+            Match memMatch = Regex.Match(UsageRes, memPattern);
+
+            int cpuUsageResValue = int.Parse(cpuMatch.Groups[1].Value.Split('.')[0]);
+            float memUsageResTotalValue = float.Parse(memMatch.Groups[1].Value);
+            float memUsageResUsedValue = float.Parse(memMatch.Groups[3].Value);
+            float memUsageResValue = (memUsageResUsedValue / memUsageResTotalValue) * 100;
+
+            if (cpuMatch.Success)
+            {
+                return new string[] { $"{cpuUsageResValue}%", $"{int.Parse(memUsageResValue.ToString().Split('.')[0])}%" };
+            }
+            else
+            {
+                return new string[] { "0%", "0%" };
+            }
+
         }
-        public static async Task<string> GetLinuxMemoryUsageAsync(CMSModel cmsModel)
+        public static async Task<string[]> GetLinuxNetAsync(CMSModel cmsModel)
         {
-            string memUsageCMD = "free -m | awk 'NR==2{printf \"%.1f\", $3/$2*100}'";
-            string memUsageRes = await SendSSHCommandAsync(memUsageCMD, cmsModel);
-            int memUsageResValue = int.Parse(memUsageRes.Split('.')[0]);
-            return memUsageResValue.ToString() + "%";
-        }
-        public static async Task<string> GetLinuxNetSentAsync(CMSModel cmsModel)
-        {
-            // 获取的是发送数据总量
-            string netSentCMD = "ifconfig eth0 | grep 'RX bytes\\|TX bytes' | awk '{print $6}' | sed 's/.*bytes://'";
+            string netSentCMD = "ifconfig";
 
             // 创建 Stopwatch 实例
             Stopwatch stopwatch = new Stopwatch();
@@ -283,85 +300,84 @@ namespace SeeMyServer.Methods
             // 获取经过的时间
             BigInteger elapsedTime = new BigInteger(stopwatch.ElapsedMilliseconds);
 
-            // 解析结果为 BigInteger
-            BigInteger netSentValue0s = BigInteger.Parse(result0s);
-            BigInteger netSentValue1s = BigInteger.Parse(result1s);
-            BigInteger netSentValue = (netSentValue1s - netSentValue0s) * 1000 / elapsedTime;
-            string netSentRes;
-            if (netSentValue >= (1024 * 1024 * 1024))
-            {
-                netSentRes = (netSentValue / 1024 / 1024 / 1024).ToString() + " GB";
-            }
-            else if (netSentValue >= (1024 * 1024))
-            {
-                netSentRes = (netSentValue / 1024 / 1024).ToString() + " MB";
-            }
-            else if (netSentValue >= 1024)
-            {
-                netSentRes = (netSentValue / 1024).ToString() + " KB";
-            }
-            else
-            {
-                netSentRes = netSentValue + " B";
-            }
-            return netSentRes + "/s ↑";
-        }
-        public static async Task<string> GetLinuxNetReceivedAsync(CMSModel cmsModel)
-        {
-            string netReceivedCMD = "ifconfig eth0 | grep 'RX bytes\\|TX bytes' | awk '{print $2}' | sed 's/.*bytes://'";
+            Regex XPattern = new Regex(@"eth0\s+Link.*?RX\s+bytes:(\d+)\s+\(.*?\)\s+TX\s+bytes:(\d+)\s+\(.*?\)", RegexOptions.Singleline);
 
-            // 创建 Stopwatch 实例
-            Stopwatch stopwatch = new Stopwatch();
+            Match XMatch0s = XPattern.Match(result0s);
+            Match XMatch1s = XPattern.Match(result1s);
 
-            string result0s = await SendSSHCommandAsync(netReceivedCMD, cmsModel);
-            // 开始计时
-            stopwatch.Start();
-            string result1s = await SendSSHCommandAsync(netReceivedCMD, cmsModel);
-            // 停止计时
-            stopwatch.Stop();
-            // 获取经过的时间
-            BigInteger elapsedTime = new BigInteger(stopwatch.ElapsedMilliseconds);
+            if (XMatch0s.Success && XMatch1s.Success)
+            {
+                // 解析结果为 BigInteger
+                BigInteger netReceivedValue0s = BigInteger.Parse(XMatch0s.Groups[1].Value);
+                BigInteger netReceivedValue1s = BigInteger.Parse(XMatch1s.Groups[1].Value);
+                BigInteger netSentValue0s = BigInteger.Parse(XMatch0s.Groups[2].Value);
+                BigInteger netSentValue1s = BigInteger.Parse(XMatch1s.Groups[2].Value);
 
-            // 解析结果为 BigInteger
-            BigInteger netReceivedValue0s = BigInteger.Parse(result0s);
-            BigInteger netReceivedValue1s = BigInteger.Parse(result1s);
-            BigInteger netReceivedValue = (netReceivedValue1s - netReceivedValue0s) * 1000 / elapsedTime;
-            string netReceivedRes;
-            if (netReceivedValue >= 1024 * 1024 * 1024)
-            {
-                netReceivedRes = (netReceivedValue / 1024 / 1024 / 1024).ToString() + " GB";
-            }
-            else if (netReceivedValue >= 1024 * 1024)
-            {
-                netReceivedRes = (netReceivedValue / 1024 / 1024).ToString() + " MB";
-            }
-            else if (netReceivedValue >= 1024)
-            {
-                netReceivedRes = (netReceivedValue / 1024).ToString() + " KB";
+                BigInteger netReceivedValue = (netReceivedValue1s - netReceivedValue0s) * 1000 / elapsedTime;
+                BigInteger netSentValue = (netSentValue1s - netSentValue0s) * 1000 / elapsedTime;
+
+                string netReceivedRes = NetUnitConversion(netReceivedValue);
+                string netSentRes = NetUnitConversion(netSentValue);
+
+                return new string[] { $"{netReceivedRes + "/s ↑"}", $"{netSentRes + "/s ↑"}" };
             }
             else
             {
-                netReceivedRes = netReceivedValue + " B";
+                return new string[] { "0B/s ↑", "0B/s ↑" };
             }
-            return netReceivedRes + "/s ↓";
+        }
+        private static string NetUnitConversion(BigInteger netValue)
+        {
+            if (netValue >= (1024 * 1024 * 1024))
+            {
+                return (netValue / 1024 / 1024 / 1024).ToString() + " GB";
+            }
+            else if (netValue >= (1024 * 1024))
+            {
+                return (netValue / 1024 / 1024).ToString() + " MB";
+            }
+            else if (netValue >= 1024)
+            {
+                return (netValue / 1024).ToString() + " KB";
+            }
+            else
+            {
+                return netValue + " B";
+            }
         }
 
 
 
 
 
-        public static async Task<string> GetOpenWRTCPUUsageAsync(CMSModel cmsModel)
-        {
-            string cpuUsageCMD = "top -bn1 | head -n 3 | grep -o 'CPU:.*' | awk '{print $2}'";
-            string cpuUsageRes = await SendSSHCommandAsync(cpuUsageCMD, cmsModel);
-            return cpuUsageRes.TrimEnd();
-        }
 
-        public static async Task<string> GetOpenWRTMemoryUsageAsync(CMSModel cmsModel)
+        public static async Task<string[]> GetOpenWRTCPUUsageAsync(CMSModel cmsModel)
         {
-            string memUsageCMD = "top -bn1 | head -n 1 | awk '{used=$2; total=$2+$4; printf \"%.0f\", (used/total)*100}'";
-            string memUsageRes = await SendSSHCommandAsync(memUsageCMD, cmsModel);
-            return memUsageRes + "%";
+            string UsageCMD = "top -bn1";
+            string UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
+
+            Regex cpuRegex = new Regex(@"CPU:\s+(\d+)% usr\s+(\d+)% sys\s+(\d+)% nic\s+(\d+)% idle\s+(\d+)% io\s+(\d+)% irq\s+(\d+)% sirq");
+            Regex memRegex = new Regex(@"Mem:\s+(\d+)K used,\s+(\d+)K free");
+
+            Match cpuMatch = cpuRegex.Match(UsageRes);
+            Match memMatch = memRegex.Match(UsageRes);
+
+            if (cpuMatch.Success)
+            {
+                // 获取使用和空闲内存的数值
+                double usedMemory = double.Parse(memMatch.Groups[1].Value);
+                double freeMemory = double.Parse(memMatch.Groups[2].Value);
+
+                // 计算内存占用百分比
+                int memoryPercentage = (int)((usedMemory / (usedMemory + freeMemory)) * 100);
+
+
+                return new string[] { $"{cpuMatch.Groups[1].Value}%", $"{memoryPercentage}%" };
+            }
+            else
+            {
+                return new string[] { "0%", "0%" };
+            }
         }
 
 

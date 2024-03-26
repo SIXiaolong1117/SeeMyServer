@@ -11,11 +11,14 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
+using Windows.Storage;
 
 namespace SeeMyServer.Pages
 {
     public sealed partial class HomePage : Page
     {
+        // 启用本地设置数据
+        ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
         ResourceLoader resourceLoader = new ResourceLoader();
         private DispatcherQueue _dispatcherQueue;
         private DispatcherTimer timer;
@@ -87,39 +90,29 @@ namespace SeeMyServer.Pages
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
             // 定义异步任务
-            Task<string> cpuTask = Method.GetLinuxCPUUsageAsync(cmsModel);
-            Task<string> memTask = Method.GetLinuxMemoryUsageAsync(cmsModel);
-            Task<string> netSentTask = Method.GetLinuxNetSentAsync(cmsModel);
-            Task<string> netReceivedTask = Method.GetLinuxNetReceivedAsync(cmsModel);
-
-            // 同时执行异步任务
-            await Task.WhenAll(cpuTask, memTask, netSentTask, netReceivedTask);
+            string[] usages = await Method.GetLinuxUsageAsync(cmsModel);
+            string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
 
             // 处理获取到的数据
-            cmsModel.CPUUsage = cpuTask.Result;
-            cmsModel.MEMUsage = memTask.Result;
-            cmsModel.NETSent = netSentTask.Result;
-            cmsModel.NETReceived = netReceivedTask.Result;
+            cmsModel.CPUUsage = usages[0];
+            cmsModel.MEMUsage = usages[1];
+            cmsModel.NETReceived = netUsages[0];
+            cmsModel.NETSent = netUsages[1];
         }
 
         // OpenWRT 信息更新
         private async Task UpdateOpenWRTCMSModelAsync(CMSModel cmsModel)
         {
             // 定义异步任务
-            Task<string> cpuTask = Method.GetOpenWRTCPUUsageAsync(cmsModel);
-            Task<string> memTask = Method.GetOpenWRTMemoryUsageAsync(cmsModel);
+            string[] usages = await Method.GetOpenWRTCPUUsageAsync(cmsModel);
             // OpenWRT也可以用ifconfig查询网速
-            Task<string> netSentTask = Method.GetLinuxNetSentAsync(cmsModel);
-            Task<string> netReceivedTask = Method.GetLinuxNetReceivedAsync(cmsModel);
-
-            // 同时执行异步任务
-            await Task.WhenAll(cpuTask, memTask, netSentTask, netReceivedTask);
+            string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
 
             // 处理获取到的数据
-            cmsModel.CPUUsage = cpuTask.Result;
-            cmsModel.MEMUsage = memTask.Result;
-            cmsModel.NETSent = netSentTask.Result;
-            cmsModel.NETReceived = netReceivedTask.Result;
+            cmsModel.CPUUsage = usages[0];
+            cmsModel.MEMUsage = usages[1];
+            cmsModel.NETReceived = netUsages[0];
+            cmsModel.NETSent = netUsages[1];
         }
 
         // Windows 信息更新
@@ -318,9 +311,18 @@ namespace SeeMyServer.Pages
         // 处理左键单击事件的代码
         private void OnListViewTapped(object sender, TappedRoutedEventArgs e)
         {
-            // 导航到页面
-            var mainWindow = Window.Current as MainWindow;
-            App.m_window.NavigateToPage(typeof(DetailPage));
+            FrameworkElement listViewItem = (sender as FrameworkElement);
+
+            if (listViewItem != null)
+            {
+                // 获取右键点击的数据对象（WoLModel）
+                CMSModel selectedItem = listViewItem?.DataContext as CMSModel;
+
+                localSettings.Values["ServerID"] = selectedItem.Id.ToString();
+
+                // 导航到页面
+                App.m_window.NavigateToPage(typeof(DetailPage));
+            }
         }
     }
 }
