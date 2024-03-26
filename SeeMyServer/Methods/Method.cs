@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.Devices.Power;
@@ -257,38 +258,49 @@ namespace SeeMyServer.Methods
 
         public static async Task<string[]> GetLinuxUsageAsync(CMSModel cmsModel)
         {
-            string UsageCMD = "top -bn1";
+            string UsageCMD = "top 1 -bn1";
             string UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
 
             // 定义正则表达式模式 匹配CPU占用
-            string cpuPattern = @"%Cpu\(s\):\s+([\d\.]+)\s+us,\s+([\d\.]+)\s+sy,\s+([\d\.]+)\s+ni,\s+([\d\.]+)\s+id,\s+([\d\.]+)\s+wa,\s+([\d\.]+)\s+hi,\s+([\d\.]+)\s+si,\s+([\d\.]+)\s+st";
+            Regex cpuPattern = new Regex(@"%Cpu\d+\s+:\s*(\d*\.\d+)\s+us,\s*(\d*\.\d+)\s+sy,\s*(\d*\.\d+)\s+ni,\s*(\d*\.\d+)\s+id,\s*(\d*\.\d+)\s+wa,\s*(\d*\.\d+)\s+hi,\s*(\d*\.\d+)\s+si,\s*(\d*\.\d+)\s+st");
+
             // 定义正则表达式模式 匹配MEM占用
             string memPattern = @"GiB\s+Mem\s+:\s+([\d\.]+)\s+total,\s+([\d\.]+)\s+free,\s+([\d\.]+)\s+used,\s+([\d\.]+)\s+buff/cache";
 
-            // 匹配输入字符串中的模式
-            Match cpuMatch = Regex.Match(UsageRes, cpuPattern);
-            Match memMatch = Regex.Match(UsageRes, memPattern);
+            // 创建列表以存储结果
+            List<string> cpuUsageList = new List<string>();
 
-            int cpuUsageResValue;
-            try
-            {
-                cpuUsageResValue = int.Parse(cpuMatch.Groups[1].Value.Split('.')[0]);
-            }
-            catch
-            {
-                throw new Exception($"Invalid argument: {cpuMatch.Groups[1].Value.Split('.')[0]}");
-            }
+            // 匹配输入字符串中的模式
+            Match memMatch = Regex.Match(UsageRes, memPattern);
             float memUsageResTotalValue = float.Parse(memMatch.Groups[1].Value);
             float memUsageResUsedValue = float.Parse(memMatch.Groups[3].Value);
             float memUsageResValue = (memUsageResUsedValue / memUsageResTotalValue) * 100;
 
-            if (cpuMatch.Success)
+            if (cpuPattern.IsMatch(UsageRes) && memMatch.Success)
             {
-                return new string[] { $"{cpuUsageResValue}%", $"{int.Parse(memUsageResValue.ToString().Split('.')[0])}%" };
+                // 在输入文本中查找匹配项并构建结果字符串
+                foreach (Match match in cpuPattern.Matches(UsageRes))
+                {
+                    string coreInfo = $"{match.Groups[1].Value}";
+                    cpuUsageList.Add(coreInfo);
+                }
+                // 计算核心平均占用率
+                double averageUsage = 0;
+                if (cpuUsageList.Count > 0)
+                {
+                    double totalUsage = 0;
+                    foreach (var coreInfo in cpuUsageList)
+                    {
+                        totalUsage += double.Parse(coreInfo);
+                    }
+                    averageUsage = totalUsage / cpuUsageList.Count;
+                }
+                //throw new Exception($"Invalid argument: {string.Join(", ", cpuUsageList)}");
+                return new string[] { $"{(int)averageUsage}%", $"{int.Parse(memUsageResValue.ToString().Split('.')[0])}%", $"{string.Join(", ", cpuUsageList)}", $"{UsageRes}" };
             }
             else
             {
-                return new string[] { "0%", "0%" };
+                return new string[] { "0%", "0%", "Err,Err", "Err" };
             }
 
         }
@@ -327,11 +339,11 @@ namespace SeeMyServer.Methods
                 string netReceivedRes = NetUnitConversion(netReceivedValue);
                 string netSentRes = NetUnitConversion(netSentValue);
 
-                return new string[] { $"{netReceivedRes + "/s ↑"}", $"{netSentRes + "/s ↑"}" };
+                return new string[] { $"{netReceivedRes + "/s ↓"}", $"{netSentRes + "/s ↑"}" };
             }
             else
             {
-                return new string[] { "0B/s ↑", "0B/s ↑" };
+                return new string[] { "0B/s ↓", "0B/s ↑" };
             }
         }
         public static async Task<string> GetLinuxHostName(CMSModel cmsModel)
@@ -366,7 +378,7 @@ namespace SeeMyServer.Methods
 
 
 
-        
+
 
 
 

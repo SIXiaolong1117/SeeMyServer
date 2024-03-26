@@ -144,8 +144,14 @@
   <data name="AboutServer.Text" xml:space="preserve">
     <value>About</value>
   </data>
+  <data name="AboutServerCPUUsage.Text" xml:space="preserve">
+    <value>CPU Usage</value>
+  </data>
   <data name="AboutServerHostName.Text" xml:space="preserve">
     <value>Host Name</value>
+  </data>
+  <data name="AboutServerMEMUsage.Text" xml:space="preserve">
+    <value>MEM Usage</value>
   </data>
   <data name="AboutServerUpTime.Text" xml:space="preserve">
     <value>Up Time</value>

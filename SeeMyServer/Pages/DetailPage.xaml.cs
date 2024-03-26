@@ -1,7 +1,9 @@
+using Microsoft.UI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using SeeMyServer.Datas;
 using SeeMyServer.Methods;
 using SeeMyServer.Models;
@@ -12,6 +14,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
 using Windows.Storage;
+using static PInvoke.User32;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SeeMyServer.Pages
 {
@@ -31,6 +35,66 @@ namespace SeeMyServer.Pages
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
             LoadData();
+        }
+
+        public static void CreateProgressBars(Grid container, string[] CPUCoreUsageTokens)
+        {
+            int numberOfBars = CPUCoreUsageTokens.Length;
+
+            // 清除 Grid 的行定义和子元素
+            container.RowDefinitions.Clear();
+            container.ColumnDefinitions.Clear();
+            container.Children.Clear();
+
+            // 检查是否需要添加列定义
+            if (container.ColumnDefinitions.Count == 0)
+            {
+                // 创建一个ColumnDefinition
+                ColumnDefinition columnDefinition = new ColumnDefinition();
+
+                // 设置宽度为自动调整大小以填充剩余空间
+                columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+
+                // 将ColumnDefinition添加到Grid的ColumnDefinitions集合中
+                container.ColumnDefinitions.Add(columnDefinition);
+
+                // 添加列定义
+                container.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
+            }
+
+            for (int i = 0; i < numberOfBars; i++)
+            {
+                // 添加新的行定义
+                container.RowDefinitions.Add(new RowDefinition());
+
+                ProgressBar progressBar = new ProgressBar();
+
+                progressBar.Margin = new Thickness(0, 5, 0, 5);
+                progressBar.Value = double.Parse(CPUCoreUsageTokens[i]);
+
+                // 创建 TextBlock 来显示与 ProgressBar 同步的值
+                TextBlock textBlock = new TextBlock();
+                textBlock.Text = $"{progressBar.Value.ToString().Split(".")[0]}%";
+                // 监听 ProgressBar 的值改变事件，更新 TextBlock 的内容
+                progressBar.ValueChanged += (sender, e) =>
+                {
+                    textBlock.Text = $"{progressBar.Value.ToString().Split(".")[0]}%";
+                };
+                textBlock.Margin = new Thickness(5, 0, 0, 0);
+                textBlock.Width = 30;
+                textBlock.HorizontalAlignment = HorizontalAlignment.Right;
+
+                // 设置 ProgressBar 和 TextBlock 的位置
+                Grid.SetRow(progressBar, i);
+                Grid.SetColumn(progressBar, 0);
+
+                Grid.SetRow(textBlock, i);
+                Grid.SetColumn(textBlock, 1);
+
+                // 将 ProgressBar 和 TextBlock 添加到 Grid 中
+                container.Children.Add(progressBar);
+                container.Children.Add(textBlock);
+            }
         }
 
         CMSModel dataList;
@@ -80,6 +144,12 @@ namespace SeeMyServer.Pages
             cmsModel.NETSent = netUsages[1];
             cmsModel.HostName = HostName;
             cmsModel.UpTime = UpTime;
+
+            //Debug.Text = usages[2];
+            //Debug2.Text = usages[3];
+
+            string[] tokens = usages[2].Split(", ");
+            CreateProgressBars(progressBarsGrid, tokens);
         }
 
         // OpenWRT 信息更新
