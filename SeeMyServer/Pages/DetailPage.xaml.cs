@@ -53,9 +53,8 @@ namespace SeeMyServer.Pages
                 columnDefinition.Width = new GridLength(1, GridUnitType.Star);
 
                 // 将ColumnDefinition添加到Grid的ColumnDefinitions集合中
+                container.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
                 container.ColumnDefinitions.Add(columnDefinition);
-
-                // 添加列定义
                 container.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
             }
 
@@ -71,24 +70,32 @@ namespace SeeMyServer.Pages
 
                 // 创建 TextBlock 来显示与 ProgressBar 同步的值
                 TextBlock textBlock = new TextBlock();
+                TextBlock textCPUBlock = new TextBlock();
                 textBlock.Text = $"{progressBar.Value.ToString().Split(".")[0]}%";
+                textCPUBlock.Text = $"CPU{i}";
+                textCPUBlock.Margin = new Thickness(0, 4, 8, 6);
                 // 监听 ProgressBar 的值改变事件，更新 TextBlock 的内容
                 progressBar.ValueChanged += (sender, e) =>
                 {
                     textBlock.Text = $"{progressBar.Value.ToString().Split(".")[0]}%";
+                    textCPUBlock.Text = $"CPU{i}";
                 };
                 textBlock.Margin = new Thickness(8, 4, 0, 6);
                 textBlock.Width = 30;
                 textBlock.HorizontalAlignment = HorizontalAlignment.Right;
 
-                // 设置 ProgressBar 和 TextBlock 的位置
+                // 设置位置
+                Grid.SetRow(textCPUBlock, i);
+                Grid.SetColumn(textCPUBlock, 0);
+
                 Grid.SetRow(progressBar, i);
-                Grid.SetColumn(progressBar, 0);
+                Grid.SetColumn(progressBar, 1);
 
                 Grid.SetRow(textBlock, i);
-                Grid.SetColumn(textBlock, 1);
+                Grid.SetColumn(textBlock, 2);
 
-                // 将 ProgressBar 和 TextBlock 添加到 Grid 中
+                // 添加到 Grid 中
+                container.Children.Add(textCPUBlock);
                 container.Children.Add(progressBar);
                 container.Children.Add(textBlock);
             }
@@ -129,7 +136,6 @@ namespace SeeMyServer.Pages
         // Linux 信息更新
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
-            // 定义异步任务
             string[] usages = await Method.GetLinuxUsageAsync(cmsModel);
             string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
             string HostName = await Method.GetLinuxHostName(cmsModel);
@@ -168,7 +174,6 @@ namespace SeeMyServer.Pages
         // OpenWRT 信息更新
         private async Task UpdateOpenWRTCMSModelAsync(CMSModel cmsModel)
         {
-            // 定义异步任务
             string[] usages = await Method.GetOpenWRTCPUUsageAsync(cmsModel);
             string HostName = await Method.GetOpenWRTHostName(cmsModel);
             // OpenWRT也可以用部分Linux命令
@@ -205,20 +210,25 @@ namespace SeeMyServer.Pages
         // Windows 信息更新
         private async Task UpdateWindowsCMSModelAsync(CMSModel cmsModel)
         {
-            // 定义异步任务
-            Task<string> cpuTask = Method.GetWindowsCPUUsageAsync(cmsModel);
+            string[] usages = await Method.GetWindowsUsageAsync(cmsModel);
             Task<string> memTask = Method.GetWindowsMemoryUsageAsync(cmsModel);
             Task<string> netSentTask = Method.GetWindowsNetSentAsync(cmsModel);
             Task<string> netReceivedTask = Method.GetWindowsNetReceivedAsync(cmsModel);
+            // Windows上可以使用相同的命令
+            string HostName = await Method.GetLinuxHostName(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(cpuTask, memTask, netSentTask, netReceivedTask);
+            await Task.WhenAll(memTask, netSentTask, netReceivedTask);
 
             // 处理获取到的数据
-            cmsModel.CPUUsage = cpuTask.Result;
+            cmsModel.CPUUsage = usages[0];
             cmsModel.MEMUsage = memTask.Result;
             cmsModel.NETSent = netSentTask.Result;
             cmsModel.NETReceived = netReceivedTask.Result;
+            cmsModel.HostName = HostName.TrimEnd();
+
+            string[] tokens = usages[2].Split(", ");
+            CreateProgressBars(progressBarsGrid, tokens);
         }
 
         private async void Timer_Tick(object sender, object e)

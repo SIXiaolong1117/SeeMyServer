@@ -298,7 +298,7 @@ namespace SeeMyServer.Methods
                     averageUsage = totalUsage / cpuUsageList.Count;
                 }
                 //throw new Exception($"Invalid argument: {string.Join(", ", cpuUsageList)}");
-                return new string[] { $"{(int)averageUsage}%", $"{int.Parse(memUsageResValue.ToString().Split('.')[0])}%", $"{string.Join(", ", cpuUsageList)}", $"{UsageRes}", $"{memUsageResTotalValue}" };
+                return new string[] { $"{(int)averageUsage}%", $"{memUsageResValue.ToString().Split('.')[0]}%", $"{string.Join(", ", cpuUsageList)}", $"{UsageRes}", $"{memUsageResTotalValue}" };
             }
             else
             {
@@ -452,6 +452,47 @@ namespace SeeMyServer.Methods
 
 
 
+        public static async Task<string[]> GetWindowsUsageAsync(CMSModel cmsModel)
+        {
+            string UsageCMD = "powershell -Command \"(Get-Counter '\\Processor(*)\\% Processor Time').CounterSamples.CookedValue; \'-\' ; ((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100); \'-\' ;(Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory\"";
+            string UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
+
+            // 以分号分割字符串
+            string[] UsageResA = UsageRes.Split('-');
+            // 去除每个子字符串的开头和结尾的换行符
+            for (int i = 0; i < UsageResA.Length; i++)
+            {
+                UsageResA[i] = UsageResA[i].Trim('\r', '\n');
+            }
+            // 第一部分是各CPU核心占用和总占用，分割出来后再处理到一个List
+            string[] cpuUsageRes = UsageResA[0].Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            // 创建列表
+            List<string> resultList = new List<string>();
+            // 将每行添加到列表中
+            foreach (string cpuUsage in cpuUsageRes)
+            {
+                resultList.Add(cpuUsage);
+            }
+
+            // 去掉最后一项（表示总占用）
+            List<string> modifiedList = new List<string>(cpuUsageRes);
+            modifiedList.RemoveAt(modifiedList.Count - 1);
+
+            // 第二部分是内存占用
+            string memUsageRes = UsageResA[1];
+
+            // 第三部分是总内存量
+            string memUsageTotalRes = UsageResA[2];
+            BigInteger memUsageTotalValue = 0;
+            try
+            {
+                memUsageTotalValue = BigInteger.Parse(memUsageTotalRes);
+                memUsageTotalRes = NetUnitConversion(memUsageTotalValue);
+            }
+            catch (Exception ex) { }
+
+            return new string[] { $"{cpuUsageRes[cpuUsageRes.Length - 1].Split('.')[0]}%", $"{memUsageRes.Split('.')[0]}%", $"{string.Join(", ", modifiedList)}", $"{UsageRes}", $"{memUsageTotalRes}" };
+        }
         public static async Task<string> GetWindowsCPUUsageAsync(CMSModel cmsModel)
         {
             string cpuUsageCMD = "powershell -Command \"(Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue\"";
