@@ -71,7 +71,7 @@
         <ScrollViewer
             Grid.Row="1"
             Grid.Column="0"
-            Margin="24,0,24,0"
+            Margin="24,18,24,0"
             Style="{StaticResource TransparentScrollViewerStyle}">
             <ListView
                 x:Name="dataListView"

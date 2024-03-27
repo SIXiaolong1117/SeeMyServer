@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace SeeMyServer.Models
 {
@@ -10,6 +11,8 @@ namespace SeeMyServer.Models
         private string _netSent;
         private string _hostName;
         private string _upTime;
+        private string _totalMEM;
+        private List<MountInfo> _mountInfos;
 
         public int Id { get; set; }
         public string Name { get; set; }
@@ -93,6 +96,32 @@ namespace SeeMyServer.Models
                 {
                     _upTime = value;
                     OnPropertyChanged(nameof(UpTime));
+                }
+            }
+        }
+
+        public string TotalMEM
+        {
+            get { return _totalMEM; }
+            set
+            {
+                if (_totalMEM != value)
+                {
+                    _totalMEM = value;
+                    OnPropertyChanged(nameof(TotalMEM));
+                }
+            }
+        }
+
+        public List<MountInfo> MountInfos
+        {
+            get { return _mountInfos; }
+            set
+            {
+                if (_mountInfos != value)
+                {
+                    _mountInfos = value;
+                    OnPropertyChanged(nameof(MountInfos));
                 }
             }
         }

@@ -153,6 +153,9 @@
   <data name="AboutServerMEMUsage.Text" xml:space="preserve">
     <value>MEM Usage</value>
   </data>
+  <data name="AboutServerMountInfos.Text" xml:space="preserve">
+    <value>Mount Infos</value>
+  </data>
   <data name="AboutServerUpTime.Text" xml:space="preserve">
     <value>Up Time</value>
   </data>
@@ -239,6 +242,9 @@
   </data>
   <data name="MEMUsageText.Text" xml:space="preserve">
     <value>MEM</value>
+  </data>
+  <data name="MountInfosUsed.Text" xml:space="preserve">
+    <value>Used </value>
   </data>
   <data name="NETUsageText.Text" xml:space="preserve">
     <value>NET</value>

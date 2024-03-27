@@ -106,6 +106,7 @@ namespace SeeMyServer.Pages
             // 查询数据
             dataList = dbHelper.GetDataById(Convert.ToInt32(localSettings.Values["ServerID"]));
 
+            // 将数据列表绑定
             dataGrid.DataContext = dataList;
 
             // 初始化占用
@@ -136,6 +137,7 @@ namespace SeeMyServer.Pages
             string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
             string HostName = await Method.GetLinuxHostName(cmsModel);
             string UpTime = await Method.GetLinuxUpTime(cmsModel);
+            List<MountInfo> MountInfos = await Method.GetLinuxMountInfo(cmsModel);
 
             // 处理获取到的数据
             cmsModel.CPUUsage = usages[0];
@@ -144,12 +146,20 @@ namespace SeeMyServer.Pages
             cmsModel.NETSent = netUsages[1];
             cmsModel.HostName = HostName;
             cmsModel.UpTime = UpTime;
+            cmsModel.TotalMEM = $" of {usages[4]} GB";
+            cmsModel.MountInfos = MountInfos;
 
             //Debug.Text = usages[2];
             //Debug2.Text = usages[3];
 
             string[] tokens = usages[2].Split(", ");
             CreateProgressBars(progressBarsGrid, tokens);
+
+            // 只有当 ItemsSource 未绑定时才进行绑定
+            if (MountInfosListView.ItemsSource == null)
+            {
+                MountInfosListView.ItemsSource = cmsModel.MountInfos;
+            }
         }
 
         // OpenWRT 信息更新

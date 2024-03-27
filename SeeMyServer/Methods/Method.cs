@@ -4,6 +4,7 @@ using SeeMyServer.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
@@ -35,14 +36,12 @@ namespace SeeMyServer.Methods
                 }
                 else
                 {
-                    //return "SSH 客户端初始化失败。";
-                    return "0";
+                    return "SSH 客户端初始化失败。";
                 }
             }
             catch (Exception ex)
             {
-                //return "SSH 操作失败：" + ex.Message;
-                return "0";
+                return "SSH 操作失败：" + ex.Message;
             }
         }
         // SSH初始化
@@ -79,16 +78,14 @@ namespace SeeMyServer.Methods
 
                     if (!string.IsNullOrEmpty(SSHCommand.Error))
                     {
-                        //return "错误：" + SSHCommand.Error;
-                        return "0";
+                        return "错误：" + SSHCommand.Error;
                     }
                     else
                     {
                         return SSHCommand.Result;
                     }
                 }
-                //return "SSH 命令执行失败。";
-                return "0";
+                return "SSH 命令执行失败。";
             }
             finally
             {
@@ -260,6 +257,7 @@ namespace SeeMyServer.Methods
         {
             string UsageCMD = "top 1 -bn1";
             string UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
+            //throw new Exception($"{UsageRes}");
 
             // 定义正则表达式模式 匹配CPU占用
             Regex cpuPattern = new Regex(@"%Cpu\d+\s+:\s*(\d*\.\d+)\s+us,\s*(\d*\.\d+)\s+sy,\s*(\d*\.\d+)\s+ni,\s*(\d*\.\d+)\s+id,\s*(\d*\.\d+)\s+wa,\s*(\d*\.\d+)\s+hi,\s*(\d*\.\d+)\s+si,\s*(\d*\.\d+)\s+st");
@@ -272,12 +270,13 @@ namespace SeeMyServer.Methods
 
             // 匹配输入字符串中的模式
             Match memMatch = Regex.Match(UsageRes, memPattern);
-            float memUsageResTotalValue = float.Parse(memMatch.Groups[1].Value);
-            float memUsageResUsedValue = float.Parse(memMatch.Groups[3].Value);
-            float memUsageResValue = (memUsageResUsedValue / memUsageResTotalValue) * 100;
 
             if (cpuPattern.IsMatch(UsageRes) && memMatch.Success)
             {
+                float memUsageResTotalValue = float.Parse(memMatch.Groups[1].Value);
+                float memUsageResUsedValue = float.Parse(memMatch.Groups[3].Value);
+                float memUsageResValue = (memUsageResUsedValue / memUsageResTotalValue) * 100;
+
                 // 在输入文本中查找匹配项并构建结果字符串
                 foreach (Match match in cpuPattern.Matches(UsageRes))
                 {
@@ -296,7 +295,7 @@ namespace SeeMyServer.Methods
                     averageUsage = totalUsage / cpuUsageList.Count;
                 }
                 //throw new Exception($"Invalid argument: {string.Join(", ", cpuUsageList)}");
-                return new string[] { $"{(int)averageUsage}%", $"{int.Parse(memUsageResValue.ToString().Split('.')[0])}%", $"{string.Join(", ", cpuUsageList)}", $"{UsageRes}" };
+                return new string[] { $"{(int)averageUsage}%", $"{int.Parse(memUsageResValue.ToString().Split('.')[0])}%", $"{string.Join(", ", cpuUsageList)}", $"{UsageRes}", $"{memUsageResTotalValue}" };
             }
             else
             {
@@ -361,7 +360,21 @@ namespace SeeMyServer.Methods
             return CMD.Split(',')[0];
         }
 
+        // 获取Linux挂载情况
+        public static async Task<List<MountInfo>> GetLinuxMountInfo(CMSModel cmsModel)
+        {
+            string CMD = "df -h";
+            CMD = await SendSSHCommandAsync(CMD, cmsModel);
 
+            List<MountInfo> mountInfos = Parse(CMD);
+
+            return mountInfos;
+
+            //foreach (var mountInfo in mountInfos)
+            //{
+            //    return $"FileSystem: {mountInfo.FileSystem}, Size: {mountInfo.Size}, Used: {mountInfo.Used}, Avail: {mountInfo.Avail}, Use%: {mountInfo.UsePercentage}, Mounted on: {mountInfo.MountedOn}";
+            //}
+        }
 
 
 
@@ -513,6 +526,44 @@ namespace SeeMyServer.Methods
             {
                 return netValue + " B";
             }
+        }
+
+        // 处理 df -h
+        public static List<MountInfo> Parse(string input)
+        {
+            var mountInfos = new List<MountInfo>();
+
+            // 按行分割输入
+            var lines = input.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+            //throw new Exception($"{lines[1]}");
+
+            // 跳过标题行
+            foreach (var line in lines.Skip(1)) 
+            {
+                var columns = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                // 共6列
+                if (columns.Length == 6)
+                {
+                    var mountInfo = new MountInfo
+                    {
+                        FileSystem = columns[0],
+                        Size = columns[1],
+                        Used = columns[2],
+                        Avail = columns[3],
+                        UsePercentage = columns[4],
+                        MountedOn = columns[5]
+                    };
+
+                    mountInfos.Add(mountInfo);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid line format: " + line);
+                }
+            }
+            return mountInfos;
         }
     }
 }
