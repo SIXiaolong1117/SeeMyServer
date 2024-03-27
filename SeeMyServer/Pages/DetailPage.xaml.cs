@@ -66,9 +66,11 @@ namespace SeeMyServer.Pages
                 ProgressBar progressBar = new ProgressBar();
 
                 progressBar.Margin = new Thickness(0, 4, 0, 4);
-                try { 
-                progressBar.Value = double.Parse(CPUCoreUsageTokens[i]);
-                }catch (Exception ex) { }
+                try
+                {
+                    progressBar.Value = double.Parse(CPUCoreUsageTokens[i]);
+                }
+                catch (Exception ex) { }
 
                 // 创建 TextBlock 来显示与 ProgressBar 同步的值
                 TextBlock textBlock = new TextBlock();
@@ -139,15 +141,12 @@ namespace SeeMyServer.Pages
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
             string[] usages = await Method.GetLinuxUsageAsync(cmsModel);
-            string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
             string HostName = await Method.GetLinuxHostName(cmsModel);
             string UpTime = await Method.GetLinuxUpTime(cmsModel);
 
             // 处理获取到的数据
             cmsModel.CPUUsage = usages[0];
             cmsModel.MEMUsage = usages[1];
-            cmsModel.NETReceived = netUsages[0];
-            cmsModel.NETSent = netUsages[1];
             cmsModel.HostName = HostName;
             cmsModel.UpTime = UpTime;
             cmsModel.TotalMEM = $" of {usages[4]} GB";

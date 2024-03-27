@@ -57,7 +57,6 @@ namespace SeeMyServer.Methods
                 return "SSH 操作失败：" + ex.Message;
             }
         }
-
         private static SshClient InitializeSshClient(IPAddress sshHost, int sshPort, string sshUser, string sshPasswd, string sshKey, bool usePrivateKey)
         {
             try
@@ -67,6 +66,10 @@ namespace SeeMyServer.Methods
                     PrivateKeyFile privateKeyFile = new PrivateKeyFile(sshKey);
                     ConnectionInfo connectionInfo = new ConnectionInfo(sshHost.ToString(), sshPort, sshUser, new PrivateKeyAuthenticationMethod(sshUser, new PrivateKeyFile[] { privateKeyFile }));
                     connectionInfo.Encoding = Encoding.UTF8;
+                    // 设置连接超时时间
+                    connectionInfo.Timeout = TimeSpan.FromSeconds(10);
+                    // 设置连接重试次数
+                    connectionInfo.RetryAttempts = 3;
                     return new SshClient(connectionInfo);
                 }
                 else
@@ -478,13 +481,12 @@ namespace SeeMyServer.Methods
 
 
 
+
+        // 如果目标主机用的cmd，那么上方的pwsh命令会失败。
+        // 但如果目标主机是pwsh，那么加powershell -Command的命令在部分情况下也会失败
+        // 所以我放弃了对cmd的兼容，要求用户必须使用pwsh作为ssh shell。
         public static async Task<string[]> GetWindowsUsageAsync(CMSModel cmsModel)
         {
-            //string UsageCMD = "powershell -Command \"(Get-Counter '\\Processor Information(*)\\% Processor Utility').CounterSamples.CookedValue;"
-            //    + " \'-\';"
-            //    + " ((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100);"
-            //    + " \'-\';"
-            //    + "(Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory;\"";
             string UsageCMD = "(Get-Counter '\\Processor Information(*)\\% Processor Utility').CounterSamples.CookedValue;"
                 + " \'-\';"
                 + " ((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100);"
@@ -511,7 +513,11 @@ namespace SeeMyServer.Methods
 
             // 去掉最后两项（表示总占用）
             List<string> modifiedList = new List<string>(cpuUsageRes);
-            modifiedList.RemoveAt(modifiedList.Count - 2);
+            try
+            {
+                modifiedList.RemoveAt(modifiedList.Count - 2);
+            }
+            catch (Exception) { }
 
             // 第二部分是内存占用
             string memUsageRes = UsageResA[1];
@@ -530,7 +536,7 @@ namespace SeeMyServer.Methods
         }
         public static async Task<string> GetWindowsUpTime(CMSModel cmsModel)
         {
-            string CMD = "powershell -Command \"[string]::Format('{0} Days {1} Hours {2} Minutes', (New-TimeSpan -Start (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).Days, (New-TimeSpan -Start (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).Hours, (New-TimeSpan -Start (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).Minutes); \"";
+            string CMD = "[string]::Format('{0} Days {1} Hours {2} Minutes', (New-TimeSpan -Start (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).Days, (New-TimeSpan -Start (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).Hours, (New-TimeSpan -Start (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).Minutes);";
             CMD = await SendSSHCommandAsync(CMD, cmsModel);
 
             return CMD;
@@ -538,7 +544,7 @@ namespace SeeMyServer.Methods
         // 保留这个方法给一级界面用（pwsh太慢了）
         public static async Task<string> GetWindowsCPUUsageAsync(CMSModel cmsModel)
         {
-            string cpuUsageCMD = "powershell -Command \"(Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue\"";
+            string cpuUsageCMD = "(Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue";
             string cpuUsageRes = await SendSSHCommandAsync(cpuUsageCMD, cmsModel);
             int cpuUsageResValue = 0;
             try { cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]); }
@@ -548,7 +554,7 @@ namespace SeeMyServer.Methods
 
         public static async Task<string> GetWindowsMemoryUsageAsync(CMSModel cmsModel)
         {
-            string memUsageCMD = "powershell -Command \"((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100)\"";
+            string memUsageCMD = "((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100)";
             string memUsageRes = await SendSSHCommandAsync(memUsageCMD, cmsModel);
             int memUsageResValue = 0;
             try { memUsageResValue = int.Parse(memUsageRes.Split('.')[0]); }
@@ -557,7 +563,7 @@ namespace SeeMyServer.Methods
         }
         public static async Task<string> GetWindowsNetSentAsync(CMSModel cmsModel)
         {
-            string netSentCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Sent/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
+            string netSentCMD = "(Get-Counter '\\Network Interface(*)\\Bytes Sent/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum";
             string netSentRes = await SendSSHCommandAsync(netSentCMD, cmsModel);
             // 获取命令输出的值并转换为整数
             int netSentValue = 0;
@@ -569,7 +575,7 @@ namespace SeeMyServer.Methods
 
         public static async Task<string> GetWindowsNetReceivedAsync(CMSModel cmsModel)
         {
-            string netReceivedCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Received/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
+            string netReceivedCMD = "(Get-Counter '\\Network Interface(*)\\Bytes Received/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum";
             string netReceivedRes = await SendSSHCommandAsync(netReceivedCMD, cmsModel);
             // 获取命令输出的值并转换为整数
             int netReceivedValue = 0;
@@ -581,7 +587,7 @@ namespace SeeMyServer.Methods
 
         public static async Task<List<MountInfo>> GetWindowsMountInfo(CMSModel cmsModel)
         {
-            string CMD = "powershell -Command \"Get-Volume\"";
+            string CMD = "Get-Volume | Format-Table -AutoSize -Wrap -Property DriveLetter,FriendlyName,FileSystemType,DriveType,SizeRemaining,Size";
             CMD = await SendSSHCommandAsync(CMD, cmsModel);
 
             List<MountInfo> mountInfos = WindowsMountInfoParse(CMD);
@@ -590,7 +596,7 @@ namespace SeeMyServer.Methods
         }
         public static async Task<List<NetworkInterfaceInfo>> GetWindowsNetworkInterfaceInfo(CMSModel cmsModel)
         {
-            string CMD = "powershell -Command \"Get-NetAdapter\"";
+            string CMD = "Get-NetAdapter | Format-Table -AutoSize -Wrap";
             CMD = await SendSSHCommandAsync(CMD, cmsModel);
 
             List<NetworkInterfaceInfo> networkInterfaceInfos = WindowsNetworkInterfaceInfoParse(CMD);
@@ -643,14 +649,11 @@ namespace SeeMyServer.Methods
             string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
 
             // Regex pattern to match the structure of the input lines
-            Regex pattern = new Regex(@"^(\w)\s+([\w\s]+)?\s+(\w+)\s+(\w+)\s+(\w+)\s+(\w+)\s+([\d.]+\s*\w+)\s+([\d.]+\s*\w+)?$");
+            Regex pattern = new Regex(@"^\s*(\w)\s+([\w\s]+)?\s+(\w+)\s+(\w+)\s+(\d+)\s+(\d+)$");
 
-
-            //throw new Exception($"{lines[5]}");
 
             foreach (string line in lines)
             {
-                throw new Exception($"{line}");
                 Match match = pattern.Match(line);
                 if (match.Success)
                 {
@@ -660,11 +663,9 @@ namespace SeeMyServer.Methods
                     info.FileSystem = $"{info.FriendlyName} ({info.DriveLetter})";
                     info.FileSystemType = match.Groups[3].Value.Trim();
                     info.DriveType = match.Groups[4].Value.Trim();
-                    info.HealthStatus = match.Groups[5].Value.Trim();
-                    info.OperationalStatus = match.Groups[6].Value.Trim();
-                    info.SizeRemaining = match.Groups[7].Value.Trim();
-                    info.Size = match.Groups[8].Value.Trim();
-
+                    info.SizeRemaining = NetUnitConversion(BigInteger.Parse(match.Groups[5].Value.Trim()));
+                    info.Size = NetUnitConversion(BigInteger.Parse(match.Groups[6].Value.Trim()));
+                    //throw new Exception($"{info.DriveLetter}");
                     try
                     {
                         float UsedValue = float.Parse(info.Size.Split(' ')[0]) - float.Parse(info.SizeRemaining.Split(' ')[0]);
@@ -721,12 +722,12 @@ namespace SeeMyServer.Methods
 
         public static List<NetworkInterfaceInfo> WindowsNetworkInterfaceInfoParse(string input)
         {
-            List<NetworkInterfaceInfo> networkInterfaceInfos = new List<NetworkInterfaceInfo>();
+            List<NetworkInterfaceInfo> networkInterfaces = new List<NetworkInterfaceInfo>();
 
             string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
 
             // Regex pattern to match the structure of the input lines
-            Regex pattern = new Regex(@"^([\w\s]+)\s+([\w\s()-.]+)\s+(\d+)\s+(\w+)\s+([\w-]+)\s+(\d+\.\d+\s+\w+)$");
+            Regex pattern = new Regex(@"^(?<Name>[\w\s]+?)\s+(?<InterfaceDescription>.+?)\s+(?<ifIndex>\d+)\s+(?<Status>.+?)\s+(?<MacAddress>[0-9A-Fa-f-]+)\s+(?<LinkSpeed>.+)$");
 
             foreach (string line in lines)
             {
@@ -734,18 +735,20 @@ namespace SeeMyServer.Methods
                 if (match.Success)
                 {
                     NetworkInterfaceInfo info = new NetworkInterfaceInfo();
-                    info.Name = match.Groups[1].Value.Trim();
-                    info.InterfaceDescription = match.Groups[2].Value.Trim();
-                    info.ifIndex = int.Parse(match.Groups[3].Value.Trim());
-                    info.Status = match.Groups[4].Value.Trim();
-                    info.MacAddress = match.Groups[5].Value.Trim();
-                    info.LinkSpeed = match.Groups[6].Value.Trim();
-                    networkInterfaceInfos.Add(info);
+                    info.Name = match.Groups["Name"].Value.Trim();
+                    info.InterfaceDescription = match.Groups["InterfaceDescription"].Value.Trim();
+                    info.ifIndex = int.Parse(match.Groups["ifIndex"].Value);
+                    info.Status = match.Groups["Status"].Value.Trim();
+                    info.MacAddress = match.Groups["MacAddress"].Value.Trim();
+                    info.LinkSpeed = match.Groups["LinkSpeed"].Value.Trim();
+
+                    networkInterfaces.Add(info);
                 }
             }
 
-            return networkInterfaceInfos;
+            return networkInterfaces;
         }
+
 
         // 处理 ifconfig
         public static List<NetworkInterfaceInfo> NetworkInterfaceInfoParse(string input)
@@ -759,8 +762,6 @@ namespace SeeMyServer.Methods
 
             foreach (Match match in matches)
             {
-                //if (match.Groups[1].Value == "lo")
-                //    throw new Exception($"{match}");
                 var interfaceInfo = new NetworkInterfaceInfo();
 
                 interfaceInfo.Name = match.Groups[1].Value;
