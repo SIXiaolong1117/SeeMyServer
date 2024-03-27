@@ -156,6 +156,9 @@
   <data name="AboutServerMountInfos.Text" xml:space="preserve">
     <value>Mount Infos</value>
   </data>
+  <data name="AboutServerNetworkInfos.Text" xml:space="preserve">
+    <value>Network</value>
+  </data>
   <data name="AboutServerUpTime.Text" xml:space="preserve">
     <value>Up Time</value>
   </data>
@@ -248,6 +251,12 @@
   </data>
   <data name="NETUsageText.Text" xml:space="preserve">
     <value>NET</value>
+  </data>
+  <data name="NetworkInfosRXBytes.Text" xml:space="preserve">
+    <value>RX</value>
+  </data>
+  <data name="NetworkInfosTXBytes.Text" xml:space="preserve">
+    <value>TX</value>
   </data>
   <data name="OSType.Header" xml:space="preserve">
     <value>OS Type</value>

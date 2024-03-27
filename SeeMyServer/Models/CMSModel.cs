@@ -13,6 +13,7 @@ namespace SeeMyServer.Models
         private string _upTime;
         private string _totalMEM;
         private List<MountInfo> _mountInfos;
+        private List<NetworkInterfaceInfo> _networkInterfaceInfos;
 
         public int Id { get; set; }
         public string Name { get; set; }
@@ -125,6 +126,19 @@ namespace SeeMyServer.Models
                 }
             }
         }
+
+        public List<NetworkInterfaceInfo> NetworkInterfaceInfos
+        {
+            get { return _networkInterfaceInfos; }
+            set
+            {
+                if (_networkInterfaceInfos != value)
+                {
+                    _networkInterfaceInfos = value;
+                    OnPropertyChanged(nameof(NetworkInterfaceInfos));
+                }
+            }
+        }            
 
         public event PropertyChangedEventHandler PropertyChanged;
 

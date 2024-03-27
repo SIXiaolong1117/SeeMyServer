@@ -138,6 +138,7 @@ namespace SeeMyServer.Pages
             string HostName = await Method.GetLinuxHostName(cmsModel);
             string UpTime = await Method.GetLinuxUpTime(cmsModel);
             List<MountInfo> MountInfos = await Method.GetLinuxMountInfo(cmsModel);
+            List<NetworkInterfaceInfo> NetworkInterfaceInfos = await Method.GetLinuxNetworkInterfaceInfo(cmsModel);
 
             // 处理获取到的数据
             cmsModel.CPUUsage = usages[0];
@@ -148,6 +149,7 @@ namespace SeeMyServer.Pages
             cmsModel.UpTime = UpTime;
             cmsModel.TotalMEM = $" of {usages[4]} GB";
             cmsModel.MountInfos = MountInfos;
+            cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
 
             //Debug.Text = usages[2];
             //Debug2.Text = usages[3];
@@ -159,6 +161,10 @@ namespace SeeMyServer.Pages
             if (MountInfosListView.ItemsSource == null)
             {
                 MountInfosListView.ItemsSource = cmsModel.MountInfos;
+            }
+            if (NetworkInfosListView.ItemsSource == null)
+            {
+                NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
             }
         }
 

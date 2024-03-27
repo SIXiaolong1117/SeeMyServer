@@ -1,9 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.UI.Xaml.Shapes;
+using Newtonsoft.Json;
 using Renci.SshNet;
+using Renci.SshNet.Security;
 using SeeMyServer.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -366,14 +369,20 @@ namespace SeeMyServer.Methods
             string CMD = "df -h";
             CMD = await SendSSHCommandAsync(CMD, cmsModel);
 
-            List<MountInfo> mountInfos = Parse(CMD);
+            List<MountInfo> mountInfos = MountInfoParse(CMD);
 
             return mountInfos;
+        }
 
-            //foreach (var mountInfo in mountInfos)
-            //{
-            //    return $"FileSystem: {mountInfo.FileSystem}, Size: {mountInfo.Size}, Used: {mountInfo.Used}, Avail: {mountInfo.Avail}, Use%: {mountInfo.UsePercentage}, Mounted on: {mountInfo.MountedOn}";
-            //}
+        // 获取Linux网络情况 
+        public static async Task<List<NetworkInterfaceInfo>> GetLinuxNetworkInterfaceInfo(CMSModel cmsModel)
+        {
+            string CMD = "ifconfig";
+            CMD = await SendSSHCommandAsync(CMD, cmsModel);
+
+            List<NetworkInterfaceInfo> networkInterfaceInfos = NetworkInterfaceInfoParse(CMD);
+
+            return networkInterfaceInfos;
         }
 
 
@@ -464,22 +473,7 @@ namespace SeeMyServer.Methods
             string netSentRes = await SendSSHCommandAsync(netSentCMD, cmsModel);
             // 获取命令输出的值并转换为整数
             int netSentValue = int.Parse(netSentRes.Split('.')[0]);
-            if (netSentValue >= (1024 * 1024 * 1024))
-            {
-                netSentRes = (netSentValue / 1024 / 1024 / 1024).ToString() + " GB";
-            }
-            else if (netSentValue >= (1024 * 1024))
-            {
-                netSentRes = (netSentValue / 1024 / 1024).ToString() + " MB";
-            }
-            else if (netSentValue >= 1024)
-            {
-                netSentRes = (netSentValue / 1024).ToString() + " KB";
-            }
-            else
-            {
-                netSentRes = netSentValue + " B";
-            }
+            netSentRes = NetUnitConversion(netSentValue);
             return netSentRes + "/s ↑";
         }
 
@@ -489,22 +483,7 @@ namespace SeeMyServer.Methods
             string netReceivedRes = await SendSSHCommandAsync(netReceivedCMD, cmsModel);
             // 获取命令输出的值并转换为整数
             int netReceivedValue = int.Parse(netReceivedRes.Split('.')[0]);
-            if (netReceivedValue >= 1024 * 1024 * 1024)
-            {
-                netReceivedRes = (netReceivedValue / 1024 / 1024 / 1024).ToString() + " GB";
-            }
-            else if (netReceivedValue >= 1024 * 1024)
-            {
-                netReceivedRes = (netReceivedValue / 1024 / 1024).ToString() + " MB";
-            }
-            else if (netReceivedValue >= 1024)
-            {
-                netReceivedRes = (netReceivedValue / 1024).ToString() + " KB";
-            }
-            else
-            {
-                netReceivedRes = netReceivedValue + " B";
-            }
+            netReceivedRes = NetUnitConversion(netReceivedValue);
             return netReceivedRes + "/s ↓";
         }
 
@@ -529,7 +508,7 @@ namespace SeeMyServer.Methods
         }
 
         // 处理 df -h
-        public static List<MountInfo> Parse(string input)
+        public static List<MountInfo> MountInfoParse(string input)
         {
             var mountInfos = new List<MountInfo>();
 
@@ -539,7 +518,7 @@ namespace SeeMyServer.Methods
             //throw new Exception($"{lines[1]}");
 
             // 跳过标题行
-            foreach (var line in lines.Skip(1)) 
+            foreach (var line in lines.Skip(1))
             {
                 var columns = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -564,6 +543,66 @@ namespace SeeMyServer.Methods
                 }
             }
             return mountInfos;
+        }
+
+        // 处理 ifconfig
+        public static List<NetworkInterfaceInfo> NetworkInterfaceInfoParse(string input)
+        {
+            //throw new Exception($"{input}");
+            var interfaceInfos = new List<NetworkInterfaceInfo>();
+
+            var pattern = @"(\w+)\s+Link encap:(.*?)\s+(?:HWaddr\s+(\S+))?(.*?)((?=\n\n)|(?=$))";
+
+            var matches = Regex.Matches(input, pattern, RegexOptions.Singleline);
+
+            foreach (Match match in matches)
+            {
+                //if (match.Groups[1].Value == "lo")
+                //    throw new Exception($"{match}");
+                var interfaceInfo = new NetworkInterfaceInfo();
+
+                interfaceInfo.Name = match.Groups[1].Value;
+                interfaceInfo.LinkEncap = match.Groups[2].Value;
+                interfaceInfo.HWAddr = match.Groups[3].Value;
+
+                var infoText = match.Groups[4].Value;
+
+                interfaceInfo.InetAddr = ExtractValue(infoText, @"inet addr:(\S+)");
+                interfaceInfo.Bcast = ExtractValue(infoText, @"Bcast:(\S+)");
+                interfaceInfo.Mask = ExtractValue(infoText, @"Mask:(\S+)");
+                interfaceInfo.Inet6Addr = ExtractValue(infoText, @"inet6 addr:(\S+)");
+                interfaceInfo.Scope = ExtractValue(infoText, @"Scope:(\S+)");
+                interfaceInfo.Status = infoText.Contains("UP") ? "UP" : "DOWN";
+                interfaceInfo.MTU = ExtractValue(infoText, @"MTU:(\S+)");
+                interfaceInfo.Metric = ExtractValue(infoText, @"Metric:(\S+)");
+                interfaceInfo.RXPackets = ExtractValue(infoText, @"RX packets:(\S+)");
+                interfaceInfo.RXErrors = ExtractValue(infoText, @"errors:(\S+)");
+                interfaceInfo.RXDropped = ExtractValue(infoText, @"dropped:(\S+)");
+                interfaceInfo.RXOverruns = ExtractValue(infoText, @"overruns:(\S+)");
+                interfaceInfo.RXFrame = ExtractValue(infoText, @"frame:(\S+)");
+                interfaceInfo.TXPackets = ExtractValue(infoText, @"TX packets:(\S+)");
+                interfaceInfo.TXErrors = ExtractValue(infoText, @"errors:(\S+)");
+                interfaceInfo.TXDropped = ExtractValue(infoText, @"dropped:(\S+)");
+                interfaceInfo.TXOverruns = ExtractValue(infoText, @"overruns:(\S+)");
+                interfaceInfo.TXCarrier = ExtractValue(infoText, @"carrier:(\S+)");
+                interfaceInfo.Collisions = ExtractValue(infoText, @"collisions:(\S+)");
+                interfaceInfo.TXQueueLen = ExtractValue(infoText, @"txqueuelen:(\S+)");
+                interfaceInfo.RXBytes = NetUnitConversion(BigInteger.Parse(ExtractValue(infoText, @"RX bytes:(\S+)")));
+                interfaceInfo.TXBytes = NetUnitConversion(BigInteger.Parse(ExtractValue(infoText, @"TX bytes:(\S+)")));
+
+                interfaceInfos.Add(interfaceInfo);
+            }
+
+            return interfaceInfos;
+        }
+        private static string ExtractValue(string input, string pattern)
+        {
+            var match = Regex.Match(input, pattern);
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+            return null;
         }
     }
 }

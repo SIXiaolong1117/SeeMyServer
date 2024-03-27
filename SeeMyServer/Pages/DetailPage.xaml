@@ -220,6 +220,7 @@
 
                 <Grid
                     Grid.Row="8"
+                    MinHeight="50"
                     Background="#11FFFFFF"
                     BorderThickness="0"
                     CornerRadius="4,4,4,4">
@@ -316,6 +317,127 @@
                                         VerticalAlignment="Center"
                                         FontSize="12"
                                         Text="{Binding UsePercentage}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+
+                <TextBlock
+                    x:Uid="AboutServerNetworkInfos"
+                    Grid.Row="9"
+                    Margin="0,18,0,8" />
+
+                <Grid
+                    Grid.Row="10"
+                    MinHeight="50"
+                    Background="#11FFFFFF"
+                    BorderThickness="0"
+                    CornerRadius="4,4,4,4">
+                    <ListView
+                        x:Name="NetworkInfosListView"
+                        x:Uid="NetworkInfosListView"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="10,0,18,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Grid.Column="0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Grid.Column="0"
+                                            Padding="0,4,0,4"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding Name}" />
+                                        <Grid Grid.Row="1" Grid.Column="0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock
+                                                x:Uid="NetworkInfosRXBytes"
+                                                Grid.Row="0"
+                                                Grid.Column="0"
+                                                Margin="0,0,1,0"
+                                                Padding="0,4,0,4"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="DarkGray" />
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="1"
+                                                Padding="0,4,0,4"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="DarkGray"
+                                                Text="{Binding RXBytes}" />
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="2"
+                                                Margin="4,0,4,0"
+                                                Padding="0,4,0,4"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="DarkGray"
+                                                Text="| " />
+                                            <TextBlock
+                                                x:Uid="NetworkInfosTXBytes"
+                                                Grid.Row="0"
+                                                Grid.Column="3"
+                                                Margin="0,0,1,0"
+                                                Padding="0,4,0,4"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="DarkGray" />
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="4"
+                                                Padding="0,4,0,4"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="DarkGray"
+                                                Text="{Binding TXBytes}" />
+                                        </Grid>
+                                    </Grid>
+                                    <!--<ProgressRing
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Width="40"
+                                        Height="40"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Foreground="#849aff"
+                                        IsIndeterminate="False"
+                                        Value="{Binding UsePercentage}" />
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Padding="0,4,0,4"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        FontSize="12"
+                                        Text="{Binding UsePercentage}" />-->
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
