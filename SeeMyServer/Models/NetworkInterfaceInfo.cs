@@ -33,5 +33,9 @@ namespace SeeMyServer.Models
         public string TXQueueLen { get; set; }
         public string RXBytes { get; set; }
         public string TXBytes { get; set; }
+        public string InterfaceDescription { get; set; }
+        public int ifIndex { get; set; }
+        public string MacAddress { get; set; }
+        public string LinkSpeed { get; set; }
     }
 }

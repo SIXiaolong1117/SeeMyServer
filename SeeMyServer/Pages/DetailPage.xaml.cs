@@ -54,8 +54,8 @@ namespace SeeMyServer.Pages
 
                 // 将ColumnDefinition添加到Grid的ColumnDefinitions集合中
                 container.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
-                container.ColumnDefinitions.Add(columnDefinition);
                 container.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
+                container.ColumnDefinitions.Add(columnDefinition);
             }
 
             for (int i = 0; i < numberOfBars; i++)
@@ -66,7 +66,9 @@ namespace SeeMyServer.Pages
                 ProgressBar progressBar = new ProgressBar();
 
                 progressBar.Margin = new Thickness(0, 4, 0, 4);
+                try { 
                 progressBar.Value = double.Parse(CPUCoreUsageTokens[i]);
+                }catch (Exception ex) { }
 
                 // 创建 TextBlock 来显示与 ProgressBar 同步的值
                 TextBlock textBlock = new TextBlock();
@@ -81,18 +83,18 @@ namespace SeeMyServer.Pages
                     textCPUBlock.Text = $"CPU{i}";
                 };
                 textBlock.Margin = new Thickness(8, 4, 0, 6);
-                textBlock.Width = 30;
+                textBlock.Width = 40;
                 textBlock.HorizontalAlignment = HorizontalAlignment.Right;
 
                 // 设置位置
                 Grid.SetRow(textCPUBlock, i);
                 Grid.SetColumn(textCPUBlock, 0);
 
-                Grid.SetRow(progressBar, i);
-                Grid.SetColumn(progressBar, 1);
-
                 Grid.SetRow(textBlock, i);
-                Grid.SetColumn(textBlock, 2);
+                Grid.SetColumn(textBlock, 1);
+
+                Grid.SetRow(progressBar, i);
+                Grid.SetColumn(progressBar, 2);
 
                 // 添加到 Grid 中
                 container.Children.Add(textCPUBlock);
@@ -140,8 +142,6 @@ namespace SeeMyServer.Pages
             string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
             string HostName = await Method.GetLinuxHostName(cmsModel);
             string UpTime = await Method.GetLinuxUpTime(cmsModel);
-            List<MountInfo> MountInfos = await Method.GetLinuxMountInfo(cmsModel);
-            List<NetworkInterfaceInfo> NetworkInterfaceInfos = await Method.GetLinuxNetworkInterfaceInfo(cmsModel);
 
             // 处理获取到的数据
             cmsModel.CPUUsage = usages[0];
@@ -151,8 +151,6 @@ namespace SeeMyServer.Pages
             cmsModel.HostName = HostName;
             cmsModel.UpTime = UpTime;
             cmsModel.TotalMEM = $" of {usages[4]} GB";
-            cmsModel.MountInfos = MountInfos;
-            cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
 
             //Debug.Text = usages[2];
             //Debug2.Text = usages[3];
@@ -163,10 +161,14 @@ namespace SeeMyServer.Pages
             // 只有当 ItemsSource 未绑定时才进行绑定
             if (MountInfosListView.ItemsSource == null)
             {
+                List<MountInfo> MountInfos = await Method.GetLinuxMountInfo(cmsModel);
+                cmsModel.MountInfos = MountInfos;
                 MountInfosListView.ItemsSource = cmsModel.MountInfos;
             }
             if (NetworkInfosListView.ItemsSource == null)
             {
+                List<NetworkInterfaceInfo> NetworkInterfaceInfos = await Method.GetLinuxNetworkInterfaceInfo(cmsModel);
+                cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
                 NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
             }
         }
@@ -179,8 +181,6 @@ namespace SeeMyServer.Pages
             // OpenWRT也可以用部分Linux命令
             string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
             string UpTime = await Method.GetLinuxUpTime(cmsModel);
-            List<MountInfo> MountInfos = await Method.GetLinuxMountInfo(cmsModel);
-            List<NetworkInterfaceInfo> NetworkInterfaceInfos = await Method.GetLinuxNetworkInterfaceInfo(cmsModel);
 
             // 处理获取到的数据
             cmsModel.CPUUsage = usages[0];
@@ -189,8 +189,6 @@ namespace SeeMyServer.Pages
             cmsModel.NETSent = netUsages[1];
             cmsModel.HostName = HostName;
             cmsModel.UpTime = UpTime;
-            cmsModel.MountInfos = MountInfos;
-            cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
 
             // OpenWRT的Top无法查看单独核心占用
             string[] tokens = new string[] { usages[0].Split("%")[0] };
@@ -199,10 +197,14 @@ namespace SeeMyServer.Pages
             // 只有当 ItemsSource 未绑定时才进行绑定
             if (MountInfosListView.ItemsSource == null)
             {
+                List<MountInfo> MountInfos = await Method.GetLinuxMountInfo(cmsModel);
                 MountInfosListView.ItemsSource = cmsModel.MountInfos;
+                cmsModel.MountInfos = MountInfos;
             }
             if (NetworkInfosListView.ItemsSource == null)
             {
+                List<NetworkInterfaceInfo> NetworkInterfaceInfos = await Method.GetLinuxNetworkInterfaceInfo(cmsModel);
+                cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
                 NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
             }
         }
@@ -211,6 +213,7 @@ namespace SeeMyServer.Pages
         private async Task UpdateWindowsCMSModelAsync(CMSModel cmsModel)
         {
             string[] usages = await Method.GetWindowsUsageAsync(cmsModel);
+            string upTime = await Method.GetWindowsUpTime(cmsModel);
             Task<string> memTask = Method.GetWindowsMemoryUsageAsync(cmsModel);
             Task<string> netSentTask = Method.GetWindowsNetSentAsync(cmsModel);
             Task<string> netReceivedTask = Method.GetWindowsNetReceivedAsync(cmsModel);
@@ -226,9 +229,25 @@ namespace SeeMyServer.Pages
             cmsModel.NETSent = netSentTask.Result;
             cmsModel.NETReceived = netReceivedTask.Result;
             cmsModel.HostName = HostName.TrimEnd();
+            cmsModel.UpTime = upTime;
+            cmsModel.TotalMEM = $" of {usages[4]} GB";
 
             string[] tokens = usages[2].Split(", ");
             CreateProgressBars(progressBarsGrid, tokens);
+
+            // 只有当 ItemsSource 未绑定时才进行
+            if (MountInfosListView.ItemsSource == null)
+            {
+                List<MountInfo> MountInfos = await Method.GetWindowsMountInfo(cmsModel);
+                cmsModel.MountInfos = MountInfos;
+                MountInfosListView.ItemsSource = cmsModel.MountInfos;
+            }
+            if (NetworkInfosListView.ItemsSource == null)
+            {
+                List<NetworkInterfaceInfo> NetworkInterfaceInfos = await Method.GetWindowsNetworkInterfaceInfo(cmsModel);
+                cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
+                NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
+            }
         }
 
         private async void Timer_Tick(object sender, object e)

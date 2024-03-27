@@ -197,19 +197,19 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <ProgressBar
+                        <!--<TextBlock
                             Grid.Column="0"
-                            Margin="0,4,0,4"
-                            Value="{Binding MEMUsage}" />
-                        <TextBlock
-                            Grid.Column="1"
-                            Width="30"
+                            Width="40"
                             Margin="8,4,0,6"
                             HorizontalAlignment="Right"
-                            Text="{Binding MEMUsage}" />
+                            Text="{Binding MEMUsage}" />-->
+                        <ProgressBar
+                            Grid.Column="1"
+                            Margin="0,4,0,4"
+                            Value="{Binding MEMUsage}" />
                     </Grid>
                 </Grid>
 

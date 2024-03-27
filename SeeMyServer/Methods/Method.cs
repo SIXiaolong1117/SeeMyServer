@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -56,6 +57,8 @@ namespace SeeMyServer.Methods
                 {
                     PrivateKeyFile privateKeyFile = new PrivateKeyFile(sshKey);
                     ConnectionInfo connectionInfo = new ConnectionInfo(sshHost, sshPort, sshUser, new PrivateKeyAuthenticationMethod(sshUser, new PrivateKeyFile[] { privateKeyFile }));
+                    // 设置编码为UTF-8
+                    connectionInfo.Encoding = Encoding.UTF8; 
                     return new SshClient(connectionInfo);
                 }
                 else
@@ -96,6 +99,30 @@ namespace SeeMyServer.Methods
                 sshClient.Dispose();
             }
         }
+        private static async Task<string> SendSSHCommandAsync(string command, CMSModel cmsModel)
+        {
+            return await Task.Run(() =>
+            {
+                return SendSSHCommand(command, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
+            });
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // 获取域名对应的IP
         public static IPAddress DomainToIp(string domain, string ipVersion)
         {
@@ -245,13 +272,6 @@ namespace SeeMyServer.Methods
                 // 未选择JSON文件。
                 return null;
             }
-        }
-        private static async Task<string> SendSSHCommandAsync(string command, CMSModel cmsModel)
-        {
-            return await Task.Run(() =>
-            {
-                return SendSSHCommand(command, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
-            });
         }
 
 
@@ -454,7 +474,11 @@ namespace SeeMyServer.Methods
 
         public static async Task<string[]> GetWindowsUsageAsync(CMSModel cmsModel)
         {
-            string UsageCMD = "powershell -Command \"(Get-Counter '\\Processor(*)\\% Processor Time').CounterSamples.CookedValue; \'-\' ; ((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100); \'-\' ;(Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory\"";
+            string UsageCMD = "powershell -Command \"(Get-Counter '\\Processor Information(*)\\% Processor Utility').CounterSamples.CookedValue;"
+                + " \'-\';"
+                + " ((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100);"
+                + " \'-\';"
+                + "(Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory;\"";
             string UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
 
             // 以分号分割字符串
@@ -474,9 +498,9 @@ namespace SeeMyServer.Methods
                 resultList.Add(cpuUsage);
             }
 
-            // 去掉最后一项（表示总占用）
+            // 去掉最后两项（表示总占用）
             List<string> modifiedList = new List<string>(cpuUsageRes);
-            modifiedList.RemoveAt(modifiedList.Count - 1);
+            modifiedList.RemoveAt(modifiedList.Count - 2);
 
             // 第二部分是内存占用
             string memUsageRes = UsageResA[1];
@@ -493,6 +517,23 @@ namespace SeeMyServer.Methods
 
             return new string[] { $"{cpuUsageRes[cpuUsageRes.Length - 1].Split('.')[0]}%", $"{memUsageRes.Split('.')[0]}%", $"{string.Join(", ", modifiedList)}", $"{UsageRes}", $"{memUsageTotalRes}" };
         }
+        public static async Task<string> GetWindowsUpTime(CMSModel cmsModel)
+        {
+            string CMD = "powershell -Command \"[string]::Format('{0} Days {1} Hours {2} Minutes', (New-TimeSpan -Start (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).Days, (New-TimeSpan -Start (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).Hours, (New-TimeSpan -Start (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).Minutes); \"";
+            CMD = await SendSSHCommandAsync(CMD, cmsModel);
+
+            return CMD;
+        }
+        public static async Task<List<MountInfo>> GetWindowsMountInfo(CMSModel cmsModel)
+        {
+            string CMD = "powershell -Command \"Get-Volume\"";
+            CMD = await SendSSHCommandAsync(CMD, cmsModel);
+
+            List<MountInfo> mountInfos = WindowsMountInfoParse(CMD);
+
+            return mountInfos;
+        }
+        // 保留这个方法给一级界面用（pwsh太慢了）
         public static async Task<string> GetWindowsCPUUsageAsync(CMSModel cmsModel)
         {
             string cpuUsageCMD = "powershell -Command \"(Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue\"";
@@ -536,6 +577,35 @@ namespace SeeMyServer.Methods
             return netReceivedRes + "/s ↓";
         }
 
+        public static async Task<List<NetworkInterfaceInfo>> GetWindowsNetworkInterfaceInfo(CMSModel cmsModel)
+        {
+            string CMD = "powershell -Command \"Get-NetAdapter\"";
+            CMD = await SendSSHCommandAsync(CMD, cmsModel);
+
+            List<NetworkInterfaceInfo> networkInterfaceInfos = WindowsNetworkInterfaceInfoParse(CMD);
+
+            throw new Exception($"{CMD}");
+
+            return networkInterfaceInfos;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         private static string NetUnitConversion(BigInteger netValue)
         {
             if (netValue >= (1024 * 1024 * 1024))
@@ -556,6 +626,53 @@ namespace SeeMyServer.Methods
             }
         }
 
+        // 
+        public static List<MountInfo> WindowsMountInfoParse(string input)
+        {
+            List<MountInfo> mountInfos = new List<MountInfo>();
+
+            string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+            // Regex pattern to match the structure of the input lines
+            Regex pattern = new Regex(@"^(\w)\s+([\w\s]+)?\s+(\w+)\s+(\w+)\s+(\w+)\s+(\w+)\s+([\d.]+\s*\w+)\s+([\d.]+\s*\w+)?$");
+
+
+            //throw new Exception($"{lines[5]}");
+
+            foreach (string line in lines)
+            {
+                Match match = pattern.Match(line);
+                if (match.Success)
+                {
+                    MountInfo info = new MountInfo();
+                    info.DriveLetter = match.Groups[1].Value.Trim();
+                    info.FriendlyName = match.Groups[2].Value.Trim();
+                    info.FileSystem = $"{info.FriendlyName} ({info.DriveLetter})";
+                    info.FileSystemType = match.Groups[3].Value.Trim();
+                    info.DriveType = match.Groups[4].Value.Trim();
+                    info.HealthStatus = match.Groups[5].Value.Trim();
+                    info.OperationalStatus = match.Groups[6].Value.Trim();
+                    info.SizeRemaining = match.Groups[7].Value.Trim();
+                    info.Size = match.Groups[8].Value.Trim();
+
+                    try
+                    {
+                        float UsedValue = float.Parse(info.Size.Split(' ')[0]) - float.Parse(info.SizeRemaining.Split(' ')[0]);
+                        //info.Used = UsedValue.ToString();
+                        info.Used = $"{String.Format("{0:0.00}", UsedValue)} {info.Size.Substring(info.Size.Length - 2)}";
+                        info.UsePercentage = (UsedValue * 100 / float.Parse(info.Size.Split(' ')[0])).ToString().Split('.')[0] + "%";
+                    }
+                    catch (Exception)
+                    {
+                        info.UsePercentage = "0%";
+                    }
+
+                    mountInfos.Add(info);
+                }
+            }
+
+            return mountInfos;
+        }
         // 处理 df -h
         public static List<MountInfo> MountInfoParse(string input)
         {
@@ -563,8 +680,6 @@ namespace SeeMyServer.Methods
 
             // 按行分割输入
             var lines = input.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
-            //throw new Exception($"{lines[1]}");
 
             // 跳过标题行
             foreach (var line in lines.Skip(1))
@@ -592,6 +707,34 @@ namespace SeeMyServer.Methods
                 }
             }
             return mountInfos;
+        }
+
+        public static List<NetworkInterfaceInfo> WindowsNetworkInterfaceInfoParse(string input)
+        {
+            List<NetworkInterfaceInfo> networkInterfaceInfos = new List<NetworkInterfaceInfo>();
+
+            string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+            // Regex pattern to match the structure of the input lines
+            Regex pattern = new Regex(@"^([\w\s]+)\s+([\w\s()-.]+)\s+(\d+)\s+(\w+)\s+([\w-]+)\s+(\d+\.\d+\s+\w+)$");
+
+            foreach (string line in lines)
+            {
+                Match match = pattern.Match(line);
+                if (match.Success)
+                {
+                    NetworkInterfaceInfo info = new NetworkInterfaceInfo();
+                    info.Name = match.Groups[1].Value.Trim();
+                    info.InterfaceDescription = match.Groups[2].Value.Trim();
+                    info.ifIndex = int.Parse(match.Groups[3].Value.Trim());
+                    info.Status = match.Groups[4].Value.Trim();
+                    info.MacAddress = match.Groups[5].Value.Trim();
+                    info.LinkSpeed = match.Groups[6].Value.Trim();
+                    networkInterfaceInfos.Add(info);
+                }
+            }
+
+            return networkInterfaceInfos;
         }
 
         // 处理 ifconfig
