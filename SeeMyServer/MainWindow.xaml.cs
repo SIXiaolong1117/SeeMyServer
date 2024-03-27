@@ -24,11 +24,11 @@ namespace SeeMyServer
         {
             this.InitializeComponent();
 
-            // Æô¶¯¸öĞÔ»¯TitleBar
+            // å¯åŠ¨ä¸ªæ€§åŒ–TitleBar
             ExtendsContentIntoTitleBar = true;
-            // ½«UIÉèÖÃÎªTitleBar
+            // å°†UIè®¾ç½®ä¸ºTitleBar
             SetTitleBar(AppTitleBar);
-            // ÉèÖÃÈÎÎñÀ¸ÏÔÊ¾Ãû³Æ
+            // è®¾ç½®ä»»åŠ¡æ æ˜¾ç¤ºåç§°
             Title = resourceLoader.GetString("AppTitle");
 
             TrySetSystemBackdrop();
@@ -187,7 +187,7 @@ namespace SeeMyServer
             {
                 contentFrame.GoBack();
 
-                // ¸üĞÂÑ¡ÖĞµÄµ¼º½Ïî
+                // æ›´æ–°é€‰ä¸­çš„å¯¼èˆªé¡¹
                 var selectedItem = FindSelectedItemByTag(contentFrame.CurrentSourcePageType.Name);
                 if (selectedItem != null)
                 {

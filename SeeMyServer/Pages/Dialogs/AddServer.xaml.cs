@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml;
+ï»¿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using SeeMyServer.Models;
 using System;
@@ -14,11 +14,11 @@ namespace SeeMyServer.Pages.Dialogs
         {
             this.InitializeComponent();
 
-            // ½«DialogÁ½¸ö°´Å¥µã»÷ÊÂ¼ş°ó¶¨
+            // å°†Dialogä¸¤ä¸ªæŒ‰é’®ç‚¹å‡»äº‹ä»¶ç»‘å®š
             PrimaryButtonClick += MyDialog_PrimaryButtonClick;
             SecondaryButtonClick += MyDialog_SecondaryButtonClick;
 
-            // ³õÊ¼»¯DialogÖĞµÄ×Ö¶Î£¬Ê¹ÓÃ´«ÈëµÄCMSModel¶ÔÏóµÄÊôĞÔ
+            // åˆå§‹åŒ–Dialogä¸­çš„å­—æ®µï¼Œä½¿ç”¨ä¼ å…¥çš„CMSModelå¯¹è±¡çš„å±æ€§
             CMSData = cmsModel;
             DisplayNameTextBox.Text = cmsModel.Name;
             HostIPTextBox.Text = cmsModel.HostIP;
@@ -26,7 +26,7 @@ namespace SeeMyServer.Pages.Dialogs
             SSHUserTextBox.Text = cmsModel.SSHUser;
             SSHKeyTextBox.Text = cmsModel.SSHKey;
 
-            // Ìí¼Ó²Ù×÷ÏµÍ³ÀàĞÍ
+            // æ·»åŠ æ“ä½œç³»ç»Ÿç±»å‹
             OSTypeComboBox.Items.Add("Windows");
             OSTypeComboBox.Items.Add("Linux");
             OSTypeComboBox.Items.Add("OpenWRT");
@@ -35,7 +35,7 @@ namespace SeeMyServer.Pages.Dialogs
 
         private void MyDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
-            // ÔÚ"È·¶¨"°´Å¥µã»÷ÊÂ¼şÖĞ±£´æÓÃ»§ÊäÈëµÄÄÚÈİ
+            // åœ¨"ç¡®å®š"æŒ‰é’®ç‚¹å‡»äº‹ä»¶ä¸­ä¿å­˜ç”¨æˆ·è¾“å…¥çš„å†…å®¹
             CMSData.Name = string.IsNullOrEmpty(DisplayNameTextBox.Text) ? "<Unnamed>" : DisplayNameTextBox.Text;
             CMSData.HostIP = HostIPTextBox.Text;
             CMSData.HostPort = HostPortTextBox.Text;
@@ -44,38 +44,38 @@ namespace SeeMyServer.Pages.Dialogs
             CMSData.OSType = GetSelectedComboBoxItemAsString(OSTypeComboBox);
         }
 
-        // »ñÈ¡Ñ¡ÖĞÄÚÈİ²¢×ª»»Îª×Ö·û´®
+        // è·å–é€‰ä¸­å†…å®¹å¹¶è½¬æ¢ä¸ºå­—ç¬¦ä¸²
         private string GetSelectedComboBoxItemAsString(ComboBox comboBox)
         {
             if (comboBox.SelectedItem != null)
             {
-                // Ö±½Ó·µ»ØÑ¡ÖĞÏî×÷Îª×Ö·û´®
+                // ç›´æ¥è¿”å›é€‰ä¸­é¡¹ä½œä¸ºå­—ç¬¦ä¸²
                 return comboBox.SelectedItem.ToString();
             }
-            return "<Unknown OS>"; // Èç¹ûÃ»ÓĞÑ¡ÖĞÏî£¬Ôò·µ»Ø¿Õ×Ö·û´®
+            return "<Unknown OS>"; // å¦‚æœæ²¡æœ‰é€‰ä¸­é¡¹ï¼Œåˆ™è¿”å›ç©ºå­—ç¬¦ä¸²
         }
 
         private void MyDialog_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
-            // ÔÚ"È¡Ïû"°´Å¥µã»÷ÊÂ¼şÖĞ²»×öÈÎºÎ²Ù×÷
+            // åœ¨"å–æ¶ˆ"æŒ‰é’®ç‚¹å‡»äº‹ä»¶ä¸­ä¸åšä»»ä½•æ“ä½œ
         }
         private async void SelectSSHKeyPath_Click(object sender, RoutedEventArgs e)
         {
-            // ´´½¨Ò»¸öFileOpenPicker
+            // åˆ›å»ºä¸€ä¸ªFileOpenPicker
             var openPicker = new FileOpenPicker();
-            // »ñÈ¡µ±Ç°´°¿Ú¾ä±ú (HWND) 
+            // è·å–å½“å‰çª—å£å¥æŸ„ (HWND) 
             var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(App.m_window);
-            // Ê¹ÓÃ´°¿Ú¾ä±ú (HWND) ³õÊ¼»¯FileOpenPicker
+            // ä½¿ç”¨çª—å£å¥æŸ„ (HWND) åˆå§‹åŒ–FileOpenPicker
             WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
 
-            // ÎªFilePickerÉèÖÃÑ¡Ïî
+            // ä¸ºFilePickerè®¾ç½®é€‰é¡¹
             openPicker.ViewMode = PickerViewMode.Thumbnail;
-            // ½¨Òé´ò¿ªÎ»ÖÃ ×ÀÃæ
+            // å»ºè®®æ‰“å¼€ä½ç½® æ¡Œé¢
             openPicker.SuggestedStartLocation = PickerLocationId.Desktop;
-            // ÎÄ¼şÀàĞÍ¹ıÂËÆ÷
+            // æ–‡ä»¶ç±»å‹è¿‡æ»¤å™¨
             openPicker.FileTypeFilter.Add("*");
 
-            // ´ò¿ªÑ¡ÔñÆ÷¹©ÓÃ»§Ñ¡ÔñÎÄ¼ş
+            // æ‰“å¼€é€‰æ‹©å™¨ä¾›ç”¨æˆ·é€‰æ‹©æ–‡ä»¶
             var file = await openPicker.PickSingleFileAsync();
             string filePath = null;
             if (file != null)

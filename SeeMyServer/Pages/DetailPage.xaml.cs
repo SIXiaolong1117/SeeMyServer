@@ -1,4 +1,4 @@
-using Microsoft.UI;
+ï»¿using Microsoft.UI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -22,7 +22,7 @@ namespace SeeMyServer.Pages
 {
     public sealed partial class DetailPage : Page
     {
-        // ÆôÓÃ±¾µØÉèÖÃÊı¾İ
+        // å¯ç”¨æœ¬åœ°è®¾ç½®æ•°æ®
         ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
         ResourceLoader resourceLoader = new ResourceLoader();
         private DispatcherTimer timer;
@@ -38,21 +38,21 @@ namespace SeeMyServer.Pages
         {
             int numberOfBars = CPUCoreUsageTokens.Length;
 
-            // Çå³ı Grid µÄĞĞ¶¨ÒåºÍ×ÓÔªËØ
+            // æ¸…é™¤ Grid çš„è¡Œå®šä¹‰å’Œå­å…ƒç´ 
             container.RowDefinitions.Clear();
             container.ColumnDefinitions.Clear();
             container.Children.Clear();
 
-            // ¼ì²éÊÇ·ñĞèÒªÌí¼ÓÁĞ¶¨Òå
+            // æ£€æŸ¥æ˜¯å¦éœ€è¦æ·»åŠ åˆ—å®šä¹‰
             if (container.ColumnDefinitions.Count == 0)
             {
-                // ´´½¨Ò»¸öColumnDefinition
+                // åˆ›å»ºä¸€ä¸ªColumnDefinition
                 ColumnDefinition columnDefinition = new ColumnDefinition();
 
-                // ÉèÖÃ¿í¶ÈÎª×Ô¶¯µ÷Õû´óĞ¡ÒÔÌî³äÊ£Óà¿Õ¼ä
+                // è®¾ç½®å®½åº¦ä¸ºè‡ªåŠ¨è°ƒæ•´å¤§å°ä»¥å¡«å……å‰©ä½™ç©ºé—´
                 columnDefinition.Width = new GridLength(1, GridUnitType.Star);
 
-                // ½«ColumnDefinitionÌí¼Óµ½GridµÄColumnDefinitions¼¯ºÏÖĞ
+                // å°†ColumnDefinitionæ·»åŠ åˆ°Gridçš„ColumnDefinitionsé›†åˆä¸­
                 container.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
                 container.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
                 container.ColumnDefinitions.Add(columnDefinition);
@@ -60,7 +60,7 @@ namespace SeeMyServer.Pages
 
             for (int i = 0; i < numberOfBars; i++)
             {
-                // Ìí¼ÓĞÂµÄĞĞ¶¨Òå
+                // æ·»åŠ æ–°çš„è¡Œå®šä¹‰
                 container.RowDefinitions.Add(new RowDefinition());
 
                 ProgressBar progressBar = new ProgressBar();
@@ -70,13 +70,13 @@ namespace SeeMyServer.Pages
                 progressBar.Value = double.Parse(CPUCoreUsageTokens[i]);
                 }catch (Exception ex) { }
 
-                // ´´½¨ TextBlock À´ÏÔÊ¾Óë ProgressBar Í¬²½µÄÖµ
+                // åˆ›å»º TextBlock æ¥æ˜¾ç¤ºä¸ ProgressBar åŒæ­¥çš„å€¼
                 TextBlock textBlock = new TextBlock();
                 TextBlock textCPUBlock = new TextBlock();
                 textBlock.Text = $"{progressBar.Value.ToString().Split(".")[0]}%";
                 textCPUBlock.Text = $"CPU{i}";
                 textCPUBlock.Margin = new Thickness(0, 4, 8, 6);
-                // ¼àÌı ProgressBar µÄÖµ¸Ä±äÊÂ¼ş£¬¸üĞÂ TextBlock µÄÄÚÈİ
+                // ç›‘å¬ ProgressBar çš„å€¼æ”¹å˜äº‹ä»¶ï¼Œæ›´æ–° TextBlock çš„å†…å®¹
                 progressBar.ValueChanged += (sender, e) =>
                 {
                     textBlock.Text = $"{progressBar.Value.ToString().Split(".")[0]}%";
@@ -86,7 +86,7 @@ namespace SeeMyServer.Pages
                 textBlock.Width = 40;
                 textBlock.HorizontalAlignment = HorizontalAlignment.Right;
 
-                // ÉèÖÃÎ»ÖÃ
+                // è®¾ç½®ä½ç½®
                 Grid.SetRow(textCPUBlock, i);
                 Grid.SetColumn(textCPUBlock, 0);
 
@@ -96,7 +96,7 @@ namespace SeeMyServer.Pages
                 Grid.SetRow(progressBar, i);
                 Grid.SetColumn(progressBar, 2);
 
-                // Ìí¼Óµ½ Grid ÖĞ
+                // æ·»åŠ åˆ° Grid ä¸­
                 container.Children.Add(textCPUBlock);
                 container.Children.Add(progressBar);
                 container.Children.Add(textBlock);
@@ -106,36 +106,36 @@ namespace SeeMyServer.Pages
         CMSModel dataList;
         private void LoadData()
         {
-            // ÊµÀı»¯SQLiteHelper
+            // å®ä¾‹åŒ–SQLiteHelper
             SQLiteHelper dbHelper = new SQLiteHelper();
 
-            // ²éÑ¯Êı¾İ
+            // æŸ¥è¯¢æ•°æ®
             dataList = dbHelper.GetDataById(Convert.ToInt32(localSettings.Values["ServerID"]));
 
-            // ½«Êı¾İÁĞ±í°ó¶¨
+            // å°†æ•°æ®åˆ—è¡¨ç»‘å®š
             dataGrid.DataContext = dataList;
 
-            // ³õÊ¼»¯Õ¼ÓÃ
+            // åˆå§‹åŒ–å ç”¨
             dataList.CPUUsage = "0%";
             dataList.MEMUsage = "0%";
-            dataList.NETSent = "0 B/s ¡ü";
-            dataList.NETReceived = "0 B/s ¡ı";
+            dataList.NETSent = "0 B/s â†‘";
+            dataList.NETReceived = "0 B/s â†“";
 
-            // ´´½¨²¢ÅäÖÃDispatcherTimer
+            // åˆ›å»ºå¹¶é…ç½®DispatcherTimer
             timer = new DispatcherTimer();
             timer.Tick += Timer_Tick;
 
-            // Ã¿¸ô¶ÎÊ±¼ä´¥·¢Ò»´Î
+            // æ¯éš”æ®µæ—¶é—´è§¦å‘ä¸€æ¬¡
             timer.Interval = TimeSpan.FromSeconds(5);
 
-            // ÏÈÖ´ĞĞÒ»´ÎÊÂ¼ş´¦Àí·½·¨
+            // å…ˆæ‰§è¡Œä¸€æ¬¡äº‹ä»¶å¤„ç†æ–¹æ³•
             Timer_Tick(null, null);
 
-            // Æô¶¯¼ÆÊ±Æ÷
+            // å¯åŠ¨è®¡æ—¶å™¨
             timer.Start();
         }
 
-        // Linux ĞÅÏ¢¸üĞÂ
+        // Linux ä¿¡æ¯æ›´æ–°
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
             string[] usages = await Method.GetLinuxUsageAsync(cmsModel);
@@ -143,7 +143,7 @@ namespace SeeMyServer.Pages
             string HostName = await Method.GetLinuxHostName(cmsModel);
             string UpTime = await Method.GetLinuxUpTime(cmsModel);
 
-            // ´¦Àí»ñÈ¡µ½µÄÊı¾İ
+            // å¤„ç†è·å–åˆ°çš„æ•°æ®
             cmsModel.CPUUsage = usages[0];
             cmsModel.MEMUsage = usages[1];
             cmsModel.NETReceived = netUsages[0];
@@ -158,7 +158,7 @@ namespace SeeMyServer.Pages
             string[] tokens = usages[2].Split(", ");
             CreateProgressBars(progressBarsGrid, tokens);
 
-            // Ö»ÓĞµ± ItemsSource Î´°ó¶¨Ê±²Å½øĞĞ°ó¶¨
+            // åªæœ‰å½“ ItemsSource æœªç»‘å®šæ—¶æ‰è¿›è¡Œç»‘å®š
             if (MountInfosListView.ItemsSource == null)
             {
                 List<MountInfo> MountInfos = await Method.GetLinuxMountInfo(cmsModel);
@@ -173,16 +173,16 @@ namespace SeeMyServer.Pages
             }
         }
 
-        // OpenWRT ĞÅÏ¢¸üĞÂ
+        // OpenWRT ä¿¡æ¯æ›´æ–°
         private async Task UpdateOpenWRTCMSModelAsync(CMSModel cmsModel)
         {
             string[] usages = await Method.GetOpenWRTCPUUsageAsync(cmsModel);
             string HostName = await Method.GetOpenWRTHostName(cmsModel);
-            // OpenWRTÒ²¿ÉÒÔÓÃ²¿·ÖLinuxÃüÁî
+            // OpenWRTä¹Ÿå¯ä»¥ç”¨éƒ¨åˆ†Linuxå‘½ä»¤
             string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
             string UpTime = await Method.GetLinuxUpTime(cmsModel);
 
-            // ´¦Àí»ñÈ¡µ½µÄÊı¾İ
+            // å¤„ç†è·å–åˆ°çš„æ•°æ®
             cmsModel.CPUUsage = usages[0];
             cmsModel.MEMUsage = usages[1];
             cmsModel.NETReceived = netUsages[0];
@@ -190,11 +190,11 @@ namespace SeeMyServer.Pages
             cmsModel.HostName = HostName;
             cmsModel.UpTime = UpTime;
 
-            // OpenWRTµÄTopÎŞ·¨²é¿´µ¥¶ÀºËĞÄÕ¼ÓÃ
+            // OpenWRTçš„Topæ— æ³•æŸ¥çœ‹å•ç‹¬æ ¸å¿ƒå ç”¨
             string[] tokens = new string[] { usages[0].Split("%")[0] };
             CreateProgressBars(progressBarsGrid, tokens);
 
-            // Ö»ÓĞµ± ItemsSource Î´°ó¶¨Ê±²Å½øĞĞ°ó¶¨
+            // åªæœ‰å½“ ItemsSource æœªç»‘å®šæ—¶æ‰è¿›è¡Œç»‘å®š
             if (MountInfosListView.ItemsSource == null)
             {
                 List<MountInfo> MountInfos = await Method.GetLinuxMountInfo(cmsModel);
@@ -209,7 +209,7 @@ namespace SeeMyServer.Pages
             }
         }
 
-        // Windows ĞÅÏ¢¸üĞÂ
+        // Windows ä¿¡æ¯æ›´æ–°
         private async Task UpdateWindowsCMSModelAsync(CMSModel cmsModel)
         {
             string[] usages = await Method.GetWindowsUsageAsync(cmsModel);
@@ -217,13 +217,13 @@ namespace SeeMyServer.Pages
             Task<string> memTask = Method.GetWindowsMemoryUsageAsync(cmsModel);
             Task<string> netSentTask = Method.GetWindowsNetSentAsync(cmsModel);
             Task<string> netReceivedTask = Method.GetWindowsNetReceivedAsync(cmsModel);
-            // WindowsÉÏ¿ÉÒÔÊ¹ÓÃÏàÍ¬µÄÃüÁî
+            // Windowsä¸Šå¯ä»¥ä½¿ç”¨ç›¸åŒçš„å‘½ä»¤
             string HostName = await Method.GetLinuxHostName(cmsModel);
 
-            // Í¬Ê±Ö´ĞĞÒì²½ÈÎÎñ
+            // åŒæ—¶æ‰§è¡Œå¼‚æ­¥ä»»åŠ¡
             await Task.WhenAll(memTask, netSentTask, netReceivedTask);
 
-            // ´¦Àí»ñÈ¡µ½µÄÊı¾İ
+            // å¤„ç†è·å–åˆ°çš„æ•°æ®
             cmsModel.CPUUsage = usages[0];
             cmsModel.MEMUsage = memTask.Result;
             cmsModel.NETSent = netSentTask.Result;
@@ -235,7 +235,7 @@ namespace SeeMyServer.Pages
             string[] tokens = usages[2].Split(", ");
             CreateProgressBars(progressBarsGrid, tokens);
 
-            // Ö»ÓĞµ± ItemsSource Î´°ó¶¨Ê±²Å½øĞĞ
+            // åªæœ‰å½“ ItemsSource æœªç»‘å®šæ—¶æ‰è¿›è¡Œ
             if (MountInfosListView.ItemsSource == null)
             {
                 List<MountInfo> MountInfos = await Method.GetWindowsMountInfo(cmsModel);
@@ -276,48 +276,48 @@ namespace SeeMyServer.Pages
         }
         public static void SSHTerminal(string KeyPath, string User, string Domain, string Port)
         {
-            // ´´½¨Ò»¸öĞÂµÄ½ø³Ì
+            // åˆ›å»ºä¸€ä¸ªæ–°çš„è¿›ç¨‹
             Process process = new Process();
-            // Ö¸¶¨ÔËĞĞPowerShell
+            // æŒ‡å®šè¿è¡ŒPowerShell
             process.StartInfo.FileName = "PowerShell.exe";
-            // ÃüÁî
+            // å‘½ä»¤
             process.StartInfo.Arguments = $"ssh -i {KeyPath} {User}@{Domain} -p {Port}";
-            // ÊÇ·ñÊ¹ÓÃ²Ù×÷ÏµÍ³shellÆô¶¯
+            // æ˜¯å¦ä½¿ç”¨æ“ä½œç³»ç»Ÿshellå¯åŠ¨
             process.StartInfo.UseShellExecute = false;
-            // ÊÇ·ñÔÚĞÂ´°¿ÚÖĞÆô¶¯¸Ã½ø³ÌµÄÖµ (²»ÏÔÊ¾³ÌĞò´°¿Ú)
+            // æ˜¯å¦åœ¨æ–°çª—å£ä¸­å¯åŠ¨è¯¥è¿›ç¨‹çš„å€¼ (ä¸æ˜¾ç¤ºç¨‹åºçª—å£)
             process.StartInfo.CreateNoWindow = false;
-            // ½ø³Ì¿ªÊ¼
+            // è¿›ç¨‹å¼€å§‹
             process.Start();
-            // µÈ´ıÖ´ĞĞ½áÊø
+            // ç­‰å¾…æ‰§è¡Œç»“æŸ
             //process.WaitForExit();
-            // ½ø³Ì¹Ø±Õ
+            // è¿›ç¨‹å…³é—­
             process.Close();
         }
         private async void EditThisConfig(CMSModel cmsModel)
         {
-            // ´´½¨Ò»¸öĞÂµÄdialog¶ÔÏó
+            // åˆ›å»ºä¸€ä¸ªæ–°çš„dialogå¯¹è±¡
             AddServer dialog = new AddServer(cmsModel);
-            // ¶Ô´Ëdialog¶ÔÏó½øĞĞÅäÖÃ
+            // å¯¹æ­¤dialogå¯¹è±¡è¿›è¡Œé…ç½®
             dialog.XamlRoot = this.XamlRoot;
             dialog.Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style;
             dialog.PrimaryButtonText = resourceLoader.GetString("DialogChange");
             dialog.CloseButtonText = resourceLoader.GetString("DialogClose");
-            // Ä¬ÈÏ°´Å¥ÎªPrimaryButton
+            // é»˜è®¤æŒ‰é’®ä¸ºPrimaryButton
             dialog.DefaultButton = ContentDialogButton.Primary;
 
-            // ÏÔÊ¾Dialog²¢µÈ´ıÆä¹Ø±Õ
+            // æ˜¾ç¤ºDialogå¹¶ç­‰å¾…å…¶å…³é—­
             ContentDialogResult result = await dialog.ShowAsync();
 
-            // Èç¹û°´ÏÂÁËPrimary
+            // å¦‚æœæŒ‰ä¸‹äº†Primary
             if (result == ContentDialogResult.Primary)
             {
-                // ÊµÀı»¯SQLiteHelper
+                // å®ä¾‹åŒ–SQLiteHelper
                 SQLiteHelper dbHelper = new SQLiteHelper();
-                // ¸üĞÂÊı¾İ
+                // æ›´æ–°æ•°æ®
                 dbHelper.UpdateData(cmsModel);
-                // ÖØĞÂ¼ÓÔØÊı¾İ
+                // é‡æ–°åŠ è½½æ•°æ®
                 LoadData();
-                // È¥µô°ó¶¨
+                // å»æ‰ç»‘å®š
                 MountInfosListView.ItemsSource = null;
                 NetworkInfosListView.ItemsSource = null;
             }

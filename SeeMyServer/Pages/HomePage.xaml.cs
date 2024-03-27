@@ -1,4 +1,4 @@
-using Microsoft.UI.Dispatching;
+ï»¿using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -17,7 +17,7 @@ namespace SeeMyServer.Pages
 {
     public sealed partial class HomePage : Page
     {
-        // ÆôÓÃ±¾µØÉèÖÃÊı¾İ
+        // å¯ç”¨æœ¬åœ°è®¾ç½®æ•°æ®
         ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
         ResourceLoader resourceLoader = new ResourceLoader();
         private DispatcherQueue _dispatcherQueue;
@@ -27,17 +27,17 @@ namespace SeeMyServer.Pages
         {
             this.InitializeComponent();
 
-            // »ñÈ¡UIÏß³ÌµÄDispatcherQueue
+            // è·å–UIçº¿ç¨‹çš„DispatcherQueue
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
-            // Ò³Ãæ³õÊ¼»¯ºó£¬¼ÓÔØÊı¾İ
+            // é¡µé¢åˆå§‹åŒ–åï¼ŒåŠ è½½æ•°æ®
             LoadData();
             LoadString();
 
         }
         private void LoadString()
         {
-            // ÔÚ×ÓÏß³ÌÖĞÖ´ĞĞÈÎÎñ
+            // åœ¨å­çº¿ç¨‹ä¸­æ‰§è¡Œä»»åŠ¡
             Thread subThread = new Thread(new ThreadStart(() =>
             {
                 _dispatcherQueue.TryEnqueue(() =>
@@ -54,80 +54,80 @@ namespace SeeMyServer.Pages
 
         private void LoadData()
         {
-            // ÊµÀı»¯SQLiteHelper
+            // å®ä¾‹åŒ–SQLiteHelper
             SQLiteHelper dbHelper = new SQLiteHelper();
 
-            // ²éÑ¯Êı¾İ
+            // æŸ¥è¯¢æ•°æ®
             dataList = dbHelper.QueryData();
 
-            // ½«Êı¾İÁĞ±í°ó¶¨µ½ListView
+            // å°†æ•°æ®åˆ—è¡¨ç»‘å®šåˆ°ListView
             dataListView.ItemsSource = dataList;
 
-            // ³õÊ¼»¯Õ¼ÓÃ
+            // åˆå§‹åŒ–å ç”¨
             foreach (CMSModel cmsModel in dataList)
             {
                 cmsModel.CPUUsage = "0%";
                 cmsModel.MEMUsage = "0%";
-                cmsModel.NETSent = "0 B/s ¡ü";
-                cmsModel.NETReceived = "0 B/s ¡ı";
+                cmsModel.NETSent = "0 B/s â†‘";
+                cmsModel.NETReceived = "0 B/s â†“";
             }
 
-            // ´´½¨²¢ÅäÖÃDispatcherTimer
+            // åˆ›å»ºå¹¶é…ç½®DispatcherTimer
             timer = new DispatcherTimer();
             timer.Tick += Timer_Tick;
 
-            // Ã¿¸ô¶ÎÊ±¼ä´¥·¢Ò»´Î
+            // æ¯éš”æ®µæ—¶é—´è§¦å‘ä¸€æ¬¡
             timer.Interval = TimeSpan.FromSeconds(5);
 
-            // ÏÈÖ´ĞĞÒ»´ÎÊÂ¼ş´¦Àí·½·¨
+            // å…ˆæ‰§è¡Œä¸€æ¬¡äº‹ä»¶å¤„ç†æ–¹æ³•
             Timer_Tick(null, null);
 
-            // Æô¶¯¼ÆÊ±Æ÷
+            // å¯åŠ¨è®¡æ—¶å™¨
             timer.Start();
         }
 
-        // Linux ĞÅÏ¢¸üĞÂ
+        // Linux ä¿¡æ¯æ›´æ–°
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
-            // ¶¨ÒåÒì²½ÈÎÎñ
+            // å®šä¹‰å¼‚æ­¥ä»»åŠ¡
             string[] usages = await Method.GetLinuxUsageAsync(cmsModel);
             string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
 
-            // ´¦Àí»ñÈ¡µ½µÄÊı¾İ
+            // å¤„ç†è·å–åˆ°çš„æ•°æ®
             cmsModel.CPUUsage = usages[0];
             cmsModel.MEMUsage = usages[1];
             cmsModel.NETReceived = netUsages[0];
             cmsModel.NETSent = netUsages[1];
         }
 
-        // OpenWRT ĞÅÏ¢¸üĞÂ
+        // OpenWRT ä¿¡æ¯æ›´æ–°
         private async Task UpdateOpenWRTCMSModelAsync(CMSModel cmsModel)
         {
-            // ¶¨ÒåÒì²½ÈÎÎñ
+            // å®šä¹‰å¼‚æ­¥ä»»åŠ¡
             string[] usages = await Method.GetOpenWRTCPUUsageAsync(cmsModel);
-            // OpenWRTÒ²¿ÉÒÔÓÃifconfig²éÑ¯ÍøËÙ
+            // OpenWRTä¹Ÿå¯ä»¥ç”¨ifconfigæŸ¥è¯¢ç½‘é€Ÿ
             string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
 
-            // ´¦Àí»ñÈ¡µ½µÄÊı¾İ
+            // å¤„ç†è·å–åˆ°çš„æ•°æ®
             cmsModel.CPUUsage = usages[0];
             cmsModel.MEMUsage = usages[1];
             cmsModel.NETReceived = netUsages[0];
             cmsModel.NETSent = netUsages[1];
         }
 
-        // Windows ĞÅÏ¢¸üĞÂ
+        // Windows ä¿¡æ¯æ›´æ–°
         private async Task UpdateWindowsCMSModelAsync(CMSModel cmsModel)
         {
-            // ¶¨ÒåÒì²½ÈÎÎñ
+            // å®šä¹‰å¼‚æ­¥ä»»åŠ¡
             Task<string> cpuTask = Method.GetWindowsCPUUsageAsync(cmsModel);
             Task<string> memTask = Method.GetWindowsMemoryUsageAsync(cmsModel);
             Task<string> netSentTask = Method.GetWindowsNetSentAsync(cmsModel);
             Task<string> netReceivedTask = Method.GetWindowsNetReceivedAsync(cmsModel);
 
-            // Í¬Ê±Ö´ĞĞÒì²½ÈÎÎñ
+            // åŒæ—¶æ‰§è¡Œå¼‚æ­¥ä»»åŠ¡
             await Task.WhenAll(cpuTask, memTask, netSentTask, netReceivedTask);
 
-            // ´¦Àí»ñÈ¡µ½µÄÊı¾İ
+            // å¤„ç†è·å–åˆ°çš„æ•°æ®
             cmsModel.CPUUsage = cpuTask.Result;
             cmsModel.MEMUsage = memTask.Result;
             cmsModel.NETSent = netSentTask.Result;
@@ -154,95 +154,95 @@ namespace SeeMyServer.Pages
             await Task.WhenAll(tasks);
         }
 
-        // Ìí¼Ó/ĞŞ¸ÄÅäÖÃ°´Å¥µã»÷
+        // æ·»åŠ /ä¿®æ”¹é…ç½®æŒ‰é’®ç‚¹å‡»
         private async void AddConfigButton_Click(object sender, RoutedEventArgs e)
         {
-            // ´´½¨Ò»¸ö³õÊ¼µÄCMSModel¶ÔÏó
+            // åˆ›å»ºä¸€ä¸ªåˆå§‹çš„CMSModelå¯¹è±¡
             CMSModel initialCMSModelData = new CMSModel();
 
-            // ´´½¨Ò»¸öĞÂµÄdialog¶ÔÏó
+            // åˆ›å»ºä¸€ä¸ªæ–°çš„dialogå¯¹è±¡
             AddServer dialog = new AddServer(initialCMSModelData);
-            // ¶Ô´Ëdialog¶ÔÏó½øĞĞÅäÖÃ
+            // å¯¹æ­¤dialogå¯¹è±¡è¿›è¡Œé…ç½®
             dialog.XamlRoot = this.XamlRoot;
             dialog.Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style;
             dialog.PrimaryButtonText = resourceLoader.GetString("DialogAdd");
             dialog.CloseButtonText = resourceLoader.GetString("DialogClose");
-            // Ä¬ÈÏ°´Å¥ÎªPrimaryButton
+            // é»˜è®¤æŒ‰é’®ä¸ºPrimaryButton
             dialog.DefaultButton = ContentDialogButton.Primary;
 
-            // ÏÔÊ¾Dialog²¢µÈ´ıÆä¹Ø±Õ
+            // æ˜¾ç¤ºDialogå¹¶ç­‰å¾…å…¶å…³é—­
             ContentDialogResult result = await dialog.ShowAsync();
 
-            // Èç¹û°´ÏÂÁËPrimary
+            // å¦‚æœæŒ‰ä¸‹äº†Primary
             if (result == ContentDialogResult.Primary)
             {
-                // ÊµÀı»¯SQLiteHelper
+                // å®ä¾‹åŒ–SQLiteHelper
                 SQLiteHelper dbHelper = new SQLiteHelper();
-                // ²åÈëĞÂÊı¾İ
+                // æ’å…¥æ–°æ•°æ®
                 dbHelper.InsertData(initialCMSModelData);
-                // ¼ÓÔØÊı¾İ
+                // åŠ è½½æ•°æ®
                 LoadData();
             }
         }
-        // µ¼ÈëÅäÖÃ°´Å¥µã»÷
+        // å¯¼å…¥é…ç½®æŒ‰é’®ç‚¹å‡»
         private async void ImportConfig_Click(object sender, RoutedEventArgs e)
         {
             HomePageImportConfig.IsEnabled = false;
-            // ÊµÀı»¯SQLiteHelper
+            // å®ä¾‹åŒ–SQLiteHelper
             SQLiteHelper dbHelper = new SQLiteHelper();
-            // »ñÈ¡µ¼ÈëµÄÊı¾İ
+            // è·å–å¯¼å…¥çš„æ•°æ®
             CMSModel cmsModel = await Method.ImportConfig();
             if (cmsModel != null)
             {
-                // ²åÈëĞÂÊı¾İ
+                // æ’å…¥æ–°æ•°æ®
                 dbHelper.InsertData(cmsModel);
-                // ÖØĞÂ¼ÓÔØÊı¾İ
+                // é‡æ–°åŠ è½½æ•°æ®
                 LoadData();
             }
             HomePageImportConfig.IsEnabled = true;
         }
         private async void EditThisConfig(CMSModel cmsModel)
         {
-            // ´´½¨Ò»¸öĞÂµÄdialog¶ÔÏó
+            // åˆ›å»ºä¸€ä¸ªæ–°çš„dialogå¯¹è±¡
             AddServer dialog = new AddServer(cmsModel);
-            // ¶Ô´Ëdialog¶ÔÏó½øĞĞÅäÖÃ
+            // å¯¹æ­¤dialogå¯¹è±¡è¿›è¡Œé…ç½®
             dialog.XamlRoot = this.XamlRoot;
             dialog.Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style;
             dialog.PrimaryButtonText = resourceLoader.GetString("DialogChange");
             dialog.CloseButtonText = resourceLoader.GetString("DialogClose");
-            // Ä¬ÈÏ°´Å¥ÎªPrimaryButton
+            // é»˜è®¤æŒ‰é’®ä¸ºPrimaryButton
             dialog.DefaultButton = ContentDialogButton.Primary;
 
-            // ÏÔÊ¾Dialog²¢µÈ´ıÆä¹Ø±Õ
+            // æ˜¾ç¤ºDialogå¹¶ç­‰å¾…å…¶å…³é—­
             ContentDialogResult result = await dialog.ShowAsync();
 
-            // Èç¹û°´ÏÂÁËPrimary
+            // å¦‚æœæŒ‰ä¸‹äº†Primary
             if (result == ContentDialogResult.Primary)
             {
-                // ÊµÀı»¯SQLiteHelper
+                // å®ä¾‹åŒ–SQLiteHelper
                 SQLiteHelper dbHelper = new SQLiteHelper();
-                // ¸üĞÂÊı¾İ
+                // æ›´æ–°æ•°æ®
                 dbHelper.UpdateData(cmsModel);
-                // ÖØĞÂ¼ÓÔØÊı¾İ
+                // é‡æ–°åŠ è½½æ•°æ®
                 LoadData();
             }
         }
         private void ConfirmDelete_Click(object sender, RoutedEventArgs e)
         {
-            // ¹Ø±Õ¶ş´ÎÈ·ÈÏFlyout
+            // å…³é—­äºŒæ¬¡ç¡®è®¤Flyout
             confirmationDelFlyout.Hide();
-            // »ñÈ¡NSModel¶ÔÏó
+            // è·å–NSModelå¯¹è±¡
             CMSModel selectedModel = (CMSModel)dataListView.SelectedItem;
-            // ÊµÀı»¯SQLiteHelper
+            // å®ä¾‹åŒ–SQLiteHelper
             SQLiteHelper dbHelper = new SQLiteHelper();
-            // É¾³ıÊı¾İ
+            // åˆ é™¤æ•°æ®
             dbHelper.DeleteData(selectedModel);
-            // ÖØĞÂ¼ÓÔØÊı¾İ
+            // é‡æ–°åŠ è½½æ•°æ®
             LoadData();
         }
         private void CancelDelete_Click(object sender, RoutedEventArgs e)
         {
-            // ¹Ø±Õ¶ş´ÎÈ·ÈÏFlyout
+            // å…³é—­äºŒæ¬¡ç¡®è®¤Flyout
             confirmationDelFlyout.Hide();
         }
         private async void ExportConfigFunction(CMSModel cmsModel)
@@ -253,18 +253,18 @@ namespace SeeMyServer.Pages
         { }
         private void OnListViewRightTapped(object sender, RightTappedRoutedEventArgs e)
         {
-            // »ñÈ¡ÓÒ¼üµã»÷µÄListViewItem
+            // è·å–å³é”®ç‚¹å‡»çš„ListViewItem
             FrameworkElement listViewItem = (sender as FrameworkElement);
 
-            // »ñÈ¡ÓÒ¼üµã»÷µÄÊı¾İ¶ÔÏó£¨NSModel£©
+            // è·å–å³é”®ç‚¹å‡»çš„æ•°æ®å¯¹è±¡ï¼ˆNSModelï¼‰
             CMSModel selectedItem = listViewItem?.DataContext as CMSModel;
 
             if (selectedItem != null)
             {
 
-                // ½«ÓÒ¼üµã»÷µÄÏîÉèÖÃÎªÑ¡ÖĞÏî
+                // å°†å³é”®ç‚¹å‡»çš„é¡¹è®¾ç½®ä¸ºé€‰ä¸­é¡¹
                 dataListView.SelectedItem = selectedItem;
-                // ´´½¨ContextMenu
+                // åˆ›å»ºContextMenu
                 MenuFlyout menuFlyout = new MenuFlyout();
 
                 MenuFlyoutItem editMenuItem = new MenuFlyoutItem
@@ -283,12 +283,12 @@ namespace SeeMyServer.Pages
                 };
                 deleteMenuItem.Click += (sender, e) =>
                 {
-                    // µ¯³ö¶ş´ÎÈ·ÈÏFlyout
+                    // å¼¹å‡ºäºŒæ¬¡ç¡®è®¤Flyout
                     confirmationDelFlyout.ShowAt(listViewItem);
                 };
                 menuFlyout.Items.Add(deleteMenuItem);
 
-                // Ìí¼Ó·Ö¸îÏß
+                // æ·»åŠ åˆ†å‰²çº¿
                 MenuFlyoutSeparator separator = new MenuFlyoutSeparator();
                 menuFlyout.Items.Add(separator);
 
@@ -304,23 +304,23 @@ namespace SeeMyServer.Pages
 
                 Thread.Sleep(10);
 
-                // ÔÚÖ¸¶¨Î»ÖÃÏÔÊ¾ContextMenu
+                // åœ¨æŒ‡å®šä½ç½®æ˜¾ç¤ºContextMenu
                 menuFlyout.ShowAt(listViewItem, e.GetPosition(listViewItem));
             }
         }
-        // ´¦Àí×ó¼üµ¥»÷ÊÂ¼şµÄ´úÂë
+        // å¤„ç†å·¦é”®å•å‡»äº‹ä»¶çš„ä»£ç 
         private void OnListViewTapped(object sender, TappedRoutedEventArgs e)
         {
             FrameworkElement listViewItem = (sender as FrameworkElement);
 
             if (listViewItem != null)
             {
-                // »ñÈ¡ÓÒ¼üµã»÷µÄÊı¾İ¶ÔÏó£¨WoLModel£©
+                // è·å–å³é”®ç‚¹å‡»çš„æ•°æ®å¯¹è±¡ï¼ˆWoLModelï¼‰
                 CMSModel selectedItem = listViewItem?.DataContext as CMSModel;
 
                 localSettings.Values["ServerID"] = selectedItem.Id.ToString();
 
-                // µ¼º½µ½Ò³Ãæ
+                // å¯¼èˆªåˆ°é¡µé¢
                 App.m_window.NavigateToPage(typeof(DetailPage));
             }
         }

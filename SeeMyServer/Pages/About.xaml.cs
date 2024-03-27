@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml.Controls;
+ï»¿using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel;
 
 namespace SeeMyServer.Pages
@@ -9,7 +9,7 @@ namespace SeeMyServer.Pages
         {
             this.InitializeComponent();
 
-            // ÔÚ¹¹Ôìº¯Êı»òÆäËûÊÊµ±Î»ÖÃÉèÖÃ°æ±¾ºÅ
+            // åœ¨æ„é€ å‡½æ•°æˆ–å…¶ä»–é€‚å½“ä½ç½®è®¾ç½®ç‰ˆæœ¬å·
             var package = Package.Current;
             var version = package.Id.Version;
 

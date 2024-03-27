@@ -25,22 +25,31 @@ namespace SeeMyServer.Methods
 {
     public class Method
     {
-        // SSH执行
         public static string SendSSHCommand(string sshCommand, string sshHost, string sshPort, string sshUser, string sshPasswd, string sshKey, string privateKeyIsOpen)
         {
-            sshHost = DomainToIp(sshHost, "IPv4").ToString();
             try
             {
-                bool usePrivateKey = string.Equals(privateKeyIsOpen, "True", StringComparison.OrdinalIgnoreCase);
-                SshClient sshClient = InitializeSshClient(sshHost, int.Parse(sshPort), sshUser, sshPasswd, sshKey, usePrivateKey);
-
-                if (sshClient != null)
+                IPAddress ipAddress = DomainToIp(sshHost, "IPv4");
+                if (ipAddress == null)
                 {
-                    return ExecuteSshCommand(sshClient, sshCommand);
+                    return "无法解析 SSH 主机地址。";
                 }
-                else
+
+                int port;
+                if (!int.TryParse(sshPort, out port))
                 {
-                    return "SSH 客户端初始化失败。";
+                    return "无效的 SSH 端口号。";
+                }
+
+                bool usePrivateKey = string.Equals(privateKeyIsOpen, "True", StringComparison.OrdinalIgnoreCase);
+                using (SshClient sshClient = InitializeSshClient(ipAddress, port, sshUser, sshPasswd, sshKey, usePrivateKey))
+                {
+                    if (sshClient == null)
+                    {
+                        return "SSH 客户端初始化失败。";
+                    }
+
+                    return ExecuteSshCommand(sshClient, sshCommand);
                 }
             }
             catch (Exception ex)
@@ -48,22 +57,21 @@ namespace SeeMyServer.Methods
                 return "SSH 操作失败：" + ex.Message;
             }
         }
-        // SSH初始化
-        private static SshClient InitializeSshClient(string sshHost, int sshPort, string sshUser, string sshPasswd, string sshKey, bool usePrivateKey)
+
+        private static SshClient InitializeSshClient(IPAddress sshHost, int sshPort, string sshUser, string sshPasswd, string sshKey, bool usePrivateKey)
         {
             try
             {
                 if (usePrivateKey)
                 {
                     PrivateKeyFile privateKeyFile = new PrivateKeyFile(sshKey);
-                    ConnectionInfo connectionInfo = new ConnectionInfo(sshHost, sshPort, sshUser, new PrivateKeyAuthenticationMethod(sshUser, new PrivateKeyFile[] { privateKeyFile }));
-                    // 设置编码为UTF-8
-                    connectionInfo.Encoding = Encoding.UTF8; 
+                    ConnectionInfo connectionInfo = new ConnectionInfo(sshHost.ToString(), sshPort, sshUser, new PrivateKeyAuthenticationMethod(sshUser, new PrivateKeyFile[] { privateKeyFile }));
+                    connectionInfo.Encoding = Encoding.UTF8;
                     return new SshClient(connectionInfo);
                 }
                 else
                 {
-                    return new SshClient(sshHost, sshPort, sshUser, sshPasswd);
+                    return new SshClient(sshHost.ToString(), sshPort, sshUser, sshPasswd);
                 }
             }
             catch
@@ -71,17 +79,15 @@ namespace SeeMyServer.Methods
                 return null;
             }
         }
-        // SSH返回
+
         private static string ExecuteSshCommand(SshClient sshClient, string sshCommand)
         {
             try
             {
                 sshClient.Connect();
-
                 if (sshClient.IsConnected)
                 {
                     SshCommand SSHCommand = sshClient.RunCommand(sshCommand);
-
                     if (!string.IsNullOrEmpty(SSHCommand.Error))
                     {
                         return "错误：" + SSHCommand.Error;
@@ -96,9 +102,9 @@ namespace SeeMyServer.Methods
             finally
             {
                 sshClient.Disconnect();
-                sshClient.Dispose();
             }
         }
+
         private static async Task<string> SendSSHCommandAsync(string command, CMSModel cmsModel)
         {
             return await Task.Run(() =>
@@ -474,11 +480,16 @@ namespace SeeMyServer.Methods
 
         public static async Task<string[]> GetWindowsUsageAsync(CMSModel cmsModel)
         {
-            string UsageCMD = "powershell -Command \"(Get-Counter '\\Processor Information(*)\\% Processor Utility').CounterSamples.CookedValue;"
+            //string UsageCMD = "powershell -Command \"(Get-Counter '\\Processor Information(*)\\% Processor Utility').CounterSamples.CookedValue;"
+            //    + " \'-\';"
+            //    + " ((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100);"
+            //    + " \'-\';"
+            //    + "(Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory;\"";
+            string UsageCMD = "(Get-Counter '\\Processor Information(*)\\% Processor Utility').CounterSamples.CookedValue;"
                 + " \'-\';"
                 + " ((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100);"
                 + " \'-\';"
-                + "(Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory;\"";
+                + "(Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory;";
             string UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
 
             // 以分号分割字符串
@@ -524,15 +535,6 @@ namespace SeeMyServer.Methods
 
             return CMD;
         }
-        public static async Task<List<MountInfo>> GetWindowsMountInfo(CMSModel cmsModel)
-        {
-            string CMD = "powershell -Command \"Get-Volume\"";
-            CMD = await SendSSHCommandAsync(CMD, cmsModel);
-
-            List<MountInfo> mountInfos = WindowsMountInfoParse(CMD);
-
-            return mountInfos;
-        }
         // 保留这个方法给一级界面用（pwsh太慢了）
         public static async Task<string> GetWindowsCPUUsageAsync(CMSModel cmsModel)
         {
@@ -577,14 +579,21 @@ namespace SeeMyServer.Methods
             return netReceivedRes + "/s ↓";
         }
 
+        public static async Task<List<MountInfo>> GetWindowsMountInfo(CMSModel cmsModel)
+        {
+            string CMD = "powershell -Command \"Get-Volume\"";
+            CMD = await SendSSHCommandAsync(CMD, cmsModel);
+
+            List<MountInfo> mountInfos = WindowsMountInfoParse(CMD);
+
+            return mountInfos;
+        }
         public static async Task<List<NetworkInterfaceInfo>> GetWindowsNetworkInterfaceInfo(CMSModel cmsModel)
         {
             string CMD = "powershell -Command \"Get-NetAdapter\"";
             CMD = await SendSSHCommandAsync(CMD, cmsModel);
 
             List<NetworkInterfaceInfo> networkInterfaceInfos = WindowsNetworkInterfaceInfoParse(CMD);
-
-            throw new Exception($"{CMD}");
 
             return networkInterfaceInfos;
         }
@@ -641,6 +650,7 @@ namespace SeeMyServer.Methods
 
             foreach (string line in lines)
             {
+                throw new Exception($"{line}");
                 Match match = pattern.Match(line);
                 if (match.Success)
                 {

@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml.Controls;
+ï»¿using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using Windows.ApplicationModel.Resources;
@@ -9,7 +9,7 @@ namespace SeeMyServer.Pages
 {
     public sealed partial class SettingsPage : Page
     {
-        // ÆôÓÃ±¾µØÉèÖÃÊı¾İ
+        // å¯ç”¨æœ¬åœ°è®¾ç½®æ•°æ®
         ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
 
         ResourceLoader resourceLoader = new ResourceLoader();
@@ -21,7 +21,7 @@ namespace SeeMyServer.Pages
             materialStatusSet();
             languageStatusSet();
         }
-        // ²ÄÁÏComboBoxÁĞ±íList
+        // ææ–™ComboBoxåˆ—è¡¨List
         public List<string> material { get; } = new List<string>()
         {
             "Mica",
@@ -31,7 +31,7 @@ namespace SeeMyServer.Pages
 
         public List<string> language { get; } = new List<string>()
         {
-            "¼òÌåÖĞÎÄ",
+            "ç®€ä½“ä¸­æ–‡",
             "English"
         };
 
@@ -39,16 +39,16 @@ namespace SeeMyServer.Pages
         {
             if (!languageStatusSetList())
             {
-                // Î´ÉèÖÃ
+                // æœªè®¾ç½®
                 localSettings.Values["languageChange"] = Windows.Globalization.Language.CurrentInputMethodLanguageTag;
-                // ·Ç·¨ÊäÈë£¬ÈÓ³ö¾¯±¨
+                // éæ³•è¾“å…¥ï¼Œæ‰”å‡ºè­¦æŠ¥
                 //throw new Exception(Windows.Globalization.Language.CurrentInputMethodLanguageTag);
                 languageStatusSetList();
             }
         }
         private bool languageStatusSetList()
         {
-            // ¶ÁÈ¡±¾µØÉèÖÃÊı¾İ£¬µ÷ÕûComboBox×´Ì¬
+            // è¯»å–æœ¬åœ°è®¾ç½®æ•°æ®ï¼Œè°ƒæ•´ComboBoxçŠ¶æ€
             if (localSettings.Values["languageChange"] as string == "zh-Hans-CN")
             {
                 languageChange.SelectedItem = language[0];
@@ -67,7 +67,7 @@ namespace SeeMyServer.Pages
 
         private void materialStatusSet()
         {
-            // ¶ÁÈ¡±¾µØÉèÖÃÊı¾İ£¬µ÷ÕûComboBox×´Ì¬
+            // è¯»å–æœ¬åœ°è®¾ç½®æ•°æ®ï¼Œè°ƒæ•´ComboBoxçŠ¶æ€
             if (localSettings.Values["materialStatus"] as string == "Mica")
             {
                 backgroundMaterial.SelectedItem = material[0];
@@ -82,15 +82,15 @@ namespace SeeMyServer.Pages
             }
             else
             {
-                // ·Ç·¨ÊäÈë£¬ÉèÖÃÄ¬ÈÏ²ÄÁÏÎªMica Alt
+                // éæ³•è¾“å…¥ï¼Œè®¾ç½®é»˜è®¤ææ–™ä¸ºMica Alt
                 localSettings.Values["materialStatus"] = "Mica Alt";
                 backgroundMaterial.SelectedItem = material[1];
-                // ·Ç·¨ÊäÈë£¬ÈÓ³ö¾¯±¨
+                // éæ³•è¾“å…¥ï¼Œæ‰”å‡ºè­¦æŠ¥
                 //throw new Exception($"Wrong material type: {localSettings.Values["materialStatus"]}");
             }
         }
 
-        // ±³¾°²ÄÁÏÉèÖÃComboBox¸Ä¶¯ÊÂ¼ş
+        // èƒŒæ™¯ææ–™è®¾ç½®ComboBoxæ”¹åŠ¨äº‹ä»¶
         private void backgroundMaterial_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             string materialStatus = e.AddedItems[0].ToString();
@@ -139,7 +139,7 @@ namespace SeeMyServer.Pages
             string languageStatus = e.AddedItems[0].ToString();
             switch (languageStatus)
             {
-                case "¼òÌåÖĞÎÄ":
+                case "ç®€ä½“ä¸­æ–‡":
                     if (localSettings.Values["languageChange"] as string != "zh-Hans-CN")
                     {
                         localSettings.Values["languageChange"] = "zh-Hans-CN";
