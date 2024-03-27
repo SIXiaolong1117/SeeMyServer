@@ -202,13 +202,16 @@
     <value>Change</value>
   </data>
   <data name="DialogClose" xml:space="preserve">
-    <value>Close</value>
+    <value>Cancel</value>
   </data>
   <data name="DisplayName.Header" xml:space="preserve">
     <value>Name</value>
   </data>
   <data name="DisplayName.PlaceholderText" xml:space="preserve">
     <value>Display Name</value>
+  </data>
+  <data name="EditConfig.Label" xml:space="preserve">
+    <value>Edit</value>
   </data>
   <data name="editMenuItemText" xml:space="preserve">
     <value>Edit</value>
@@ -257,6 +260,9 @@
   </data>
   <data name="NetworkInfosTXBytes.Text" xml:space="preserve">
     <value>TX</value>
+  </data>
+  <data name="OpenSSHTerminal.Label" xml:space="preserve">
+    <value>Open Terminal</value>
   </data>
   <data name="OSType.Header" xml:space="preserve">
     <value>OS Type</value>

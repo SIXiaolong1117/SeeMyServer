@@ -302,7 +302,7 @@ namespace SeeMyServer.Methods
             }
             else
             {
-                return new string[] { "0%", "0%", "Err,Err", "Err" };
+                return new string[] { "0%", "0%", "0,0", "Err", "0.0" };
             }
 
         }
@@ -456,7 +456,9 @@ namespace SeeMyServer.Methods
         {
             string cpuUsageCMD = "powershell -Command \"(Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue\"";
             string cpuUsageRes = await SendSSHCommandAsync(cpuUsageCMD, cmsModel);
-            int cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]);
+            int cpuUsageResValue = 0;
+            try { cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]); }
+            catch (Exception) { }
             return Math.Min(Math.Max(cpuUsageResValue, 0), 100).ToString() + "%";
         }
 
@@ -464,7 +466,9 @@ namespace SeeMyServer.Methods
         {
             string memUsageCMD = "powershell -Command \"((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100)\"";
             string memUsageRes = await SendSSHCommandAsync(memUsageCMD, cmsModel);
-            int memUsageResValue = int.Parse(memUsageRes.Split('.')[0]);
+            int memUsageResValue = 0;
+            try { memUsageResValue = int.Parse(memUsageRes.Split('.')[0]); }
+            catch (Exception) { }
             return Math.Min(Math.Max(memUsageResValue, 0), 100).ToString() + "%";
         }
         public static async Task<string> GetWindowsNetSentAsync(CMSModel cmsModel)
@@ -472,7 +476,9 @@ namespace SeeMyServer.Methods
             string netSentCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Sent/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
             string netSentRes = await SendSSHCommandAsync(netSentCMD, cmsModel);
             // 获取命令输出的值并转换为整数
-            int netSentValue = int.Parse(netSentRes.Split('.')[0]);
+            int netSentValue = 0;
+            try { netSentValue = int.Parse(netSentRes.Split('.')[0]); }
+            catch (Exception) { }
             netSentRes = NetUnitConversion(netSentValue);
             return netSentRes + "/s ↑";
         }
@@ -482,7 +488,9 @@ namespace SeeMyServer.Methods
             string netReceivedCMD = "powershell -Command \"(Get-Counter '\\Network Interface(*)\\Bytes Received/sec').CounterSamples.CookedValue | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum\"";
             string netReceivedRes = await SendSSHCommandAsync(netReceivedCMD, cmsModel);
             // 获取命令输出的值并转换为整数
-            int netReceivedValue = int.Parse(netReceivedRes.Split('.')[0]);
+            int netReceivedValue = 0;
+            try { netReceivedValue = int.Parse(netReceivedRes.Split('.')[0]); }
+            catch (Exception) { }
             netReceivedRes = NetUnitConversion(netReceivedValue);
             return netReceivedRes + "/s ↓";
         }

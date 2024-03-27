@@ -10,12 +10,13 @@ using SeeMyServer.Models;
 using SeeMyServer.Pages.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
+using Windows.Devices.Geolocation;
 using Windows.Storage;
-using static PInvoke.User32;
-using static System.Net.Mime.MediaTypeNames;
+using Windows.System;
 
 namespace SeeMyServer.Pages
 {
@@ -24,15 +25,11 @@ namespace SeeMyServer.Pages
         // 启用本地设置数据
         ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
         ResourceLoader resourceLoader = new ResourceLoader();
-        private DispatcherQueue _dispatcherQueue;
         private DispatcherTimer timer;
 
         public DetailPage()
         {
             this.InitializeComponent();
-
-            // 获取UI线程的DispatcherQueue
-            _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
             LoadData();
         }
@@ -69,7 +66,7 @@ namespace SeeMyServer.Pages
 
                 ProgressBar progressBar = new ProgressBar();
 
-                progressBar.Margin = new Thickness(0, 5, 0, 5);
+                progressBar.Margin = new Thickness(0, 4, 0, 4);
                 progressBar.Value = double.Parse(CPUCoreUsageTokens[i]);
 
                 // 创建 TextBlock 来显示与 ProgressBar 同步的值
@@ -80,7 +77,7 @@ namespace SeeMyServer.Pages
                 {
                     textBlock.Text = $"{progressBar.Value.ToString().Split(".")[0]}%";
                 };
-                textBlock.Margin = new Thickness(5, 0, 0, 0);
+                textBlock.Margin = new Thickness(8, 4, 0, 6);
                 textBlock.Width = 30;
                 textBlock.HorizontalAlignment = HorizontalAlignment.Right;
 
@@ -239,6 +236,62 @@ namespace SeeMyServer.Pages
             tasks.Add(updateTask);
 
             await Task.WhenAll(tasks);
+        }
+        private void OpenSSHTerminal_Click(object sender, RoutedEventArgs e)
+        {
+            SSHTerminal(dataList.SSHKey, dataList.SSHUser, dataList.HostIP, dataList.HostPort);
+        }
+        private void EditConfig_Click(object sender, RoutedEventArgs e)
+        {
+            EditThisConfig(dataList);
+        }
+        public static void SSHTerminal(string KeyPath, string User, string Domain, string Port)
+        {
+            // 创建一个新的进程
+            Process process = new Process();
+            // 指定运行PowerShell
+            process.StartInfo.FileName = "PowerShell.exe";
+            // 命令
+            process.StartInfo.Arguments = $"ssh -i {KeyPath} {User}@{Domain} -p {Port}";
+            // 是否使用操作系统shell启动
+            process.StartInfo.UseShellExecute = false;
+            // 是否在新窗口中启动该进程的值 (不显示程序窗口)
+            process.StartInfo.CreateNoWindow = false;
+            // 进程开始
+            process.Start();
+            // 等待执行结束
+            //process.WaitForExit();
+            // 进程关闭
+            process.Close();
+        }
+        private async void EditThisConfig(CMSModel cmsModel)
+        {
+            // 创建一个新的dialog对象
+            AddServer dialog = new AddServer(cmsModel);
+            // 对此dialog对象进行配置
+            dialog.XamlRoot = this.XamlRoot;
+            dialog.Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style;
+            dialog.PrimaryButtonText = resourceLoader.GetString("DialogChange");
+            dialog.CloseButtonText = resourceLoader.GetString("DialogClose");
+            // 默认按钮为PrimaryButton
+            dialog.DefaultButton = ContentDialogButton.Primary;
+
+            // 显示Dialog并等待其关闭
+            ContentDialogResult result = await dialog.ShowAsync();
+
+            // 如果按下了Primary
+            if (result == ContentDialogResult.Primary)
+            {
+                // 实例化SQLiteHelper
+                SQLiteHelper dbHelper = new SQLiteHelper();
+                // 更新数据
+                dbHelper.UpdateData(cmsModel);
+                // 重新加载数据
+                LoadData();
+                // 去掉绑定
+                MountInfosListView.ItemsSource = null;
+                NetworkInfosListView.ItemsSource = null;
+            }
         }
     }
 }

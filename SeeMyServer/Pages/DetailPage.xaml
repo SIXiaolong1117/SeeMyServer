@@ -38,6 +38,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -51,7 +52,7 @@
             FontSize="24"
             Text="{Binding Name}" />
 
-        <ScrollViewer Grid.Row="1" Padding="24">
+        <ScrollViewer Grid.Row="1" Padding="24,24,24,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -201,12 +202,12 @@
                         </Grid.ColumnDefinitions>
                         <ProgressBar
                             Grid.Column="0"
-                            Margin="0,5,0,5"
+                            Margin="0,4,0,4"
                             Value="{Binding MEMUsage}" />
                         <TextBlock
                             Grid.Column="1"
                             Width="30"
-                            Margin="5,0,0,0"
+                            Margin="8,4,0,6"
                             HorizontalAlignment="Right"
                             Text="{Binding MEMUsage}" />
                     </Grid>
@@ -477,5 +478,33 @@
             </Grid>-->
             </Grid>
         </ScrollViewer>
+        <CommandBar
+            Grid.Row="2"
+            Grid.Column="0"
+            Margin="0,0,0,4"
+            Background="Transparent"
+            DefaultLabelPosition="Right"
+            IsOpen="False">
+            <AppBarButton
+                x:Name="OpenSSHTerminal"
+                x:Uid="OpenSSHTerminal"
+                Grid.Row="0"
+                Grid.Column="0"
+                Click="OpenSSHTerminal_Click">
+                <AppBarButton.Icon>
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF117;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton
+                x:Name="EditConfig"
+                x:Uid="EditConfig"
+                Grid.Row="0"
+                Grid.Column="0"
+                Click="EditConfig_Click">
+                <AppBarButton.Icon>
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE70F;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
+        </CommandBar>
     </Grid>
 </Page>

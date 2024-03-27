@@ -31,8 +31,8 @@ namespace SeeMyServer.Pages
 
         public List<string> language { get; } = new List<string>()
         {
-            "简体中文（中国）",
-            "English (US)"
+            "简体中文",
+            "English"
         };
 
         private void languageStatusSet()
@@ -139,7 +139,7 @@ namespace SeeMyServer.Pages
             string languageStatus = e.AddedItems[0].ToString();
             switch (languageStatus)
             {
-                case "简体中文（中国）":
+                case "简体中文":
                     if (localSettings.Values["languageChange"] as string != "zh-Hans-CN")
                     {
                         localSettings.Values["languageChange"] = "zh-Hans-CN";
@@ -152,7 +152,7 @@ namespace SeeMyServer.Pages
                         localSettings.Values["languageChange"] = "zh-Hans-CN";
                     }
                     break;
-                case "English (US)":
+                case "English":
                     if (localSettings.Values["languageChange"] as string != "en-US")
                     {
                         localSettings.Values["languageChange"] = "en-US";
