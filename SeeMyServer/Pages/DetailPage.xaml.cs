@@ -177,6 +177,8 @@ namespace SeeMyServer.Pages
             // OpenWRT也可以用部分Linux命令
             string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
             string UpTime = await Method.GetLinuxUpTime(cmsModel);
+            List<MountInfo> MountInfos = await Method.GetLinuxMountInfo(cmsModel);
+            List<NetworkInterfaceInfo> NetworkInterfaceInfos = await Method.GetLinuxNetworkInterfaceInfo(cmsModel);
 
             // 处理获取到的数据
             cmsModel.CPUUsage = usages[0];
@@ -185,6 +187,22 @@ namespace SeeMyServer.Pages
             cmsModel.NETSent = netUsages[1];
             cmsModel.HostName = HostName;
             cmsModel.UpTime = UpTime;
+            cmsModel.MountInfos = MountInfos;
+            cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
+
+            // OpenWRT的Top无法查看单独核心占用
+            string[] tokens = new string[] { usages[0].Split("%")[0] };
+            CreateProgressBars(progressBarsGrid, tokens);
+
+            // 只有当 ItemsSource 未绑定时才进行绑定
+            if (MountInfosListView.ItemsSource == null)
+            {
+                MountInfosListView.ItemsSource = cmsModel.MountInfos;
+            }
+            if (NetworkInfosListView.ItemsSource == null)
+            {
+                NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
+            }
         }
 
         // Windows 信息更新

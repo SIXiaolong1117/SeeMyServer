@@ -366,7 +366,7 @@ namespace SeeMyServer.Methods
         // 获取Linux挂载情况
         public static async Task<List<MountInfo>> GetLinuxMountInfo(CMSModel cmsModel)
         {
-            string CMD = "df -h";
+            string CMD = "df -hP";
             CMD = await SendSSHCommandAsync(CMD, cmsModel);
 
             List<MountInfo> mountInfos = MountInfoParse(CMD);
