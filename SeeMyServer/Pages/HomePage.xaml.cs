@@ -90,29 +90,35 @@ namespace SeeMyServer.Pages
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
             // 定义异步任务
-            string[] usages = await Method.GetLinuxUsageAsync(cmsModel);
-            string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
+            Task<string[]> usages = Method.GetLinuxUsageAsync(cmsModel);
+            Task<string[]> netUsages = Method.GetLinuxNetAsync(cmsModel);
+
+            // 同时执行异步任务
+            await Task.WhenAll(usages, netUsages);
 
             // 处理获取到的数据
-            cmsModel.CPUUsage = usages[0];
-            cmsModel.MEMUsage = usages[1];
-            cmsModel.NETReceived = netUsages[0];
-            cmsModel.NETSent = netUsages[1];
+            cmsModel.CPUUsage = usages.Result[0];
+            cmsModel.MEMUsage = usages.Result[1];
+            cmsModel.NETReceived = netUsages.Result[0];
+            cmsModel.NETSent = netUsages.Result[1];
         }
 
         // OpenWRT 信息更新
         private async Task UpdateOpenWRTCMSModelAsync(CMSModel cmsModel)
         {
             // 定义异步任务
-            string[] usages = await Method.GetOpenWRTCPUUsageAsync(cmsModel);
+            Task<string[]> usages = Method.GetOpenWRTCPUUsageAsync(cmsModel);
             // OpenWRT也可以用ifconfig查询网速
-            string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
+            Task<string[]> netUsages = Method.GetLinuxNetAsync(cmsModel);
+
+            // 同时执行异步任务
+            await Task.WhenAll(usages, netUsages);
 
             // 处理获取到的数据
-            cmsModel.CPUUsage = usages[0];
-            cmsModel.MEMUsage = usages[1];
-            cmsModel.NETReceived = netUsages[0];
-            cmsModel.NETSent = netUsages[1];
+            cmsModel.CPUUsage = usages.Result[0];
+            cmsModel.MEMUsage = usages.Result[1];
+            cmsModel.NETReceived = netUsages.Result[0];
+            cmsModel.NETSent = netUsages.Result[1];
         }
 
         // Windows 信息更新

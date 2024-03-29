@@ -15,7 +15,7 @@ namespace SeeMyServer
             m_window = new MainWindow();
 
             IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(m_window);
-            SetWindowSize(hwnd, 400, 600);
+            SetWindowSize(hwnd, 500, 700);
 
             m_window.Activate();
         }

@@ -67,7 +67,7 @@ namespace SeeMyServer.Methods
                     ConnectionInfo connectionInfo = new ConnectionInfo(sshHost.ToString(), sshPort, sshUser, new PrivateKeyAuthenticationMethod(sshUser, new PrivateKeyFile[] { privateKeyFile }));
                     connectionInfo.Encoding = Encoding.UTF8;
                     // 设置连接超时时间
-                    connectionInfo.Timeout = TimeSpan.FromSeconds(10);
+                    connectionInfo.Timeout = TimeSpan.FromSeconds(5);
                     // 设置连接重试次数
                     connectionInfo.RetryAttempts = 3;
                     return new SshClient(connectionInfo);
@@ -698,7 +698,7 @@ namespace SeeMyServer.Methods
                 var columns = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
                 // 共6列
-                if (columns.Length == 6)
+                if (columns.Length == 6 && columns[0] != "tmpfs" && columns[0] != "devtmpfs")
                 {
                     var mountInfo = new MountInfo
                     {

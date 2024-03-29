@@ -175,22 +175,25 @@ namespace SeeMyServer.Pages
         // OpenWRT 信息更新
         private async Task UpdateOpenWRTCMSModelAsync(CMSModel cmsModel)
         {
-            string[] usages = await Method.GetOpenWRTCPUUsageAsync(cmsModel);
-            string HostName = await Method.GetOpenWRTHostName(cmsModel);
+            Task<string[]> usages = Method.GetOpenWRTCPUUsageAsync(cmsModel);
+            Task<string> HostName = Method.GetOpenWRTHostName(cmsModel);
             // OpenWRT也可以用部分Linux命令
-            string[] netUsages = await Method.GetLinuxNetAsync(cmsModel);
-            string UpTime = await Method.GetLinuxUpTime(cmsModel);
+            Task<string[]> netUsages = Method.GetLinuxNetAsync(cmsModel);
+            Task<string> UpTime = Method.GetLinuxUpTime(cmsModel);
+
+            // 同时执行异步任务
+            await Task.WhenAll(usages, HostName, netUsages, UpTime);
 
             // 处理获取到的数据
-            cmsModel.CPUUsage = usages[0];
-            cmsModel.MEMUsage = usages[1];
-            cmsModel.NETReceived = netUsages[0];
-            cmsModel.NETSent = netUsages[1];
-            cmsModel.HostName = HostName;
-            cmsModel.UpTime = UpTime;
+            cmsModel.CPUUsage = usages.Result[0];
+            cmsModel.MEMUsage = usages.Result[1];
+            cmsModel.NETReceived = netUsages.Result[0];
+            cmsModel.NETSent = netUsages.Result[1];
+            cmsModel.HostName = HostName.Result;
+            cmsModel.UpTime = UpTime.Result;
 
             // OpenWRT的Top无法查看单独核心占用
-            string[] tokens = new string[] { usages[0].Split("%")[0] };
+            string[] tokens = new string[] { usages.Result[0].Split("%")[0] };
             CreateProgressBars(progressBarsGrid, tokens);
 
             // 只有当 ItemsSource 未绑定时才进行绑定
@@ -211,27 +214,27 @@ namespace SeeMyServer.Pages
         // Windows 信息更新
         private async Task UpdateWindowsCMSModelAsync(CMSModel cmsModel)
         {
-            string[] usages = await Method.GetWindowsUsageAsync(cmsModel);
-            string upTime = await Method.GetWindowsUpTime(cmsModel);
+            Task<string[]> usages = Method.GetWindowsUsageAsync(cmsModel);
+            Task<string> upTime = Method.GetWindowsUpTime(cmsModel);
             Task<string> memTask = Method.GetWindowsMemoryUsageAsync(cmsModel);
             Task<string> netSentTask = Method.GetWindowsNetSentAsync(cmsModel);
             Task<string> netReceivedTask = Method.GetWindowsNetReceivedAsync(cmsModel);
             // Windows上可以使用相同的命令
-            string HostName = await Method.GetLinuxHostName(cmsModel);
+            Task<string> HostName = Method.GetLinuxHostName(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(memTask, netSentTask, netReceivedTask);
+            await Task.WhenAll(usages, upTime, memTask, netSentTask, netReceivedTask, HostName);
 
             // 处理获取到的数据
-            cmsModel.CPUUsage = usages[0];
+            cmsModel.CPUUsage = usages.Result[0];
             cmsModel.MEMUsage = memTask.Result;
             cmsModel.NETSent = netSentTask.Result;
             cmsModel.NETReceived = netReceivedTask.Result;
-            cmsModel.HostName = HostName.TrimEnd();
-            cmsModel.UpTime = upTime;
-            cmsModel.TotalMEM = $" of {usages[4]} GB";
+            cmsModel.HostName = HostName.Result.TrimEnd();
+            cmsModel.UpTime = upTime.Result;
+            cmsModel.TotalMEM = $" of {usages.Result[4]} GB";
 
-            string[] tokens = usages[2].Split(", ");
+            string[] tokens = usages.Result[2].Split(", ");
             CreateProgressBars(progressBarsGrid, tokens);
 
             // 只有当 ItemsSource 未绑定时才进行

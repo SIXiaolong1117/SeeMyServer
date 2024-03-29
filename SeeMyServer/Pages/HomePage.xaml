@@ -122,9 +122,10 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" MinWidth="100" />
-                                    <ColumnDefinition Width="Auto" MinWidth="100" />
-                                    <ColumnDefinition Width="*" MinWidth="100" />
+                                    <ColumnDefinition Width="*" MinWidth="60" />
+                                    <ColumnDefinition Width="*" MinWidth="60" />
+                                    <ColumnDefinition Width="*" MinWidth="60" />
+                                    <ColumnDefinition Width="*" MinWidth="60" />
                                 </Grid.ColumnDefinitions>
                                 <!--  CPU Usage  -->
                                 <Grid
