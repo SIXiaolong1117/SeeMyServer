@@ -12,6 +12,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -110,9 +111,28 @@ namespace SeeMyServer.Methods
 
         private static async Task<string> SendSSHCommandAsync(string command, CMSModel cmsModel)
         {
+            string passwd = "";
+            if (cmsModel.SSHKeyIsOpen != "True")
+            {
+                // 检查是否已经存在密钥和初始化向量，如果不存在则生成新的
+                string key = Method.LoadKeyFromLocalSettings() ?? Method.GenerateRandomKey();
+                string iv = Method.LoadIVFromLocalSettings() ?? Method.GenerateRandomIV();
+
+                // 将密钥和初始化向量保存到 localSettings 中
+                Method.SaveKeyToLocalSettings(key);
+                Method.SaveIVToLocalSettings(iv);
+
+                // 使用的对称加密算法
+                SymmetricAlgorithm symmetricAlgorithm = new AesManaged();
+
+                // 设置加密密钥和初始化向量
+                symmetricAlgorithm.Key = Convert.FromBase64String(key);
+                symmetricAlgorithm.IV = Convert.FromBase64String(iv);
+                passwd = Method.DecryptString(cmsModel.SSHPasswd, symmetricAlgorithm);
+            }
             return await Task.Run(() =>
             {
-                return SendSSHCommand(command, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, "sshPasswd", cmsModel.SSHKey, "True");
+                return SendSSHCommand(command, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, passwd, cmsModel.SSHKey, cmsModel.SSHKeyIsOpen);
             });
         }
 
@@ -806,6 +826,122 @@ namespace SeeMyServer.Methods
                 return match.Groups[1].Value;
             }
             return null;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public static string EncryptString(string plainText, SymmetricAlgorithm symmetricAlgorithm)
+        {
+            // 创建加密器
+            ICryptoTransform encryptor = symmetricAlgorithm.CreateEncryptor(symmetricAlgorithm.Key, symmetricAlgorithm.IV);
+
+            // 创建内存流，用于写入加密后的数据
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                // 创建加密流
+                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
+                {
+                    // 将字符串转换为字节数组并写入加密流
+                    byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
+                    cryptoStream.Write(plainBytes, 0, plainBytes.Length);
+                    cryptoStream.FlushFinalBlock();
+                }
+                // 返回加密后的数据，以Base64编码的字符串形式
+                return Convert.ToBase64String(memoryStream.ToArray());
+            }
+        }
+
+        public static string DecryptString(string cipherText, SymmetricAlgorithm symmetricAlgorithm)
+        {
+            // 创建解密器
+            ICryptoTransform decryptor = symmetricAlgorithm.CreateDecryptor(symmetricAlgorithm.Key, symmetricAlgorithm.IV);
+
+            // 创建内存流，用于写入解密后的数据
+            using (MemoryStream memoryStream = new MemoryStream(Convert.FromBase64String(cipherText)))
+            {
+                // 创建解密流
+                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
+                {
+                    // 从解密流中读取解密后的字节数组
+                    using (StreamReader streamReader = new StreamReader(cryptoStream))
+                    {
+                        return streamReader.ReadToEnd();
+                    }
+                }
+            }
+        }
+
+        public static string LoadKeyFromLocalSettings()
+        {
+            // 从 localSettings 中加载密钥
+            var localSettings = ApplicationData.Current.LocalSettings;
+            return localSettings.Values["Key"] as string;
+        }
+
+        public static string LoadIVFromLocalSettings()
+        {
+            // 从 localSettings 中加载初始化向量
+            var localSettings = ApplicationData.Current.LocalSettings;
+            return localSettings.Values["IV"] as string;
+        }
+
+        public static void SaveKeyToLocalSettings(string key)
+        {
+            // 将密钥保存到 localSettings 中
+            var localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values["Key"] = key;
+        }
+
+        public static void SaveIVToLocalSettings(string iv)
+        {
+            // 将初始化向量保存到 localSettings 中
+            var localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values["IV"] = iv;
+        }
+
+        public static string GenerateRandomKey()
+        {
+            // 生成一个随机的密钥
+            byte[] key = new byte[32];
+            using (var rng = new RNGCryptoServiceProvider())
+            {
+                rng.GetBytes(key);
+            }
+            return Convert.ToBase64String(key);
+        }
+
+        public static string GenerateRandomIV()
+        {
+            // 生成一个随机的初始化向量
+            byte[] iv = new byte[16];
+            using (var rng = new RNGCryptoServiceProvider())
+            {
+                rng.GetBytes(iv);
+            }
+            return Convert.ToBase64String(iv);
         }
     }
 }

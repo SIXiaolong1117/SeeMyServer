@@ -25,7 +25,8 @@
         <ScrollViewer
             Grid.Row="1"
             Grid.Column="0"
-            MinWidth="280">
+            MinWidth="280"
+            MaxHeight="360">
             <Grid Width="260">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -41,7 +42,7 @@
 
 
 
-                <Grid Grid.Row="1" Grid.Column="0">
+                <Grid Grid.Row="0" Grid.Column="0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -76,76 +77,7 @@
                         Margin="0,4,0,0" />
                 </Grid>
 
-                <Grid
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    Margin="0,24,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock
-                        x:Uid="AddServerAuthenticationHeader"
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        FontSize="16" />
-
-                    <!--  SSHUser  -->
-                    <TextBox
-                        x:Name="SSHUserTextBox"
-                        x:Uid="SSHUser"
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        Margin="0,4,0,0" />
-
-                    <!--  SSHPasswd  -->
-                    <!--
-                <PasswordBox
-                    x:Uid="SSHPasswd"
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    Margin="0,4,0,0" />-->
-
-                    <Grid Grid.Row="2" Grid.Column="0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <!--  SSHKey  -->
-                        <TextBox
-                            x:Name="SSHKeyTextBox"
-                            x:Uid="SSHKey"
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            Margin="0,4,0,0" />
-                        <Button
-                            x:Uid="SSHKeyPathButton"
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            Margin="4,0,0,0"
-                            VerticalAlignment="Bottom"
-                            Click="SelectSSHKeyPath_Click" />
-                    </Grid>
-                </Grid>
-
-                <TextBlock
-                    x:Uid="SSHKeyTips"
-                    Grid.Row="4"
-                    Grid.Column="0"
-                    Margin="0,4,0,0"
-                    FontSize="12"
-                    Foreground="Gray"
-                    TextWrapping="Wrap" />
-
-                <Grid Grid.Row="5" Grid.Column="0">
+                <Grid Grid.Row="1" Grid.Column="0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -171,6 +103,124 @@
                         Foreground="Gray"
                         TextWrapping="Wrap" />
                 </Grid>
+
+                <Grid
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="0,24,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        x:Uid="AddServerAuthenticationHeader"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        FontSize="16" />
+
+                    <!--  SSHUser  -->
+                    <TextBox
+                        x:Name="SSHUserTextBox"
+                        x:Uid="SSHUser"
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Margin="0,4,0,0" />
+
+                    <!--  SSHKeyOrPasswd  -->
+                    <Grid
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Margin="0,4,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock
+                            x:Uid="SSHKeyOrPasswd"
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            VerticalAlignment="Center" />
+
+                        <ToggleSwitch
+                            x:Name="SSHKeyOrPasswdToggleSwitch"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Margin="0,0,-113,0"
+                            HorizontalAlignment="Right"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="privateKeyIsOpen_Toggled" />
+
+                    </Grid>
+
+                    <!--  SSHPasswd  -->
+                    <Grid
+                        x:Name="AddSSHPasswd"
+                        Grid.Row="3"
+                        Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <PasswordBox
+                            x:Name="SSHPasswd"
+                            x:Uid="SSHPasswd"
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Margin="0,4,0,0" />
+                    </Grid>
+
+                    <!--  SSHKey  -->
+                    <Grid
+                        x:Name="AddSSHKey"
+                        Grid.Row="3"
+                        Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox
+                            x:Name="SSHKeyTextBox"
+                            x:Uid="SSHKey"
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Margin="0,4,0,0" />
+                        <Button
+                            x:Uid="SSHKeyPathButton"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Margin="4,0,0,0"
+                            VerticalAlignment="Bottom"
+                            Click="SelectSSHKeyPath_Click" />
+                    </Grid>
+                </Grid>
+
+                <TextBlock
+                    x:Uid="SSHKeyTips"
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    Margin="0,4,0,0"
+                    FontSize="12"
+                    Foreground="Gray"
+                    TextWrapping="Wrap" />
+
+
             </Grid>
         </ScrollViewer>
     </Grid>

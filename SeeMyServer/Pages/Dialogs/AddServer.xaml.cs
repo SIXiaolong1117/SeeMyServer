@@ -1,7 +1,12 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using SeeMyServer.Methods;
 using SeeMyServer.Models;
 using System;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using Windows.Storage;
 using Windows.Storage.Pickers;
 
 
@@ -9,7 +14,10 @@ namespace SeeMyServer.Pages.Dialogs
 {
     public sealed partial class AddServer : ContentDialog
     {
+        // 启用本地设置数据
+        ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
         public CMSModel CMSData { get; private set; }
+        public CMSModel IncomingData { get; private set; }
         public AddServer(CMSModel cmsModel)
         {
             this.InitializeComponent();
@@ -31,6 +39,9 @@ namespace SeeMyServer.Pages.Dialogs
             OSTypeComboBox.Items.Add("Linux");
             OSTypeComboBox.Items.Add("OpenWRT");
             OSTypeComboBox.SelectedItem = cmsModel.OSType;
+
+            // 刷新Key Auth状态
+            PrivateKeyIsOpen();
         }
 
         private void MyDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -40,8 +51,37 @@ namespace SeeMyServer.Pages.Dialogs
             CMSData.HostIP = HostIPTextBox.Text;
             CMSData.HostPort = HostPortTextBox.Text;
             CMSData.SSHUser = SSHUserTextBox.Text;
-            CMSData.SSHKey = SSHKeyTextBox.Text;
             CMSData.OSType = GetSelectedComboBoxItemAsString(OSTypeComboBox);
+
+            // 根据Key Auth状态写入
+            if (SSHKeyOrPasswdToggleSwitch.IsOn == true)
+            {
+                CMSData.SSHKeyIsOpen = "True";
+                CMSData.SSHKey = SSHKeyTextBox.Text;
+            }
+            else
+            {
+                CMSData.SSHKeyIsOpen = "False";
+                // 检查是否已经存在密钥和初始化向量，如果不存在则生成新的
+                string key = Method.LoadKeyFromLocalSettings() ?? Method.GenerateRandomKey();
+                string iv = Method.LoadIVFromLocalSettings() ?? Method.GenerateRandomIV();
+
+                // 将密钥和初始化向量保存到 localSettings 中
+                Method.SaveKeyToLocalSettings(key);
+                Method.SaveIVToLocalSettings(iv);
+
+                // 使用的对称加密算法
+                SymmetricAlgorithm symmetricAlgorithm = new AesManaged();
+
+                // 设置加密密钥和初始化向量
+                symmetricAlgorithm.Key = Convert.FromBase64String(key);
+                symmetricAlgorithm.IV = Convert.FromBase64String(iv);
+
+                // 加密字符串
+                string encrypted = Method.EncryptString(SSHPasswd.Password, symmetricAlgorithm);
+
+                CMSData.SSHPasswd = encrypted;
+            }
         }
 
         // 获取选中内容并转换为字符串
@@ -52,7 +92,8 @@ namespace SeeMyServer.Pages.Dialogs
                 // 直接返回选中项作为字符串
                 return comboBox.SelectedItem.ToString();
             }
-            return "<Unknown OS>"; // 如果没有选中项，则返回空字符串
+            // 如果没有选中项，则返回空字符串
+            return "<Unknown OS>";
         }
 
         private void MyDialog_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -87,6 +128,23 @@ namespace SeeMyServer.Pages.Dialogs
                 filePath = null;
             }
             SSHKeyTextBox.Text = filePath;
+        }
+        private void privateKeyIsOpen_Toggled(object sender, RoutedEventArgs e)
+        {
+            PrivateKeyIsOpen();
+        }
+        private void PrivateKeyIsOpen()
+        {
+            if (SSHKeyOrPasswdToggleSwitch.IsOn == true)
+            {
+                AddSSHKey.Visibility = Visibility.Visible;
+                AddSSHPasswd.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                AddSSHKey.Visibility = Visibility.Collapsed;
+                AddSSHPasswd.Visibility = Visibility.Visible;
+            }
         }
     }
 }

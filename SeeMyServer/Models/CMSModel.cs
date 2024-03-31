@@ -23,6 +23,7 @@ namespace SeeMyServer.Models
         public string SSHPasswd { get; set; }
         public string SSHKey { get; set; }
         public string OSType { get; set; }
+        public string SSHKeyIsOpen { get; set; }
 
         public string CPUUsage
         {
@@ -138,7 +139,7 @@ namespace SeeMyServer.Models
                     OnPropertyChanged(nameof(NetworkInterfaceInfos));
                 }
             }
-        }            
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

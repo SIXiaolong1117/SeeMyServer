@@ -8,6 +8,8 @@ using WinRT;
 using System;
 using Microsoft.UI.Xaml.Navigation;
 using SeeMyServer.Pages;
+using System.Security.Cryptography;
+using SeeMyServer.Methods;
 
 namespace SeeMyServer
 {

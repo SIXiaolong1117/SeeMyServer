@@ -33,7 +33,7 @@ namespace SeeMyServer.Datas
 
             // 创建信息表，存储服务器相关配置数据
             var createTableCommand = connection.CreateCommand();
-            createTableCommand.CommandText = "CREATE TABLE IF NOT EXISTS CMSTable (Id INTEGER PRIMARY KEY, Name TEXT, HostIP TEXT, HostPort TEXT, SSHUser TEXT, SSHPasswd TEXT, SSHKey TEXT, OSType TEXT)";
+            createTableCommand.CommandText = "CREATE TABLE IF NOT EXISTS CMSTable (Id INTEGER PRIMARY KEY, Name TEXT, HostIP TEXT, HostPort TEXT, SSHUser TEXT, SSHPasswd BLOB, SSHKey TEXT, OSType TEXT, SSHKeyIsOpen TEXT)";
             createTableCommand.ExecuteNonQuery();
 
             // 创建数据库版本表，用于指示当前数据库版本
@@ -138,7 +138,7 @@ namespace SeeMyServer.Datas
                 connection.Open();
 
                 var insertCommand = connection.CreateCommand();
-                insertCommand.CommandText = "INSERT INTO CMSTable (Name, HostIP, HostPort, SSHUser, SSHPasswd, SSHKey, OSType) VALUES (@Name, @HostIP, @HostPort, @SSHUser, @SSHPasswd, @SSHKey, @OSType)";
+                insertCommand.CommandText = "INSERT INTO CMSTable (Name, HostIP, HostPort, SSHUser, SSHPasswd, SSHKey, OSType, SSHKeyIsOpen) VALUES (@Name, @HostIP, @HostPort, @SSHUser, @SSHPasswd, @SSHKey, @OSType, @SSHKeyIsOpen)";
 
                 insertCommand.Parameters.AddWithValue("@Name", cmsModel.Name ?? (object)DBNull.Value);
                 insertCommand.Parameters.AddWithValue("@HostIP", cmsModel.HostIP ?? (object)DBNull.Value);
@@ -147,6 +147,7 @@ namespace SeeMyServer.Datas
                 insertCommand.Parameters.AddWithValue("@SSHPasswd", cmsModel.SSHPasswd ?? (object)DBNull.Value);
                 insertCommand.Parameters.AddWithValue("@SSHKey", cmsModel.SSHKey ?? (object)DBNull.Value);
                 insertCommand.Parameters.AddWithValue("@OSType", cmsModel.OSType ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@SSHKeyIsOpen", cmsModel.SSHKeyIsOpen ?? (object)DBNull.Value);
 
                 insertCommand.ExecuteNonQuery();
             }
@@ -176,7 +177,7 @@ namespace SeeMyServer.Datas
                 connection.Open();
 
                 var updateCommand = connection.CreateCommand();
-                updateCommand.CommandText = "UPDATE CMSTable SET Name = @Name, HostIP = @HostIP, HostPort = @HostPort, SSHUser = @SSHUser, SSHPasswd = @SSHPasswd, SSHKey = @SSHKey, OSType = @OSType WHERE Id = @Id";
+                updateCommand.CommandText = "UPDATE CMSTable SET Name = @Name, HostIP = @HostIP, HostPort = @HostPort, SSHUser = @SSHUser, SSHPasswd = @SSHPasswd, SSHKey = @SSHKey, OSType = @OSType, SSHKeyIsOpen = @SSHKeyIsOpen WHERE Id = @Id";
 
                 updateCommand.Parameters.AddWithValue("@Id", cmsModel.Id);
                 updateCommand.Parameters.AddWithValue("@Name", cmsModel.Name ?? (object)DBNull.Value);
@@ -186,6 +187,7 @@ namespace SeeMyServer.Datas
                 updateCommand.Parameters.AddWithValue("@SSHPasswd", cmsModel.SSHPasswd ?? (object)DBNull.Value);
                 updateCommand.Parameters.AddWithValue("@SSHKey", cmsModel.SSHKey ?? (object)DBNull.Value);
                 updateCommand.Parameters.AddWithValue("@OSType", cmsModel.OSType ?? (object)DBNull.Value);
+                updateCommand.Parameters.AddWithValue("@SSHKeyIsOpen", cmsModel.SSHKeyIsOpen ?? (object)DBNull.Value);
 
                 updateCommand.ExecuteNonQuery();
             }
@@ -214,8 +216,10 @@ namespace SeeMyServer.Datas
                             HostIP = reader.IsDBNull(2) ? "" : reader.GetString(2),
                             HostPort = reader.IsDBNull(3) ? "" : reader.GetString(3),
                             SSHUser = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                            SSHPasswd = reader.IsDBNull(5) ? "" : reader.GetString(5),
                             SSHKey = reader.IsDBNull(6) ? "" : reader.GetString(6),
-                            OSType = reader.IsDBNull(7) ? "" : reader.GetString(7)
+                            OSType = reader.IsDBNull(7) ? "" : reader.GetString(7),
+                            SSHKeyIsOpen = reader.IsDBNull(8) ? "" : reader.GetString(8)
                         };
                         entries.Add(entry);
                     }
@@ -247,8 +251,10 @@ namespace SeeMyServer.Datas
                             HostIP = reader.IsDBNull(2) ? "" : reader.GetString(2),
                             HostPort = reader.IsDBNull(3) ? "" : reader.GetString(3),
                             SSHUser = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                            SSHPasswd = reader.IsDBNull(5) ? "" : reader.GetString(5),
                             SSHKey = reader.IsDBNull(6) ? "" : reader.GetString(6),
-                            OSType = reader.IsDBNull(7) ? "" : reader.GetString(7)
+                            OSType = reader.IsDBNull(7) ? "" : reader.GetString(7),
+                            SSHKeyIsOpen = reader.IsDBNull(8) ? "" : reader.GetString(8)
                         };
                     }
                 }
