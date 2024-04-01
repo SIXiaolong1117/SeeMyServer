@@ -50,7 +50,7 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -64,26 +64,27 @@
             x:Uid="HomePageHeader"
             Grid.Row="0"
             Grid.Column="0"
-            Margin="0,24,0,8"
-            HorizontalAlignment="Center"
+            Margin="24,24,0,8"
+            HorizontalAlignment="Left"
             FontSize="24" />
 
         <ScrollViewer
             Grid.Row="1"
             Grid.Column="0"
-            Margin="24,18,24,0"
-            Style="{StaticResource TransparentScrollViewerStyle}">
-            <ListView
+            Margin="24,18,0,0"
+            HorizontalAlignment="Stretch">
+            <GridView
                 x:Name="dataListView"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
-                <ListView.ItemTemplate>
+                <GridView.ItemTemplate>
                     <DataTemplate>
                         <!--  Background="Transparent"之后，整个Grid才算是一个“区域”。DoubleTapped和RightTapped就可以在整个Gird中使用了。  -->
                         <Grid
-                            Background="Transparent"
+                            HorizontalAlignment="Center"
                             DoubleTapped="OnListViewDoubleTapped"
                             RightTapped="OnListViewRightTapped"
+                            Style="{StaticResource TransparentItemStyle}"
                             Tapped="OnListViewTapped">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -101,19 +102,23 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" MinWidth="100" />
-                                    <ColumnDefinition Width="*" MinWidth="100" />
+                                    <ColumnDefinition Width="*" MinWidth="70" />
+                                    <ColumnDefinition Width="*" MinWidth="70" />
+                                    <ColumnDefinition Width="*" MinWidth="70" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock
                                     Grid.Row="0"
                                     Grid.Column="0"
                                     Padding="0,4,0,4"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
                                     Text="{Binding Name}" />
                                 <TextBlock
                                     Grid.Row="0"
                                     Grid.Column="1"
                                     Padding="0,4,0,4"
-                                    HorizontalAlignment="Right"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
                                     Text="{Binding OSType}" />
                             </Grid>
 
@@ -122,10 +127,10 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" MinWidth="60" />
-                                    <ColumnDefinition Width="*" MinWidth="60" />
-                                    <ColumnDefinition Width="*" MinWidth="60" />
-                                    <ColumnDefinition Width="*" MinWidth="60" />
+                                    <ColumnDefinition Width="*" MinWidth="80" />
+                                    <ColumnDefinition Width="*" MinWidth="80" />
+                                    <ColumnDefinition Width="*" MinWidth="80" />
+                                    <!--<ColumnDefinition Width="*" MinWidth="80" />-->
                                 </Grid.ColumnDefinitions>
                                 <!--  CPU Usage  -->
                                 <Grid
@@ -246,14 +251,15 @@
                             </Grid>
                         </Grid>
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                </GridView.ItemTemplate>
+            </GridView>
         </ScrollViewer>
 
         <CommandBar
             Grid.Row="2"
             Grid.Column="0"
-            Margin="0,0,0,4"
+            Margin="18,0,0,4"
+            HorizontalAlignment="Left"
             Background="Transparent"
             DefaultLabelPosition="Right"
             IsOpen="False">

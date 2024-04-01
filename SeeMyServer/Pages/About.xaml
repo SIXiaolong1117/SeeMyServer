@@ -26,8 +26,8 @@
             x:Uid="AboutHeader"
             Grid.Row="0"
             Grid.Column="0"
-            Margin="0,24,0,8"
-            HorizontalAlignment="Center"
+            Margin="24,24,0,8"
+            HorizontalAlignment="Left"
             FontSize="24" />
 
         <ScrollViewer Grid.Row="1" Padding="0,0,0,24">
@@ -113,7 +113,7 @@
                     <HyperlinkButton
                         x:Name="FeedbackBugs"
                         x:Uid="FeedbackBugs"
-                        Grid.Row="1"
+                        Grid.Row="0"
                         Grid.Column="0"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
@@ -122,12 +122,19 @@
                     <HyperlinkButton
                         x:Name="PRIVACYLink"
                         x:Uid="PRIVACYLink"
-                        Grid.Row="2"
+                        Grid.Row="1"
                         Grid.Column="0"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         Content="Github Issues"
                         NavigateUri="https://github.com/Direct5dom/SeeMyServer_Issues/issues" />
+                    <HyperlinkButton
+                        x:Uid="AboutHelp"
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        NavigateUri="https://about.sixiaolong.win/Project/See-My-Server.html" />
                 </Grid>
 
                 <TextBlock
@@ -187,13 +194,6 @@
                             VerticalAlignment="Center"
                             Content="Twitter"
                             NavigateUri="https://twitter.com/SI_Xiaolong" />
-                        <HyperlinkButton
-                            x:Uid="AboutHelp"
-                            Grid.Row="3"
-                            Grid.Column="0"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
-                            NavigateUri="https://about.sixiaolong.win/Project/See-My-Server.html" />
                     </Grid>
                 </Grid>
 
@@ -213,6 +213,13 @@
                     CornerRadius="4,4,4,4">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -224,6 +231,20 @@
                         VerticalAlignment="Center"
                         Content="WindowsAppSDK"
                         NavigateUri="https://aka.ms/windowsappsdk" />
+                    <HyperlinkButton
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Content="SSH.NET"
+                        NavigateUri="https://github.com/sshnet/SSH.NET" />
+                    <HyperlinkButton
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Content="Microsoft.Data.Sqlite"
+                        NavigateUri="https://www.nuget.org/packages/Microsoft.Data.Sqlite/" />
                 </Grid>
             </Grid>
         </ScrollViewer>

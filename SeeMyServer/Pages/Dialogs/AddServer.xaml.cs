@@ -34,6 +34,7 @@ namespace SeeMyServer.Pages.Dialogs
             SSHUserTextBox.Text = cmsModel.SSHUser;
             SSHKeyTextBox.Text = cmsModel.SSHKey;
             SSHKeyOrPasswdToggleSwitch.IsOn = cmsModel.SSHKeyIsOpen == "True";
+            SSHPasswd.PlaceholderText = cmsModel.SSHPasswd != "" ? "<Not Changed>" : SSHPasswd.PlaceholderText;
 
             // 添加操作系统类型
             OSTypeComboBox.Items.Add("Windows");

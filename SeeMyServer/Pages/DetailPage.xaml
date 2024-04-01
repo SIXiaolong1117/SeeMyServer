@@ -47,8 +47,8 @@
         <TextBlock
             Grid.Row="0"
             Grid.Column="0"
-            Margin="0,24,0,8"
-            HorizontalAlignment="Center"
+            Margin="24,24,0,8"
+            HorizontalAlignment="Left"
             FontSize="24"
             Text="{Binding Name}" />
 

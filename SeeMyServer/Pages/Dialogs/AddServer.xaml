@@ -26,7 +26,8 @@
             Grid.Row="1"
             Grid.Column="0"
             MinWidth="280"
-            MaxHeight="360">
+            MaxHeight="360"
+            Padding="20,0,20,0">
             <Grid Width="260">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
