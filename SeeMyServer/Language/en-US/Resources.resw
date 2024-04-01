@@ -312,6 +312,9 @@
   <data name="SSHUser.PlaceholderText" xml:space="preserve">
     <value>eg: root</value>
   </data>
+  <data name="terminalMenuItemText" xml:space="preserve">
+    <value>Open Terminal</value>
+  </data>
   <data name="ThemeSetting.Text" xml:space="preserve">
     <value>App theme</value>
   </data>

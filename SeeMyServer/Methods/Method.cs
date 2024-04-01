@@ -897,5 +897,68 @@ namespace SeeMyServer.Methods
             }
             return Convert.ToBase64String(iv);
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public static void SSHTerminal(CMSModel cmsModel)
+        {
+            //string KeyPath, string User, string Domain, string Port
+            // 创建一个新的进程
+            Process process = new Process();
+            // 指定运行PowerShell
+            process.StartInfo.FileName = "PowerShell.exe";
+            // 命令
+            if (cmsModel.SSHKeyIsOpen == "True")
+            {
+                process.StartInfo.Arguments = $"ssh -i {cmsModel.SSHKey} {cmsModel.SSHUser}@{cmsModel.HostIP} -p {cmsModel.HostPort}";
+            }
+            else
+            {
+                process.StartInfo.Arguments = $"ssh {cmsModel.SSHUser}@{cmsModel.HostIP} -p {cmsModel.HostPort}";
+            }
+            // 是否使用操作系统shell启动
+            process.StartInfo.UseShellExecute = false;
+            // 是否在新窗口中启动该进程的值 (不显示程序窗口)
+            process.StartInfo.CreateNoWindow = false;
+            // 进程开始
+            process.Start();
+            // 等待执行结束
+            //process.WaitForExit();
+            // 进程关闭
+            process.Close();
+        }
     }
 }

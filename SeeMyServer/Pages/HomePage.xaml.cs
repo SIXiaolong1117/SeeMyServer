@@ -273,6 +273,20 @@ namespace SeeMyServer.Pages
                 // 创建ContextMenu
                 MenuFlyout menuFlyout = new MenuFlyout();
 
+                MenuFlyoutItem terminalMenuItem = new MenuFlyoutItem
+                {
+                    Text = resourceLoader.GetString("terminalMenuItemText")
+                };
+                terminalMenuItem.Click += (sender, e) =>
+                {
+                    Method.SSHTerminal(selectedItem);
+                };
+                menuFlyout.Items.Add(terminalMenuItem);
+
+                // 添加分割线
+                MenuFlyoutSeparator separator = new MenuFlyoutSeparator();
+                menuFlyout.Items.Add(separator);
+
                 MenuFlyoutItem editMenuItem = new MenuFlyoutItem
                 {
                     Text = resourceLoader.GetString("editMenuItemText")
@@ -295,8 +309,8 @@ namespace SeeMyServer.Pages
                 menuFlyout.Items.Add(deleteMenuItem);
 
                 // 添加分割线
-                MenuFlyoutSeparator separator = new MenuFlyoutSeparator();
-                menuFlyout.Items.Add(separator);
+                MenuFlyoutSeparator separator2 = new MenuFlyoutSeparator();
+                menuFlyout.Items.Add(separator2);
 
                 MenuFlyoutItem exportMenuItem = new MenuFlyoutItem
                 {
