@@ -128,13 +128,13 @@
                         VerticalAlignment="Center"
                         Content="Github Issues"
                         NavigateUri="https://github.com/Direct5dom/SeeMyServer_Issues/issues" />
-                    <HyperlinkButton
+                    <!--<HyperlinkButton
                         x:Uid="AboutHelp"
                         Grid.Row="2"
                         Grid.Column="0"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
-                        NavigateUri="https://about.sixiaolong.win/Project/See-My-Server.html" />
+                        NavigateUri="https://about.sixiaolong.win/Project/See-My-Server.html" />-->
                 </Grid>
 
                 <TextBlock

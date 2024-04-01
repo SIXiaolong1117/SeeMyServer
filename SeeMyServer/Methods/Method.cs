@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Renci.SshNet;
 using Renci.SshNet.Security;
+using SeeMyServer.Helper;
 using SeeMyServer.Models;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,8 @@ namespace SeeMyServer.Methods
 {
     public class Method
     {
+        // 设置日志，最大1MB
+        private static Logger logger = new Logger(1);
         public static string SendSSHCommand(string sshCommand, string sshHost, string sshPort, string sshUser, string sshPasswd, string sshKey, string privateKeyIsOpen)
         {
             try
@@ -33,6 +36,7 @@ namespace SeeMyServer.Methods
                 int port;
                 if (!int.TryParse(sshPort, out port))
                 {
+                    logger.LogError("无效的 SSH 端口号。");
                     return "无效的 SSH 端口号。";
                 }
 
@@ -41,6 +45,7 @@ namespace SeeMyServer.Methods
                 {
                     if (sshClient == null)
                     {
+                        logger.LogError("SSH 客户端初始化失败。");
                         return "SSH 客户端初始化失败。";
                     }
 
@@ -49,6 +54,7 @@ namespace SeeMyServer.Methods
             }
             catch (Exception ex)
             {
+                logger.LogError("SSH 操作失败：" + ex.Message);
                 return "SSH 操作失败：" + ex.Message;
             }
         }
@@ -72,8 +78,9 @@ namespace SeeMyServer.Methods
                     return new SshClient(sshHost, sshPort, sshUser, sshPasswd);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                logger.LogError("SSH 连接失败：" + ex.Message);
                 return null;
             }
         }
@@ -88,13 +95,15 @@ namespace SeeMyServer.Methods
                     SshCommand SSHCommand = sshClient.RunCommand(sshCommand);
                     if (!string.IsNullOrEmpty(SSHCommand.Error))
                     {
-                        return "错误：" + SSHCommand.Error;
+                        logger.LogError("SSH 命令执行错误：" + SSHCommand.Error);
+                        return "SSH 命令执行错误：" + SSHCommand.Error;
                     }
                     else
                     {
                         return SSHCommand.Result;
                     }
                 }
+                logger.LogError("SSH 命令执行失败。");
                 return "SSH 命令执行失败。";
             }
             finally
@@ -179,6 +188,7 @@ namespace SeeMyServer.Methods
                 catch
                 {
                     // 当您保存至OneDrive等同步盘目录时，在Windows11上可能引起DeferUpdates错误，备份文件不一定写入正确。
+                    logger.LogWarning("保存行为完成，但当您保存至OneDrive等同步盘目录时，在Windows11上可能引起DeferUpdates错误，备份文件不一定写入正确。");
                     return "保存行为完成，但当您保存至OneDrive等同步盘目录时，在Windows11上可能引起DeferUpdates错误，备份文件不一定写入正确。";
                 }
 
@@ -194,16 +204,19 @@ namespace SeeMyServer.Methods
                 if (status == FileUpdateStatus.Complete)
                 {
                     // 保存成功
+                    logger.LogInfo("保存成功");
                     return "保存成功";
                 }
                 else if (status == FileUpdateStatus.CompleteAndRenamed)
                 {
                     // 重命名并保存成功
+                    logger.LogInfo("重命名并保存成功");
                     return "重命名并保存成功";
                 }
                 else
                 {
                     // 文件无法保存！
+                    logger.LogError("无法保存！");
                     return "无法保存！";
                 }
             }
@@ -480,13 +493,13 @@ namespace SeeMyServer.Methods
                 resultList.Add(cpuUsage);
             }
 
-            // 去掉最后两项（表示总占用）
+            // 去掉最后两项（最后两项表示总占用）
             List<string> modifiedList = new List<string>(cpuUsageRes);
             try
             {
                 modifiedList.RemoveAt(modifiedList.Count - 2);
             }
-            catch (Exception) { }
+            catch (Exception ex) { logger.LogError($"CPU各核心占用获取失败：{ex.Message}"); }
 
             // 第二部分是内存占用
             string memUsageRes = "";
@@ -494,7 +507,7 @@ namespace SeeMyServer.Methods
             {
                 memUsageRes = UsageResA[1];
             }
-            catch (Exception) { }
+            catch (Exception ex) { logger.LogError($"内存占用获取失败：{ex.Message}"); }
 
             // 第三部分是总内存量
             string memUsageTotalRes = "";
@@ -505,7 +518,7 @@ namespace SeeMyServer.Methods
                 memUsageTotalValue = BigInteger.Parse(memUsageTotalRes);
                 memUsageTotalRes = NetUnitConversion(memUsageTotalValue);
             }
-            catch (Exception ex) { }
+            catch (Exception ex) { logger.LogError($"总内存量获取失败：{ex.Message}"); }
 
             return new string[] { $"{cpuUsageRes[cpuUsageRes.Length - 1].Split('.')[0]}%", $"{memUsageRes.Split('.')[0]}%", $"{string.Join(", ", modifiedList)}", $"{UsageRes}", $"{memUsageTotalRes}" };
         }
@@ -522,8 +535,14 @@ namespace SeeMyServer.Methods
             string cpuUsageCMD = "(Get-Counter '\\Processor Information(_Total)\\% Processor Utility').CounterSamples.CookedValue";
             string cpuUsageRes = await SendSSHCommandAsync(cpuUsageCMD, cmsModel);
             int cpuUsageResValue = 0;
-            try { cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]); }
-            catch (Exception) { }
+            try
+            {
+                cpuUsageResValue = int.Parse(cpuUsageRes.Split('.')[0]);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"CPU占用结果{cpuUsageResValue}转换失败：{ex.Message}");
+            }
             return Math.Min(Math.Max(cpuUsageResValue, 0), 100).ToString() + "%";
         }
 
@@ -532,8 +551,14 @@ namespace SeeMyServer.Methods
             string memUsageCMD = "((($totalMemory = (Get-WmiObject -Class Win32_OperatingSystem).TotalVisibleMemorySize) - (Get-WmiObject -Class Win32_OperatingSystem).FreePhysicalMemory) / $totalMemory * 100)";
             string memUsageRes = await SendSSHCommandAsync(memUsageCMD, cmsModel);
             int memUsageResValue = 0;
-            try { memUsageResValue = int.Parse(memUsageRes.Split('.')[0]); }
-            catch (Exception) { }
+            try
+            {
+                memUsageResValue = int.Parse(memUsageRes.Split('.')[0]);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"内存占用结果{memUsageResValue}转换失败：{ex.Message}");
+            }
             return Math.Min(Math.Max(memUsageResValue, 0), 100).ToString() + "%";
         }
         public static async Task<string> GetWindowsNetSentAsync(CMSModel cmsModel)
@@ -542,8 +567,14 @@ namespace SeeMyServer.Methods
             string netSentRes = await SendSSHCommandAsync(netSentCMD, cmsModel);
             // 获取命令输出的值并转换为整数
             int netSentValue = 0;
-            try { netSentValue = int.Parse(netSentRes.Split('.')[0]); }
-            catch (Exception) { }
+            try
+            {
+                netSentValue = int.Parse(netSentRes.Split('.')[0]);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"netSent结果{netSentValue}转换失败：{ex.Message}");
+            }
             netSentRes = NetUnitConversion(netSentValue);
             return netSentRes + "/s ↑";
         }
@@ -554,8 +585,14 @@ namespace SeeMyServer.Methods
             string netReceivedRes = await SendSSHCommandAsync(netReceivedCMD, cmsModel);
             // 获取命令输出的值并转换为整数
             int netReceivedValue = 0;
-            try { netReceivedValue = int.Parse(netReceivedRes.Split('.')[0]); }
-            catch (Exception) { }
+            try
+            {
+                netReceivedValue = int.Parse(netReceivedRes.Split('.')[0]);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"netReceived结果{netReceivedValue}转换失败：{ex.Message}");
+            }
             netReceivedRes = NetUnitConversion(netReceivedValue);
             return netReceivedRes + "/s ↓";
         }
@@ -647,8 +684,9 @@ namespace SeeMyServer.Methods
                         info.Used = $"{String.Format("{0:0.00}", UsedValue)} {info.Size.Substring(info.Size.Length - 2)}";
                         info.UsePercentage = (UsedValue * 100 / float.Parse(info.Size.Split(' ')[0])).ToString().Split('.')[0] + "%";
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        logger.LogError($"Windows挂载占用结果转换失败：{ex.Message}");
                         info.UsePercentage = "0%";
                     }
 

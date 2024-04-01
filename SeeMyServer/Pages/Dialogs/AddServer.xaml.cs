@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using SeeMyServer.Helper;
 using SeeMyServer.Methods;
 using SeeMyServer.Models;
 using System;
@@ -18,9 +19,13 @@ namespace SeeMyServer.Pages.Dialogs
         ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
         public CMSModel CMSData { get; private set; }
         public CMSModel IncomingData { get; private set; }
+        private Logger logger;
         public AddServer(CMSModel cmsModel)
         {
             this.InitializeComponent();
+
+            // 设置日志，最大1MB
+            logger = new Logger(1);
 
             // 将Dialog两个按钮点击事件绑定
             PrimaryButtonClick += MyDialog_PrimaryButtonClick;
@@ -35,6 +40,7 @@ namespace SeeMyServer.Pages.Dialogs
             SSHKeyTextBox.Text = cmsModel.SSHKey;
             SSHKeyOrPasswdToggleSwitch.IsOn = cmsModel.SSHKeyIsOpen == "True";
             SSHPasswd.PlaceholderText = cmsModel.SSHPasswd != "" ? "<Not Changed>" : SSHPasswd.PlaceholderText;
+            logger.LogInfo("Dialog field initialization completed.");
 
             // 添加操作系统类型
             OSTypeComboBox.Items.Add("Windows");
@@ -147,6 +153,7 @@ namespace SeeMyServer.Pages.Dialogs
                 AddSSHKey.Visibility = Visibility.Collapsed;
                 AddSSHPasswd.Visibility = Visibility.Visible;
             }
+            logger.LogInfo("PrivateKeyIsOpen() completed.");
         }
     }
 }

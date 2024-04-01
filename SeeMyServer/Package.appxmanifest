@@ -10,7 +10,7 @@
   <Identity
     Name="f264ac4a-3bea-4e7d-b22a-5149a0456c29"
     Publisher="CN=SIXiaolong"
-    Version="1.0.3.0" />
+    Version="1.0.4.0" />
 
   <mp:PhoneIdentity PhoneProductId="f264ac4a-3bea-4e7d-b22a-5149a0456c29" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

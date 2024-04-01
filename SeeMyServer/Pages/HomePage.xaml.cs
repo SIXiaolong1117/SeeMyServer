@@ -3,11 +3,14 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using SeeMyServer.Datas;
+using SeeMyServer.Helper;
 using SeeMyServer.Methods;
 using SeeMyServer.Models;
 using SeeMyServer.Pages.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
@@ -22,10 +25,14 @@ namespace SeeMyServer.Pages
         ResourceLoader resourceLoader = new ResourceLoader();
         private DispatcherQueue _dispatcherQueue;
         private DispatcherTimer timer;
+        private Logger logger;
 
         public HomePage()
         {
             this.InitializeComponent();
+
+            // 设置日志，最大1MB
+            logger = new Logger(1);
 
             // 获取UI线程的DispatcherQueue
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
@@ -33,7 +40,6 @@ namespace SeeMyServer.Pages
             // 页面初始化后，加载数据
             LoadData();
             LoadString();
-
         }
         private void LoadString()
         {
@@ -84,6 +90,7 @@ namespace SeeMyServer.Pages
 
             // 启动计时器
             timer.Start();
+            logger.LogInfo("Timer_Tick starts.");
         }
 
         // Linux 信息更新
@@ -188,6 +195,7 @@ namespace SeeMyServer.Pages
                 dbHelper.InsertData(initialCMSModelData);
                 // 加载数据
                 LoadData();
+                logger.LogInfo("Add Config is completed.");
             }
         }
         // 导入配置按钮点击
@@ -204,6 +212,7 @@ namespace SeeMyServer.Pages
                 dbHelper.InsertData(cmsModel);
                 // 重新加载数据
                 LoadData();
+                logger.LogInfo("Import Config is completed.");
             }
             HomePageImportConfig.IsEnabled = true;
         }
@@ -231,6 +240,7 @@ namespace SeeMyServer.Pages
                 dbHelper.UpdateData(cmsModel);
                 // 重新加载数据
                 LoadData();
+                logger.LogInfo("Edit Config is completed.");
             }
         }
         private void ConfirmDelete_Click(object sender, RoutedEventArgs e)
@@ -245,6 +255,7 @@ namespace SeeMyServer.Pages
             dbHelper.DeleteData(selectedModel);
             // 重新加载数据
             LoadData();
+            logger.LogInfo("Delete Config is completed.");
         }
         private void CancelDelete_Click(object sender, RoutedEventArgs e)
         {
@@ -321,8 +332,6 @@ namespace SeeMyServer.Pages
                     ExportConfigFunction(selectedItem);
                 };
                 menuFlyout.Items.Add(exportMenuItem);
-
-                Thread.Sleep(10);
 
                 // 在指定位置显示ContextMenu
                 menuFlyout.ShowAt(listViewItem, e.GetPosition(listViewItem));

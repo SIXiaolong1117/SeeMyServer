@@ -1,13 +1,18 @@
 ﻿using Microsoft.UI.Xaml;
+using SeeMyServer.Helper;
 using System;
 
 namespace SeeMyServer
 {
     public partial class App : Application
     {
+        private Logger logger;
         public App()
         {
             this.InitializeComponent();
+            
+            // 设置日志，最大1MB
+            logger = new Logger(1);
         }
 
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
@@ -18,6 +23,8 @@ namespace SeeMyServer
             SetWindowSize(hwnd, 1110, 700);
 
             m_window.Activate();
+
+            logger.LogInfo("See My Server starts.");
         }
 
         private void SetWindowSize(IntPtr hwnd, int width, int height)

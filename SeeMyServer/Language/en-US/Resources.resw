@@ -151,7 +151,7 @@
     <value>Host Name</value>
   </data>
   <data name="AboutServerMEMUsage.Text" xml:space="preserve">
-    <value>MEM Usage</value>
+    <value>Mem Usage</value>
   </data>
   <data name="AboutServerMountInfos.Text" xml:space="preserve">
     <value>Mount Infos</value>
@@ -247,7 +247,7 @@
     <value>Language</value>
   </data>
   <data name="MEMUsageText.Text" xml:space="preserve">
-    <value>MEM</value>
+    <value>Mem</value>
   </data>
   <data name="MountInfosUsed.Text" xml:space="preserve">
     <value>Used </value>

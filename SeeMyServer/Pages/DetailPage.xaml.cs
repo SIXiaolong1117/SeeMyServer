@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using SeeMyServer.Datas;
+using SeeMyServer.Helper;
 using SeeMyServer.Methods;
 using SeeMyServer.Models;
 using SeeMyServer.Pages.Dialogs;
@@ -26,10 +27,14 @@ namespace SeeMyServer.Pages
         ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
         ResourceLoader resourceLoader = new ResourceLoader();
         private DispatcherTimer timer;
+        private Logger logger;
 
         public DetailPage()
         {
             this.InitializeComponent();
+
+            // 设置日志，最大1MB
+            logger = new Logger(1);
 
             LoadData();
         }
@@ -272,6 +277,7 @@ namespace SeeMyServer.Pages
         {
             // dataList.SSHKey, dataList.SSHUser, dataList.HostIP, dataList.HostPort
             Method.SSHTerminal(dataList);
+            logger.LogInfo("OpenSSHTerminal() completed.");
         }
         private void EditConfig_Click(object sender, RoutedEventArgs e)
         {
@@ -305,6 +311,7 @@ namespace SeeMyServer.Pages
                 // 去掉绑定
                 MountInfosListView.ItemsSource = null;
                 NetworkInfosListView.ItemsSource = null;
+                logger.LogInfo("Edit Config is completed.");
             }
         }
     }
