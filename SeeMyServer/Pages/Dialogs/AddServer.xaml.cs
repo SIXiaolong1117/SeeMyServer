@@ -33,6 +33,7 @@ namespace SeeMyServer.Pages.Dialogs
             HostPortTextBox.Text = cmsModel.HostPort;
             SSHUserTextBox.Text = cmsModel.SSHUser;
             SSHKeyTextBox.Text = cmsModel.SSHKey;
+            SSHKeyOrPasswdToggleSwitch.IsOn = cmsModel.SSHKeyIsOpen == "True";
 
             // 添加操作系统类型
             OSTypeComboBox.Items.Add("Windows");

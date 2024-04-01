@@ -270,20 +270,29 @@ namespace SeeMyServer.Pages
         }
         private void OpenSSHTerminal_Click(object sender, RoutedEventArgs e)
         {
-            SSHTerminal(dataList.SSHKey, dataList.SSHUser, dataList.HostIP, dataList.HostPort);
+            // dataList.SSHKey, dataList.SSHUser, dataList.HostIP, dataList.HostPort
+            SSHTerminal(dataList);
         }
         private void EditConfig_Click(object sender, RoutedEventArgs e)
         {
             EditThisConfig(dataList);
         }
-        public static void SSHTerminal(string KeyPath, string User, string Domain, string Port)
+        public static void SSHTerminal(CMSModel cmsModel)
         {
+            //string KeyPath, string User, string Domain, string Port
             // 创建一个新的进程
             Process process = new Process();
             // 指定运行PowerShell
             process.StartInfo.FileName = "PowerShell.exe";
             // 命令
-            process.StartInfo.Arguments = $"ssh -i {KeyPath} {User}@{Domain} -p {Port}";
+            if (cmsModel.SSHKeyIsOpen == "True")
+            {
+                process.StartInfo.Arguments = $"ssh -i {cmsModel.SSHKey} {cmsModel.SSHUser}@{cmsModel.SSHUser} -p {cmsModel.HostPort}";
+            }
+            else
+            {
+                process.StartInfo.Arguments = $"ssh {cmsModel.SSHUser}@{cmsModel.SSHUser} -p {cmsModel.HostPort}";
+            }
             // 是否使用操作系统shell启动
             process.StartInfo.UseShellExecute = false;
             // 是否在新窗口中启动该进程的值 (不显示程序窗口)

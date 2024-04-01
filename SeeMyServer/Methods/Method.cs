@@ -30,12 +30,6 @@ namespace SeeMyServer.Methods
         {
             try
             {
-                IPAddress ipAddress = DomainToIp(sshHost, "IPv4");
-                if (ipAddress == null)
-                {
-                    return "无法解析 SSH 主机地址。";
-                }
-
                 int port;
                 if (!int.TryParse(sshPort, out port))
                 {
@@ -43,7 +37,7 @@ namespace SeeMyServer.Methods
                 }
 
                 bool usePrivateKey = string.Equals(privateKeyIsOpen, "True", StringComparison.OrdinalIgnoreCase);
-                using (SshClient sshClient = InitializeSshClient(ipAddress, port, sshUser, sshPasswd, sshKey, usePrivateKey))
+                using (SshClient sshClient = InitializeSshClient(sshHost, port, sshUser, sshPasswd, sshKey, usePrivateKey))
                 {
                     if (sshClient == null)
                     {
@@ -58,14 +52,14 @@ namespace SeeMyServer.Methods
                 return "SSH 操作失败：" + ex.Message;
             }
         }
-        private static SshClient InitializeSshClient(IPAddress sshHost, int sshPort, string sshUser, string sshPasswd, string sshKey, bool usePrivateKey)
+        private static SshClient InitializeSshClient(string sshHost, int sshPort, string sshUser, string sshPasswd, string sshKey, bool usePrivateKey)
         {
             try
             {
                 if (usePrivateKey)
                 {
                     PrivateKeyFile privateKeyFile = new PrivateKeyFile(sshKey);
-                    ConnectionInfo connectionInfo = new ConnectionInfo(sshHost.ToString(), sshPort, sshUser, new PrivateKeyAuthenticationMethod(sshUser, new PrivateKeyFile[] { privateKeyFile }));
+                    ConnectionInfo connectionInfo = new ConnectionInfo(sshHost, sshPort, sshUser, new PrivateKeyAuthenticationMethod(sshUser, new PrivateKeyFile[] { privateKeyFile }));
                     connectionInfo.Encoding = Encoding.UTF8;
                     // 设置连接超时时间
                     connectionInfo.Timeout = TimeSpan.FromSeconds(5);
@@ -75,7 +69,7 @@ namespace SeeMyServer.Methods
                 }
                 else
                 {
-                    return new SshClient(sshHost.ToString(), sshPort, sshUser, sshPasswd);
+                    return new SshClient(sshHost, sshPort, sshUser, sshPasswd);
                 }
             }
             catch
@@ -152,52 +146,7 @@ namespace SeeMyServer.Methods
 
 
 
-        // 获取域名对应的IP
-        public static IPAddress DomainToIp(string domain, string ipVersion)
-        {
-            IPAddress ipAddress;
-            if (IPAddress.TryParse(domain, out ipAddress))
-            {
-                // 是IP
-                if ((ipVersion == "IPv4" && ipAddress.AddressFamily == AddressFamily.InterNetwork) ||
-                    (ipVersion == "IPv6" && ipAddress.AddressFamily == AddressFamily.InterNetworkV6))
-                {
-                    return ipAddress;
-                }
-                else
-                {
-                    throw new ArgumentException("IP version mismatch");
-                }
-            }
-            else
-            {
-                // 是域名或其他输入
-                IPAddress[] addressList = Dns.GetHostEntry(domain).AddressList;
 
-                if (ipVersion == "IPv4")
-                {
-                    foreach (IPAddress address in addressList)
-                    {
-                        if (address.AddressFamily == AddressFamily.InterNetwork)
-                        {
-                            return address;
-                        }
-                    }
-                }
-                else if (ipVersion == "IPv6")
-                {
-                    foreach (IPAddress address in addressList)
-                    {
-                        if (address.AddressFamily == AddressFamily.InterNetworkV6)
-                        {
-                            return address;
-                        }
-                    }
-                }
-
-                throw new ArgumentException("No matching IP address found");
-            }
-        }
         // 导出配置
         public static async Task<string> ExportConfig(CMSModel cmsModel)
         {
@@ -540,13 +489,19 @@ namespace SeeMyServer.Methods
             catch (Exception) { }
 
             // 第二部分是内存占用
-            string memUsageRes = UsageResA[1];
+            string memUsageRes = "";
+            try
+            {
+                memUsageRes = UsageResA[1];
+            }
+            catch (Exception) { }
 
             // 第三部分是总内存量
-            string memUsageTotalRes = UsageResA[2];
+            string memUsageTotalRes = "";
             BigInteger memUsageTotalValue = 0;
             try
             {
+                memUsageTotalRes = UsageResA[2];
                 memUsageTotalValue = BigInteger.Parse(memUsageTotalRes);
                 memUsageTotalRes = NetUnitConversion(memUsageTotalValue);
             }
@@ -661,7 +616,6 @@ namespace SeeMyServer.Methods
             }
         }
 
-        // 
         public static List<MountInfo> WindowsMountInfoParse(string input)
         {
             List<MountInfo> mountInfos = new List<MountInfo>();
