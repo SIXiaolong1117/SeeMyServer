@@ -3,6 +3,7 @@
     x:Class="SeeMyServer.Pages.HomePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:SeeMyServer.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -102,9 +103,9 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" MinWidth="70" />
-                                    <ColumnDefinition Width="*" MinWidth="70" />
-                                    <ColumnDefinition Width="*" MinWidth="70" />
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition Width="80" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock
                                     Grid.Row="0"
@@ -127,10 +128,9 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" MinWidth="80" />
-                                    <ColumnDefinition Width="*" MinWidth="80" />
-                                    <ColumnDefinition Width="*" MinWidth="80" />
-                                    <!--<ColumnDefinition Width="*" MinWidth="80" />-->
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition Width="80" />
                                 </Grid.ColumnDefinitions>
                                 <!--  CPU Usage  -->
                                 <Grid
@@ -144,7 +144,43 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <ProgressRing
+                                    <controls:RadialGauge
+                                        Width="60"
+                                        IsInteractive="False"
+                                        MaxAngle="0"
+                                        Maximum="100"
+                                        MinAngle="0"
+                                        NeedleLength="0"
+                                        ScaleWidth="15"
+                                        TickLength="0"
+                                        ValueStringFormat=" "
+                                        Value="{Binding CPUUsage}" />
+                                    <controls:RadialGauge
+                                        Width="60"
+                                        IsInteractive="False"
+                                        MaxAngle="0"
+                                        Maximum="100"
+                                        MinAngle="0"
+                                        NeedleLength="0"
+                                        ScalePadding="20"
+                                        ScaleWidth="10"
+                                        TickLength="0"
+                                        ValueStringFormat=" "
+                                        Value="{Binding CPUUsage}" />
+                                    <controls:RadialGauge
+                                        Width="60"
+                                        IsInteractive="False"
+                                        MaxAngle="0"
+                                        Maximum="100"
+                                        MinAngle="0"
+                                        NeedleLength="0"
+                                        ScalePadding="35"
+                                        ScaleWidth="7"
+                                        TickLength="0"
+                                        ValueStringFormat=" "
+                                        Value="{Binding CPUUsage}" />
+
+                                    <!--<ProgressRing
                                         Grid.Row="0"
                                         Grid.Column="0"
                                         Width="60"
@@ -153,7 +189,7 @@
                                         VerticalAlignment="Center"
                                         Foreground="#42cdef"
                                         IsIndeterminate="False"
-                                        Value="{Binding CPUUsage}" />
+                                        Value="{Binding CPUUsage}" />-->
                                     <TextBlock
                                         Grid.Row="0"
                                         Grid.Column="0"
@@ -179,7 +215,18 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <ProgressRing
+                                    <controls:RadialGauge
+                                        Width="60"
+                                        IsInteractive="False"
+                                        MaxAngle="0"
+                                        Maximum="100"
+                                        MinAngle="0"
+                                        NeedleLength="0"
+                                        ScaleWidth="30"
+                                        TickLength="0"
+                                        ValueStringFormat=" "
+                                        Value="{Binding MEMUsage}" />
+                                    <!--<ProgressRing
                                         Grid.Row="0"
                                         Grid.Column="0"
                                         Width="60"
@@ -188,7 +235,7 @@
                                         VerticalAlignment="Center"
                                         Foreground="#849aff"
                                         IsIndeterminate="False"
-                                        Value="{Binding MEMUsage}" />
+                                        Value="{Binding MEMUsage}" />-->
                                     <TextBlock
                                         Grid.Row="0"
                                         Grid.Column="0"
