@@ -50,7 +50,7 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -268,15 +268,21 @@
                 x:Uid="HomePageAddConfig"
                 Grid.Row="0"
                 Grid.Column="0"
-                Click="AddConfigButton_Click"
-                Icon="Add" />
+                Click="AddConfigButton_Click">
+                <AppBarButton.Icon>
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xECC8;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
             <AppBarButton
                 x:Name="HomePageImportConfig"
                 x:Uid="HomePageImportConfig"
                 Grid.Row="0"
                 Grid.Column="1"
-                Click="ImportConfig_Click"
-                Icon="Import" />
+                Click="ImportConfig_Click">
+                <AppBarButton.Icon>
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8B5;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
         </CommandBar>
     </Grid>
 
