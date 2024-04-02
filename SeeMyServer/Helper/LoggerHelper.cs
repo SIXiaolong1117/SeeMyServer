@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SeeMyServer.Helper
@@ -12,6 +14,9 @@ namespace SeeMyServer.Helper
     {
         private string logFilePath;
         private int maxLogSize;
+        private ConcurrentQueue<string> logQueue = new ConcurrentQueue<string>();
+        private bool writingInProgress = false;
+        private readonly object lockObject = new object();
 
         public Logger(int maxFileSizeMB)
         {
@@ -24,6 +29,11 @@ namespace SeeMyServer.Helper
 
             // 确保目录存在
             Directory.CreateDirectory(logFolder);
+
+            // 启动日志写入线程
+            Thread logThread = new Thread(WriteLogThread);
+            logThread.IsBackground = true;
+            logThread.Start();
         }
 
         public void LogInfo(string message)
@@ -43,12 +53,42 @@ namespace SeeMyServer.Helper
 
         private void Log(string message)
         {
-            File.AppendAllText(logFilePath, message + Environment.NewLine);
+            logQueue.Enqueue(message);
+        }
 
-            // 检查日志尺寸
-            if (new FileInfo(logFilePath).Length > maxLogSize)
+        private void WriteLogThread()
+        {
+            while (true)
             {
-                RotateLogFile();
+                if (!writingInProgress && logQueue.Count > 0)
+                {
+                    lock (lockObject)
+                    {
+                        if (!writingInProgress && logQueue.Count > 0)
+                        {
+                            writingInProgress = true;
+                            try
+                            {
+                                string nextLogEntry;
+                                while (logQueue.TryDequeue(out nextLogEntry))
+                                {
+                                    File.AppendAllText(logFilePath, nextLogEntry + Environment.NewLine);
+
+                                    // 检查日志尺寸
+                                    if (new FileInfo(logFilePath).Length > maxLogSize)
+                                    {
+                                        RotateLogFile();
+                                    }
+                                }
+                            }
+                            finally
+                            {
+                                writingInProgress = false;
+                            }
+                        }
+                    }
+                }
+                Thread.Sleep(100); // 每100毫秒检查一次队列
             }
         }
 
@@ -77,7 +117,7 @@ namespace SeeMyServer.Helper
             string logFileDirectory = Path.GetDirectoryName(logFilePath);
             if (Directory.Exists(logFileDirectory))
             {
-                Process.Start("explorer.exe", logFileDirectory);
+                System.Diagnostics.Process.Start("explorer.exe", logFileDirectory);
             }
             else
             {
