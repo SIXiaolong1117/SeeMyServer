@@ -39,14 +39,14 @@ namespace SeeMyServer.Pages.Dialogs
             SSHUserTextBox.Text = cmsModel.SSHUser;
             SSHKeyTextBox.Text = cmsModel.SSHKey;
             SSHKeyOrPasswdToggleSwitch.IsOn = cmsModel.SSHKeyIsOpen == "True";
-            SSHPasswd.PlaceholderText = cmsModel.SSHPasswd != "" ? "<Not Changed>" : SSHPasswd.PlaceholderText;
+            SSHPasswd.PlaceholderText = cmsModel.SSHPasswd != null ? "<Not Changed>" : SSHPasswd.PlaceholderText;
             logger.LogInfo("Dialog field initialization completed.");
 
             // 添加操作系统类型
-            OSTypeComboBox.Items.Add("Windows");
+            //OSTypeComboBox.Items.Add("Windows");
             OSTypeComboBox.Items.Add("Linux");
             OSTypeComboBox.Items.Add("OpenWRT");
-            OSTypeComboBox.SelectedItem = cmsModel.OSType;
+            OSTypeComboBox.SelectedItem = cmsModel.OSType == null ? "Linux" : OSTypeComboBox.SelectedItem;
 
             // 刷新Key Auth状态
             PrivateKeyIsOpen();

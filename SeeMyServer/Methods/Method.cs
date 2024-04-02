@@ -36,7 +36,7 @@ namespace SeeMyServer.Methods
                 int port;
                 if (!int.TryParse(sshPort, out port))
                 {
-                    logger.LogError("无效的 SSH 端口号。");
+                    logger.LogError($"{sshHost} 使用了无效的 SSH 端口号：{sshPort}");
                     return "无效的 SSH 端口号。";
                 }
 
@@ -45,7 +45,7 @@ namespace SeeMyServer.Methods
                 {
                     if (sshClient == null)
                     {
-                        logger.LogError("SSH 客户端初始化失败。");
+                        logger.LogError($"{sshHost} SSH 客户端初始化失败。");
                         return "SSH 客户端初始化失败。";
                     }
 
@@ -80,7 +80,7 @@ namespace SeeMyServer.Methods
             }
             catch (Exception ex)
             {
-                logger.LogError("SSH 连接失败：" + ex.Message);
+                logger.LogError($"{sshHost} SSH 连接失败：" + ex.Message);
                 return null;
             }
         }
@@ -95,7 +95,7 @@ namespace SeeMyServer.Methods
                     SshCommand SSHCommand = sshClient.RunCommand(sshCommand);
                     if (!string.IsNullOrEmpty(SSHCommand.Error))
                     {
-                        logger.LogError("SSH 命令执行错误：" + SSHCommand.Error);
+                        logger.LogError($"{sshCommand} SSH 命令执行错误：{SSHCommand.Error}");
                         return "SSH 命令执行错误：" + SSHCommand.Error;
                     }
                     else
@@ -103,7 +103,7 @@ namespace SeeMyServer.Methods
                         return SSHCommand.Result;
                     }
                 }
-                logger.LogError("SSH 命令执行失败。");
+                logger.LogError($"{sshCommand} SSH 命令执行失败。");
                 return "SSH 命令执行失败。";
             }
             finally
@@ -541,7 +541,7 @@ namespace SeeMyServer.Methods
             }
             catch (Exception ex)
             {
-                logger.LogError($"CPU占用结果{cpuUsageResValue}转换失败：{ex.Message}");
+                logger.LogError($"CPU占用结果 {cpuUsageResValue} 转换失败：{ex.Message}");
             }
             return Math.Min(Math.Max(cpuUsageResValue, 0), 100).ToString() + "%";
         }
@@ -557,7 +557,7 @@ namespace SeeMyServer.Methods
             }
             catch (Exception ex)
             {
-                logger.LogError($"内存占用结果{memUsageResValue}转换失败：{ex.Message}");
+                logger.LogError($"内存占用结果 {memUsageResValue} 转换失败：{ex.Message}");
             }
             return Math.Min(Math.Max(memUsageResValue, 0), 100).ToString() + "%";
         }
@@ -573,7 +573,7 @@ namespace SeeMyServer.Methods
             }
             catch (Exception ex)
             {
-                logger.LogError($"netSent结果{netSentValue}转换失败：{ex.Message}");
+                logger.LogError($"netSent结果 {netSentValue} 转换失败：{ex.Message}");
             }
             netSentRes = NetUnitConversion(netSentValue);
             return netSentRes + "/s ↑";
@@ -591,7 +591,7 @@ namespace SeeMyServer.Methods
             }
             catch (Exception ex)
             {
-                logger.LogError($"netReceived结果{netReceivedValue}转换失败：{ex.Message}");
+                logger.LogError($"netReceived结果 {netReceivedValue} 转换失败：{ex.Message}");
             }
             netReceivedRes = NetUnitConversion(netReceivedValue);
             return netReceivedRes + "/s ↓";
