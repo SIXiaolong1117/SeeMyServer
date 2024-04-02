@@ -133,7 +133,7 @@ namespace SeeMyServer.Pages
             timer.Tick += Timer_Tick;
 
             // 每隔段时间触发一次
-            timer.Interval = TimeSpan.FromSeconds(5);
+            timer.Interval = TimeSpan.FromSeconds(3);
 
             // 先执行一次事件处理方法
             Timer_Tick(null, null);
@@ -180,25 +180,32 @@ namespace SeeMyServer.Pages
         // OpenWRT 信息更新
         private async Task UpdateOpenWRTCMSModelAsync(CMSModel cmsModel)
         {
-            Task<string[]> usages = Method.GetOpenWRTCPUUsageAsync(cmsModel);
+            Task<string[]> usages = Method.GetOpenWRTUsageAsync(cmsModel);
             Task<string> HostName = Method.GetOpenWRTHostName(cmsModel);
+            Task<string> CPUCoreUsage = Method.GetOpenWRTCPUCoreUsageAsync(cmsModel);
             // OpenWRT也可以用部分Linux命令
             Task<string[]> netUsages = Method.GetLinuxNetAsync(cmsModel);
             Task<string> UpTime = Method.GetLinuxUpTime(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(usages, HostName, netUsages, UpTime);
+            await Task.WhenAll(usages, HostName, netUsages, UpTime, CPUCoreUsage);
 
             // 处理获取到的数据
-            cmsModel.CPUUsage = usages.Result[0];
-            cmsModel.MEMUsage = usages.Result[1];
+            //cmsModel.CPUUsage = usages.Result[0];
+            cmsModel.CPUUsage = $"{Math.Round(double.Parse(usages.Result[0]))}%";
+            //cmsModel.MEMUsage = usages.Result[1];
+            cmsModel.MEMUsage = $"{Math.Round(double.Parse(usages.Result[1]))}%";
+            cmsModel.TotalMEM = $" of {usages.Result[8]}";
             cmsModel.NETReceived = netUsages.Result[0];
             cmsModel.NETSent = netUsages.Result[1];
+            cmsModel.Average1Percentage = usages.Result[5];
+            cmsModel.Average5Percentage = usages.Result[6];
+            cmsModel.Average15Percentage = usages.Result[7];
             cmsModel.HostName = HostName.Result;
             cmsModel.UpTime = UpTime.Result;
 
             // OpenWRT的Top无法查看单独核心占用
-            string[] tokens = new string[] { usages.Result[0].Split("%")[0] };
+            string[] tokens = CPUCoreUsage.Result.Split(", ");
             CreateProgressBars(progressBarsGrid, tokens);
 
             // 只有当 ItemsSource 未绑定时才进行绑定
@@ -216,47 +223,6 @@ namespace SeeMyServer.Pages
             }
         }
 
-        // Windows 信息更新
-        private async Task UpdateWindowsCMSModelAsync(CMSModel cmsModel)
-        {
-            Task<string[]> usages = Method.GetWindowsUsageAsync(cmsModel);
-            Task<string> upTime = Method.GetWindowsUpTime(cmsModel);
-            Task<string> memTask = Method.GetWindowsMemoryUsageAsync(cmsModel);
-            Task<string> netSentTask = Method.GetWindowsNetSentAsync(cmsModel);
-            Task<string> netReceivedTask = Method.GetWindowsNetReceivedAsync(cmsModel);
-            // Windows上可以使用相同的命令
-            Task<string> HostName = Method.GetLinuxHostName(cmsModel);
-
-            // 同时执行异步任务
-            await Task.WhenAll(usages, upTime, memTask, netSentTask, netReceivedTask, HostName);
-
-            // 处理获取到的数据
-            cmsModel.CPUUsage = usages.Result[0];
-            cmsModel.MEMUsage = memTask.Result;
-            cmsModel.NETSent = netSentTask.Result;
-            cmsModel.NETReceived = netReceivedTask.Result;
-            cmsModel.HostName = HostName.Result.TrimEnd();
-            cmsModel.UpTime = upTime.Result;
-            cmsModel.TotalMEM = $" of {usages.Result[4]} GB";
-
-            string[] tokens = usages.Result[2].Split(", ");
-            CreateProgressBars(progressBarsGrid, tokens);
-
-            // 只有当 ItemsSource 未绑定时才进行
-            if (MountInfosListView.ItemsSource == null)
-            {
-                List<MountInfo> MountInfos = await Method.GetWindowsMountInfo(cmsModel);
-                cmsModel.MountInfos = MountInfos;
-                MountInfosListView.ItemsSource = cmsModel.MountInfos;
-            }
-            if (NetworkInfosListView.ItemsSource == null)
-            {
-                List<NetworkInterfaceInfo> NetworkInterfaceInfos = await Method.GetWindowsNetworkInterfaceInfo(cmsModel);
-                cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
-                NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
-            }
-        }
-
         private async void Timer_Tick(object sender, object e)
         {
             List<Task> tasks = new List<Task>();
@@ -265,7 +231,6 @@ namespace SeeMyServer.Pages
             {
                 "Linux" => UpdateLinuxCMSModelAsync(dataList),
                 "OpenWRT" => UpdateOpenWRTCMSModelAsync(dataList),
-                "Windows" => UpdateWindowsCMSModelAsync(dataList),
                 _ => Task.CompletedTask
             };
 
@@ -283,7 +248,7 @@ namespace SeeMyServer.Pages
         {
             EditThisConfig(dataList);
         }
-        
+
         private async void EditThisConfig(CMSModel cmsModel)
         {
             // 创建一个新的dialog对象

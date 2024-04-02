@@ -153,6 +153,7 @@
                                         NeedleLength="0"
                                         ScaleWidth="15"
                                         TickLength="0"
+                                        TrailBrush="#42cdef"
                                         ValueStringFormat=" "
                                         Value="{Binding CPUUsage}" />
                                     <controls:RadialGauge
@@ -163,10 +164,11 @@
                                         MinAngle="0"
                                         NeedleLength="0"
                                         ScalePadding="20"
-                                        ScaleWidth="10"
+                                        ScaleWidth="5"
                                         TickLength="0"
+                                        TrailBrush="#42cdef"
                                         ValueStringFormat=" "
-                                        Value="{Binding CPUUsage}" />
+                                        Value="{Binding Average1Percentage}" />
                                     <controls:RadialGauge
                                         Width="60"
                                         IsInteractive="False"
@@ -174,11 +176,25 @@
                                         Maximum="100"
                                         MinAngle="0"
                                         NeedleLength="0"
-                                        ScalePadding="35"
-                                        ScaleWidth="7"
+                                        ScalePadding="30"
+                                        ScaleWidth="5"
                                         TickLength="0"
+                                        TrailBrush="#42cdef"
                                         ValueStringFormat=" "
-                                        Value="{Binding CPUUsage}" />
+                                        Value="{Binding Average5Percentage}" />
+                                    <controls:RadialGauge
+                                        Width="60"
+                                        IsInteractive="False"
+                                        MaxAngle="0"
+                                        Maximum="100"
+                                        MinAngle="0"
+                                        NeedleLength="0"
+                                        ScalePadding="40"
+                                        ScaleWidth="5"
+                                        TickLength="0"
+                                        TrailBrush="#42cdef"
+                                        ValueStringFormat=" "
+                                        Value="{Binding Average15Percentage}" />
 
                                     <!--<ProgressRing
                                         Grid.Row="0"
@@ -224,6 +240,7 @@
                                         NeedleLength="0"
                                         ScaleWidth="30"
                                         TickLength="0"
+                                        TrailBrush="#849aff"
                                         ValueStringFormat=" "
                                         Value="{Binding MEMUsage}" />
                                     <!--<ProgressRing
@@ -279,6 +296,7 @@
                                             Padding="0,4,0,4"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
+                                            FontSize="10"
                                             Text="{Binding NETSent}" />
                                         <TextBlock
                                             Grid.Row="1"
@@ -286,6 +304,7 @@
                                             Padding="0,4,0,4"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
+                                            FontSize="10"
                                             Text="{Binding NETReceived}" />
                                     </Grid>
                                     <TextBlock

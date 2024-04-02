@@ -245,6 +245,13 @@
                         VerticalAlignment="Center"
                         Content="Microsoft.Data.Sqlite"
                         NavigateUri="https://www.nuget.org/packages/Microsoft.Data.Sqlite/" />
+                    <HyperlinkButton
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Content="Windows Community Toolkit"
+                        NavigateUri="https://github.com/CommunityToolkit/Windows" />
                 </Grid>
             </Grid>
         </ScrollViewer>

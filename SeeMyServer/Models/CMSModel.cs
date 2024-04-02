@@ -6,6 +6,9 @@ namespace SeeMyServer.Models
     public class CMSModel : INotifyPropertyChanged
     {
         private string _cpuUsage;
+        private string _average1Percentage;
+        private string _average5Percentage;
+        private string _average15Percentage;
         private string _memUsage;
         private string _netReceived;
         private string _netSent;
@@ -34,6 +37,42 @@ namespace SeeMyServer.Models
                 {
                     _cpuUsage = value;
                     OnPropertyChanged(nameof(CPUUsage));
+                }
+            }
+        }
+        public string Average1Percentage
+        {
+            get { return _average1Percentage; }
+            set
+            {
+                if (_average1Percentage != value)
+                {
+                    _average1Percentage = value;
+                    OnPropertyChanged(nameof(Average1Percentage));
+                }
+            }
+        }
+        public string Average5Percentage
+        {
+            get { return _average5Percentage; }
+            set
+            {
+                if (_average5Percentage != value)
+                {
+                    _average5Percentage = value;
+                    OnPropertyChanged(nameof(Average5Percentage));
+                }
+            }
+        }
+        public string Average15Percentage
+        {
+            get { return _average15Percentage; }
+            set
+            {
+                if (_average15Percentage != value)
+                {
+                    _average15Percentage = value;
+                    OnPropertyChanged(nameof(Average15Percentage));
                 }
             }
         }

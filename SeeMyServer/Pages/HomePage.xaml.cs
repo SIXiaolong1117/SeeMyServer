@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
 using Windows.Storage;
 using CommunityToolkit.WinUI.Controls;
+using static PInvoke.User32;
 
 namespace SeeMyServer.Pages
 {
@@ -84,7 +85,7 @@ namespace SeeMyServer.Pages
             timer.Tick += Timer_Tick;
 
             // 每隔段时间触发一次
-            timer.Interval = TimeSpan.FromSeconds(5);
+            timer.Interval = TimeSpan.FromSeconds(3);
 
             // 先执行一次事件处理方法
             Timer_Tick(null, null);
@@ -115,7 +116,7 @@ namespace SeeMyServer.Pages
         private async Task UpdateOpenWRTCMSModelAsync(CMSModel cmsModel)
         {
             // 定义异步任务
-            Task<string[]> usages = Method.GetOpenWRTCPUUsageAsync(cmsModel);
+            Task<string[]> usages = Method.GetOpenWRTUsageAsync(cmsModel);
             // OpenWRT也可以用ifconfig查询网速
             Task<string[]> netUsages = Method.GetLinuxNetAsync(cmsModel);
 
@@ -123,29 +124,15 @@ namespace SeeMyServer.Pages
             await Task.WhenAll(usages, netUsages);
 
             // 处理获取到的数据
-            cmsModel.CPUUsage = usages.Result[0];
-            cmsModel.MEMUsage = usages.Result[1];
+            //cmsModel.CPUUsage = usages.Result[0];
+            cmsModel.CPUUsage = $"{Math.Round(double.Parse(usages.Result[0]))}%";
+            //cmsModel.MEMUsage = usages.Result[1];
+            cmsModel.MEMUsage = $"{Math.Round(double.Parse(usages.Result[1]))}%";
             cmsModel.NETReceived = netUsages.Result[0];
             cmsModel.NETSent = netUsages.Result[1];
-        }
-
-        // Windows 信息更新
-        private async Task UpdateWindowsCMSModelAsync(CMSModel cmsModel)
-        {
-            // 定义异步任务
-            Task<string> cpuTask = Method.GetWindowsCPUUsageAsync(cmsModel);
-            Task<string> memTask = Method.GetWindowsMemoryUsageAsync(cmsModel);
-            Task<string> netSentTask = Method.GetWindowsNetSentAsync(cmsModel);
-            Task<string> netReceivedTask = Method.GetWindowsNetReceivedAsync(cmsModel);
-
-            // 同时执行异步任务
-            await Task.WhenAll(cpuTask, memTask, netSentTask, netReceivedTask);
-
-            // 处理获取到的数据
-            cmsModel.CPUUsage = cpuTask.Result;
-            cmsModel.MEMUsage = memTask.Result;
-            cmsModel.NETSent = netSentTask.Result;
-            cmsModel.NETReceived = netReceivedTask.Result;
+            cmsModel.Average1Percentage = usages.Result[5];
+            cmsModel.Average5Percentage = usages.Result[6];
+            cmsModel.Average15Percentage = usages.Result[7];
         }
 
         private async void Timer_Tick(object sender, object e)
@@ -158,7 +145,6 @@ namespace SeeMyServer.Pages
                 {
                     "Linux" => UpdateLinuxCMSModelAsync(cmsModel),
                     "OpenWRT" => UpdateOpenWRTCMSModelAsync(cmsModel),
-                    "Windows" => UpdateWindowsCMSModelAsync(cmsModel),
                     _ => Task.CompletedTask
                 };
 
