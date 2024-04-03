@@ -269,27 +269,57 @@ namespace SeeMyServer.Methods
 
         public static async Task<string[]> GetLinuxUsageAsync(CMSModel cmsModel)
         {
+            // top查询
             string UsageCMD = "top 1 -bn1";
             string UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
-            //throw new Exception($"{UsageRes}");
 
-            // 定义正则表达式模式 匹配CPU占用
+            // CPU核心数
+            string CPUCoreCMD = "cat /proc/cpuinfo | grep processor | wc -l";
+            string CPUCoreRes = await SendSSHCommandAsync(CPUCoreCMD, cmsModel);
+
+            // 使用正则取出CPU占用
             Regex cpuPattern = new Regex(@"%Cpu\d+\s+:\s*(\d*\.\d+)\s+us,\s*(\d*\.\d+)\s+sy,\s*(\d*\.\d+)\s+ni,\s*(\d*\.\d+)\s+id,\s*(\d*\.\d+)\s+wa,\s*(\d*\.\d+)\s+hi,\s*(\d*\.\d+)\s+si,\s*(\d*\.\d+)\s+st");
+            // 使用正则取出MEM占用
+            Regex memPattern = new Regex(@"GiB\s+Mem\s+:\s+([\d\.]+)\s+total,\s+([\d\.]+)\s+free,\s+([\d\.]+)\s+used,\s+([\d\.]+)\s+buff/cache");
+            // 使用正则取出负载信息
+            Regex loadRegex = new Regex(@"load average: (\d+\.\d+), (\d+\.\d+), (\d+\.\d+)");
 
-            // 定义正则表达式模式 匹配MEM占用
-            string memPattern = @"GiB\s+Mem\s+:\s+([\d\.]+)\s+total,\s+([\d\.]+)\s+free,\s+([\d\.]+)\s+used,\s+([\d\.]+)\s+buff/cache";
+            Match memMatch = memPattern.Match(UsageRes);
+            Match loadMatch = loadRegex.Match(UsageRes);
+
 
             // 创建列表以存储结果
             List<string> cpuUsageList = new List<string>();
-
-            // 匹配输入字符串中的模式
-            Match memMatch = Regex.Match(UsageRes, memPattern);
-
             if (cpuPattern.IsMatch(UsageRes) && memMatch.Success)
             {
                 float memUsageResTotalValue = float.Parse(memMatch.Groups[1].Value);
                 float memUsageResUsedValue = float.Parse(memMatch.Groups[3].Value);
                 float memUsageResValue = (memUsageResUsedValue / memUsageResTotalValue) * 100;
+
+                // 获取1分钟内负载
+                double average1 = double.Parse(loadMatch.Groups[1].Value);
+                // 获取5分钟内负载
+                double average5 = double.Parse(loadMatch.Groups[2].Value);
+                // 获取15分钟内负载
+                double average15 = double.Parse(loadMatch.Groups[3].Value);
+                // 计算负载
+                double average1Percentage = 0.0;
+                double average5Percentage = 0.0;
+                double average15Percentage = 0.0;
+                try
+                {
+                    // 此处的计算基于Load average定义，每个核心有一个任务在执行是最佳满载状态(100%)
+                    // 1分钟内
+                    average1Percentage = average1 * 100 / double.Parse(CPUCoreRes);
+                    // 5分钟内
+                    average5Percentage = average5 * 100 / double.Parse(CPUCoreRes);
+                    // 15分钟内
+                    average15Percentage = average15 * 100 / double.Parse(CPUCoreRes);
+                }
+                catch
+                {
+                    //double.Parse(CPUCoreRes)失败
+                }
 
                 // 在输入文本中查找匹配项并构建结果字符串
                 foreach (Match match in cpuPattern.Matches(UsageRes))
@@ -297,6 +327,7 @@ namespace SeeMyServer.Methods
                     string coreInfo = $"{match.Groups[1].Value}";
                     cpuUsageList.Add(coreInfo);
                 }
+
                 // 计算核心平均占用率
                 double averageUsage = 0;
                 if (cpuUsageList.Count > 0)
@@ -309,11 +340,34 @@ namespace SeeMyServer.Methods
                     averageUsage = totalUsage / cpuUsageList.Count;
                 }
                 //throw new Exception($"Invalid argument: {string.Join(", ", cpuUsageList)}");
-                return new string[] { $"{(int)averageUsage}%", $"{memUsageResValue.ToString().Split('.')[0]}%", $"{string.Join(", ", cpuUsageList)}", $"{UsageRes}", $"{memUsageResTotalValue}" };
+                return new string[] {
+                    $"{(int)averageUsage}%",                            //0 平均占用
+                    $"{memUsageResValue.ToString().Split('.')[0]}%",    //1
+                    $"{string.Join(", ", cpuUsageList)}",               //2
+                    $"{UsageRes}",                                      //3
+                    $"{memUsageResTotalValue}",                         //4 物理内存量
+                    $"{average1}",                                      //5 1分钟内负载
+                    $"{average5}",                                      //6 5分钟内负载
+                    $"{average15}",                                     //7 15分钟内负载
+                    $"{average1Percentage}",                            //8 1分钟负载百分比
+                    $"{average5Percentage}",                            //9 5分钟内负载百分比
+                    $"{average15Percentage}",                           //10 15分钟内负载百分比
+                };
             }
             else
             {
-                return new string[] { "0%", "0%", "0,0", "Err", "0.0" };
+                return new string[] {
+                    "0%",
+                    "0%",
+                    "0,0",
+                    "Err",
+                    "0.0",
+                    "0",
+                    "0",
+                    "0",
+                    "0",
+                    "0",
+                    "0"};
             }
 
         }

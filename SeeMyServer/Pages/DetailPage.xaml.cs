@@ -132,11 +132,11 @@ namespace SeeMyServer.Pages
             timer = new DispatcherTimer();
             timer.Tick += Timer_Tick;
 
-            // 每隔段时间触发一次
-            timer.Interval = TimeSpan.FromSeconds(3);
-
             // 先执行一次事件处理方法
             Timer_Tick(null, null);
+
+            // 每隔段时间触发一次
+            timer.Interval = TimeSpan.FromSeconds(3);
 
             // 启动计时器
             timer.Start();
@@ -145,21 +145,23 @@ namespace SeeMyServer.Pages
         // Linux 信息更新
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
-            string[] usages = await Method.GetLinuxUsageAsync(cmsModel);
-            string HostName = await Method.GetLinuxHostName(cmsModel);
-            string UpTime = await Method.GetLinuxUpTime(cmsModel);
+            Task<string[]> usages = Method.GetLinuxUsageAsync(cmsModel);
+            Task<string> HostName = Method.GetLinuxHostName(cmsModel);
+            Task<string> UpTime = Method.GetLinuxUpTime(cmsModel);
+
+            // 同时执行异步任务
+            await Task.WhenAll(usages, HostName, UpTime);
 
             // 处理获取到的数据
-            cmsModel.CPUUsage = usages[0];
-            cmsModel.MEMUsage = usages[1];
-            cmsModel.HostName = HostName;
-            cmsModel.UpTime = UpTime;
-            cmsModel.TotalMEM = $" of {usages[4]} GB";
-
-            //Debug.Text = usages[2];
-            //Debug2.Text = usages[3];
-
-            string[] tokens = usages[2].Split(", ");
+            cmsModel.CPUUsage = usages.Result[0];
+            cmsModel.MEMUsage = usages.Result[1];
+            cmsModel.HostName = HostName.Result;
+            cmsModel.UpTime = UpTime.Result;
+            if (!string.IsNullOrEmpty(usages.Result[4]))
+            {
+                cmsModel.TotalMEM = $" of {usages.Result[4].Substring(0, usages.Result[4].Length - 1)} GB";
+            }
+            string[] tokens = usages.Result[2].Split(", ");
             CreateProgressBars(progressBarsGrid, tokens);
 
             // 只有当 ItemsSource 未绑定时才进行绑定

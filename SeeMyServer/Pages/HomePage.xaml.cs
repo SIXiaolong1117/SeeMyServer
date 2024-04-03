@@ -84,11 +84,11 @@ namespace SeeMyServer.Pages
             timer = new DispatcherTimer();
             timer.Tick += Timer_Tick;
 
-            // 每隔段时间触发一次
-            timer.Interval = TimeSpan.FromSeconds(3);
-
             // 先执行一次事件处理方法
             Timer_Tick(null, null);
+
+            // 每隔段时间触发一次
+            timer.Interval = TimeSpan.FromSeconds(3);
 
             // 启动计时器
             timer.Start();
@@ -110,6 +110,9 @@ namespace SeeMyServer.Pages
             cmsModel.MEMUsage = usages.Result[1];
             cmsModel.NETReceived = netUsages.Result[0];
             cmsModel.NETSent = netUsages.Result[1];
+            cmsModel.Average1Percentage = usages.Result[8];
+            cmsModel.Average5Percentage = usages.Result[9];
+            cmsModel.Average15Percentage = usages.Result[10];
         }
 
         // OpenWRT 信息更新
