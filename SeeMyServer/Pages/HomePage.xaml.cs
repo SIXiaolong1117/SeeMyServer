@@ -99,7 +99,7 @@ namespace SeeMyServer.Pages
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
             // 定义异步任务
-            Task<List<string>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
+            Task<List<List<string>>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
             Task<List<string>> memUsages = Method.GetLinuxMEMUsageAsync(cmsModel);
             Task<string[]> loadAverage = Method.GetLinuxLoadAverageAsync(cmsModel);
 
@@ -112,7 +112,7 @@ namespace SeeMyServer.Pages
             // 处理获取到的数据
             try
             {
-                cmsModel.CPUUsage = $"{cpuUsages.Result[0].Split(".")[0]}%";
+                cmsModel.CPUUsage = $"{cpuUsages.Result[0][0].Split(".")[0]}%";
             }
             catch (Exception ex) { }
             try

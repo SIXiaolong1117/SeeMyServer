@@ -6,6 +6,10 @@ namespace SeeMyServer.Models
     public class CMSModel : INotifyPropertyChanged
     {
         private string _cpuUsage;
+        private string _cpuUserUsage;
+        private string _cpuSysUsage;
+        private string _cpuIdleUsage;
+        private string _cpuIOUsage;
         private string _average1Percentage;
         private string _average5Percentage;
         private string _average15Percentage;
@@ -37,6 +41,54 @@ namespace SeeMyServer.Models
                 {
                     _cpuUsage = value;
                     OnPropertyChanged(nameof(CPUUsage));
+                }
+            }
+        }
+        public string CPUUserUsage
+        {
+            get { return _cpuUserUsage; }
+            set
+            {
+                if (_cpuUserUsage != value)
+                {
+                    _cpuUserUsage = value;
+                    OnPropertyChanged(nameof(CPUUserUsage));
+                }
+            }
+        }
+        public string CPUSysUsage
+        {
+            get { return _cpuSysUsage; }
+            set
+            {
+                if (_cpuSysUsage != value)
+                {
+                    _cpuSysUsage = value;
+                    OnPropertyChanged(nameof(CPUSysUsage));
+                }
+            }
+        }
+        public string CPUIdleUsage
+        {
+            get { return _cpuIdleUsage; }
+            set
+            {
+                if (_cpuIdleUsage != value)
+                {
+                    _cpuIdleUsage = value;
+                    OnPropertyChanged(nameof(CPUIdleUsage));
+                }
+            }
+        }
+        public string CPUIOUsage
+        {
+            get { return _cpuIOUsage; }
+            set
+            {
+                if (_cpuIOUsage != value)
+                {
+                    _cpuIOUsage = value;
+                    OnPropertyChanged(nameof(CPUIOUsage));
                 }
             }
         }

@@ -418,6 +418,12 @@ namespace SeeMyServer.Methods
             string CMD = "hostname";
             CMD = await SendSSHCommandAsync(CMD, cmsModel);
 
+            if (CMD == "")
+            {
+                CMD = "uci get system.@system[0].hostname";
+                CMD = await SendSSHCommandAsync(CMD, cmsModel);
+            }
+
             return CMD.Split('\n')[0];
         }
         public static async Task<string> GetLinuxUpTime(CMSModel cmsModel)
@@ -604,7 +610,7 @@ namespace SeeMyServer.Methods
 
 
         // 获取Linux系统CPU占用百分比
-        public static async Task<List<string>> GetLinuxCPUUsageAsync(CMSModel cmsModel)
+        public static async Task<List<List<string>>> GetLinuxCPUUsageAsync(CMSModel cmsModel)
         {
             // 结果格式如下：
             // cpu  697687 0 1332141 93898629 1722210 0 840664 0 0 0
@@ -619,7 +625,7 @@ namespace SeeMyServer.Methods
 
             // 解析结果
             // 用于保存结果的List
-            List<string> cpuUsageList = new List<string>();
+            List<List<string>> cpuUsageList = new List<List<string>>();
 
             // 以换行符为准，按行分割结果
             string[] lines = CPUUsageRes.Split('\n');
@@ -633,6 +639,9 @@ namespace SeeMyServer.Methods
                     // 以空格分割，并去除空白项
                     string[] fields = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
+                    // 保存当前 CPU 的使用情况
+                    List<string> cpuUsage = new List<string>();
+
                     // 计算CPU总事件（单行之和）
                     long totalCpuTime = 0;
                     for (int i = 1; i < fields.Length; i++)
@@ -644,10 +653,22 @@ namespace SeeMyServer.Methods
                     }
 
                     // 计算CPU占用率百分比
-                    double cpuUsage = (double)(totalCpuTime - long.Parse(fields[4])) / totalCpuTime * 100;
+                    double user1 = (double)long.Parse(fields[1]) / totalCpuTime * 100; // 用户态
+                    double user2 = (double)long.Parse(fields[2]) / totalCpuTime * 100; // 用户态低优先级
 
-                    //cpuUsageList.Add($"CPU{fields[0].Substring(3)} 占用率：{cpuUsage:F2}%");
-                    cpuUsageList.Add($"{cpuUsage:F2}");
+                    // 添加 CPU 用户态 用户态低优先级 系统态 空闲 I/O等待 无意义 硬件中断 软件中断 steal_time guest_nice进程的占用百分比
+                    cpuUsage.Add(((double)(totalCpuTime - long.Parse(fields[4])) / totalCpuTime * 100).ToString("F2"));//0 总占比
+                    cpuUsage.Add((user1 + user2).ToString("F2")); //1 用户态 + 用户态低优先级
+                    cpuUsage.Add(((double)long.Parse(fields[3]) / totalCpuTime * 100).ToString("F2")); // 系统态
+                    cpuUsage.Add(((double)long.Parse(fields[4]) / totalCpuTime * 100).ToString("F2")); // 空闲
+                    cpuUsage.Add(((double)long.Parse(fields[5]) / totalCpuTime * 100).ToString("F2")); // I/O等待
+                    cpuUsage.Add(((double)long.Parse(fields[6]) / totalCpuTime * 100).ToString("F2")); // 无意义
+                    cpuUsage.Add(((double)long.Parse(fields[7]) / totalCpuTime * 100).ToString("F2")); // 硬件中断
+                    cpuUsage.Add(((double)long.Parse(fields[8]) / totalCpuTime * 100).ToString("F2")); // 软件中断
+                    cpuUsage.Add(((double)long.Parse(fields[9]) / totalCpuTime * 100).ToString("F2")); // steal_time
+                    cpuUsage.Add(((double)long.Parse(fields[10]) / totalCpuTime * 100).ToString("F2")); // guest_nice进程
+
+                    cpuUsageList.Add(cpuUsage);
                 }
             }
 

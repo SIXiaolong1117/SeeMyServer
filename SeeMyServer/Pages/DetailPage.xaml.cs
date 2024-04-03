@@ -12,6 +12,7 @@ using SeeMyServer.Pages.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
@@ -145,17 +146,10 @@ namespace SeeMyServer.Pages
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
             // 定义异步任务
-            Task<List<string>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
+            Task<List<List<string>>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
             Task<List<string>> memUsages = Method.GetLinuxMEMUsageAsync(cmsModel);
             Task<string> HostName;
-            if (cmsModel.OSType == "OpenWRT")
-            {
-                HostName = Method.GetOpenWRTHostName(cmsModel);
-            }
-            else
-            {
-                HostName = Method.GetLinuxHostName(cmsModel);
-            }
+            HostName = Method.GetLinuxHostName(cmsModel);
             Task<string> UpTime = Method.GetLinuxUpTime(cmsModel);
 
             // 同时执行异步任务
@@ -164,7 +158,11 @@ namespace SeeMyServer.Pages
             // 处理获取到的数据
             try
             {
-                cmsModel.CPUUsage = $"{cpuUsages.Result[0]}%";
+                cmsModel.CPUUsage = $"{cpuUsages.Result[0][0]}%";
+                cmsModel.CPUUserUsage = $"{cpuUsages.Result[0][1]}%";
+                cmsModel.CPUSysUsage = $"{cpuUsages.Result[0][2]}%";
+                cmsModel.CPUIdleUsage = $"{cpuUsages.Result[0][3]}%";
+                cmsModel.CPUIOUsage = $"{cpuUsages.Result[0][4]}%";
             }
             catch (Exception ex) { }
             try
@@ -192,7 +190,7 @@ namespace SeeMyServer.Pages
             string[] tokens = new string[] { "0" };
             try
             {
-                tokens = cpuUsages.Result.GetRange(1, cpuUsages.Result.Count - 1).ToArray();
+                tokens = cpuUsages.Result.Skip(1).Select(cpuUsage => cpuUsage[0]).ToArray();
             }
             catch (Exception ex) { }
 
@@ -216,7 +214,7 @@ namespace SeeMyServer.Pages
         // OpenWRT 信息更新
         private async Task UpdateOpenWRTCMSModelAsync(CMSModel cmsModel)
         {
-            Task<List<string>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
+            Task<List<List<string>>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
             Task<List<string>> memUsages = Method.GetLinuxMEMUsageAsync(cmsModel);
             Task<string[]> usages = Method.GetOpenWRTUsageAsync(cmsModel);
             Task<string> HostName = Method.GetOpenWRTHostName(cmsModel);
