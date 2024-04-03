@@ -431,7 +431,9 @@ namespace SeeMyServer.Methods
         // 获取Linux挂载情况
         public static async Task<List<MountInfo>> GetLinuxMountInfo(CMSModel cmsModel)
         {
-            string CMD = "df -hP";
+            // P - 防止换行
+            // 2>&1 - 将标准错误输出重定向到标准输出，这样可以在管道中处理错误消息。
+            string CMD = "df -hP 2>&1";
             CMD = await SendSSHCommandAsync(CMD, cmsModel);
 
             List<MountInfo> mountInfos = MountInfoParse(CMD);
@@ -706,18 +708,21 @@ namespace SeeMyServer.Methods
 
             Match loadMatch = loadRegex.Match(UsageRes);
 
-            // 获取1分钟内负载
-            double average1 = double.Parse(loadMatch.Groups[1].Value);
-            // 获取5分钟内负载
-            double average5 = double.Parse(loadMatch.Groups[2].Value);
-            // 获取15分钟内负载
-            double average15 = double.Parse(loadMatch.Groups[3].Value);
-            // 计算负载
-            double average1Percentage = 0.0;
-            double average5Percentage = 0.0;
-            double average15Percentage = 0.0;
+            double average1 = .0;
+            double average5 = .0;
+            double average15 = .0;
+            double average1Percentage = .0;
+            double average5Percentage = .0;
+            double average15Percentage = .0;
             try
             {
+                // 获取1分钟内负载
+                average1 = double.Parse(loadMatch.Groups[1].Value);
+                // 获取5分钟内负载
+                average5 = double.Parse(loadMatch.Groups[2].Value);
+                // 获取15分钟内负载
+                average15 = double.Parse(loadMatch.Groups[3].Value);
+
                 // 此处的计算基于Load average定义，每个核心有一个任务在执行是最佳满载状态(100%)
                 // 1分钟内
                 average1Percentage = average1 * 100 / double.Parse(CPUCoreRes);
@@ -772,7 +777,7 @@ namespace SeeMyServer.Methods
                 return netValue + " B";
             }
         }
-        // 处理 df -h
+        // 处理 df
         public static List<MountInfo> MountInfoParse(string input)
         {
             var mountInfos = new List<MountInfo>();
@@ -783,26 +788,30 @@ namespace SeeMyServer.Methods
             // 跳过标题行
             foreach (var line in lines.Skip(1))
             {
-                var columns = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                // 共6列
-                if (columns.Length == 6 && columns[0] != "tmpfs" && columns[0] != "devtmpfs")
+                // 检查是否以 / 开头
+                if (line.StartsWith("/"))
                 {
-                    var mountInfo = new MountInfo
+                    var columns = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    // 共6列
+                    if (columns.Length == 6)
                     {
-                        FileSystem = columns[0],
-                        Size = columns[1],
-                        Used = columns[2],
-                        Avail = columns[3],
-                        UsePercentage = columns[4],
-                        MountedOn = columns[5]
-                    };
+                        var mountInfo = new MountInfo
+                        {
+                            FileSystem = columns[0],
+                            Size = columns[1],
+                            Used = columns[2],
+                            Avail = columns[3],
+                            UsePercentage = columns[4],
+                            MountedOn = columns[5]
+                        };
 
-                    mountInfos.Add(mountInfo);
-                }
-                else
-                {
-                    Console.WriteLine("Invalid line format: " + line);
+                        mountInfos.Add(mountInfo);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid line format: " + line);
+                    }
                 }
             }
             return mountInfos;
