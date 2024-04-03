@@ -17,6 +17,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Windows.ApplicationModel;
 using Windows.Devices.Power;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -600,6 +601,144 @@ namespace SeeMyServer.Methods
 
 
 
+        // 获取Linux系统CPU占用百分比
+        public static async Task<List<string>> GetLinuxCPUUsageAsync(CMSModel cmsModel)
+        {
+            // 结果格式如下：
+            // cpu  697687 0 1332141 93898629 1722210 0 840664 0 0 0
+            // cpu0 171727 0 309858 23571901 565476 0 3820 0 0 0
+            // cpu1 163341 0 297540 23583515 578130 0 277 0 0 0
+            // cpu2 155832 0 299665 23203048 129886 0 834464 0 0 0
+            // cpu3 206787 0 425078 23540165 448718 0 2103 0 0 0
+            //
+            // CPU 用户态 用户态低优先级 系统态 空闲 I/O等待 无意义 硬件中断 软件中断 steal_time guest_nice进程
+            string CPUUsageCMD = "cat /proc/stat | grep cpu";
+            string CPUUsageRes = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
+
+            // 解析结果
+            // 用于保存结果的List
+            List<string> cpuUsageList = new List<string>();
+
+            // 以换行符为准，按行分割结果
+            string[] lines = CPUUsageRes.Split('\n');
+
+            // 遍历每行
+            foreach (string line in lines)
+            {
+                // 检查是否以 cpu 开头
+                if (line.StartsWith("cpu"))
+                {
+                    // 以空格分割，并去除空白项
+                    string[] fields = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    // 计算CPU总事件（单行之和）
+                    long totalCpuTime = 0;
+                    for (int i = 1; i < fields.Length; i++)
+                    {
+                        if (long.TryParse(fields[i], out long cpuTime))
+                        {
+                            totalCpuTime += cpuTime;
+                        }
+                    }
+
+                    // 计算CPU占用率百分比
+                    double cpuUsage = (double)(totalCpuTime - long.Parse(fields[4])) / totalCpuTime * 100;
+
+                    //cpuUsageList.Add($"CPU{fields[0].Substring(3)} 占用率：{cpuUsage:F2}%");
+                    cpuUsageList.Add($"{cpuUsage:F2}");
+                }
+            }
+
+            return cpuUsageList;
+        }
+
+        // 获取Linux系统内存占用百分比
+        public static async Task<List<string>> GetLinuxMEMUsageAsync(CMSModel cmsModel)
+        {
+            // 结果格式如下
+            // MemTotal:        3902716 kB
+            // MemFree:          151924 kB
+            // MemAvailable:    2799072 kB
+            // SwapCached:        66680 kB
+            // SwapTotal:       4439980 kB
+            // SwapFree:        3741944 kB
+            string MEMUsageCMD = "cat /proc/meminfo | grep -E 'Mem|Swap'";
+            string MEMUsageRes = await SendSSHCommandAsync(MEMUsageCMD, cmsModel);
+
+            List<string> parsedResults = new List<string>();
+
+            // 定义正则表达式模式
+            Regex pattern = new Regex(@"(\w+):\s+(\d+)\s+(\w+)");
+
+            // 使用正则表达式进行匹配
+            MatchCollection matches = pattern.Matches(MEMUsageRes);
+
+            // 遍历匹配结果
+            foreach (Match match in matches)
+            {
+                // 检查匹配是否成功
+                if (match.Success)
+                {
+                    // 构造解析结果字符串并添加到列表中
+                    //string result = $"{match.Groups[1].Value}: {match.Groups[2].Value} {match.Groups[3].Value}";
+                    string result = $"{match.Groups[2].Value}";
+                    parsedResults.Add(result);
+                }
+            }
+
+            return parsedResults;
+        }
+
+        // 获取系统1、5、15分钟负载
+        public static async Task<string[]> GetLinuxLoadAverageAsync(CMSModel cmsModel)
+        {
+
+            // top查询
+            string UsageCMD = "top 1 -bn1";
+            string UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
+
+            // CPU核心数
+            string CPUCoreCMD = "cat /proc/cpuinfo | grep processor | wc -l";
+            string CPUCoreRes = await SendSSHCommandAsync(CPUCoreCMD, cmsModel);
+
+            // 使用正则取出负载信息
+            Regex loadRegex = new Regex(@"load average: (\d+\.\d+), (\d+\.\d+), (\d+\.\d+)");
+
+            Match loadMatch = loadRegex.Match(UsageRes);
+
+            // 获取1分钟内负载
+            double average1 = double.Parse(loadMatch.Groups[1].Value);
+            // 获取5分钟内负载
+            double average5 = double.Parse(loadMatch.Groups[2].Value);
+            // 获取15分钟内负载
+            double average15 = double.Parse(loadMatch.Groups[3].Value);
+            // 计算负载
+            double average1Percentage = 0.0;
+            double average5Percentage = 0.0;
+            double average15Percentage = 0.0;
+            try
+            {
+                // 此处的计算基于Load average定义，每个核心有一个任务在执行是最佳满载状态(100%)
+                // 1分钟内
+                average1Percentage = average1 * 100 / double.Parse(CPUCoreRes);
+                // 5分钟内
+                average5Percentage = average5 * 100 / double.Parse(CPUCoreRes);
+                // 15分钟内
+                average15Percentage = average15 * 100 / double.Parse(CPUCoreRes);
+            }
+            catch
+            {
+                //double.Parse(CPUCoreRes)失败
+            }
+            return new string[] {
+                    $"{average1}",                                      //0 1分钟内负载
+                    $"{average5}",                                      //1 5分钟内负载
+                    $"{average15}",                                     //2 15分钟内负载
+                    $"{average1Percentage}",                            //3 1分钟负载百分比
+                    $"{average5Percentage}",                            //4 5分钟内负载百分比
+                    $"{average15Percentage}",                           //5 15分钟内负载百分比
+                };
+        }
 
 
 
@@ -614,12 +753,7 @@ namespace SeeMyServer.Methods
 
 
 
-
-
-
-
-
-        private static string NetUnitConversion(decimal netValue)
+        public static string NetUnitConversion(decimal netValue)
         {
             if (netValue >= (1000 * 1000 * 1000))
             {

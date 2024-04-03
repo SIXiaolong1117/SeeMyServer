@@ -46,7 +46,14 @@ namespace SeeMyServer.Pages.Dialogs
             //OSTypeComboBox.Items.Add("Windows");
             OSTypeComboBox.Items.Add("Linux");
             OSTypeComboBox.Items.Add("OpenWRT");
-            OSTypeComboBox.SelectedItem = cmsModel.OSType == null ? "Linux" : OSTypeComboBox.SelectedItem;
+            if (cmsModel.OSType == null)
+            {
+                OSTypeComboBox.SelectedItem = "Linux";
+            }
+            else
+            {
+                OSTypeComboBox.SelectedItem = cmsModel.OSType;
+            }
 
             // 刷新Key Auth状态
             PrivateKeyIsOpen();
@@ -69,26 +76,29 @@ namespace SeeMyServer.Pages.Dialogs
             }
             else
             {
-                CMSData.SSHKeyIsOpen = "False";
-                // 检查是否已经存在密钥和初始化向量，如果不存在则生成新的
-                string key = Method.LoadKeyFromLocalSettings() ?? Method.GenerateRandomKey();
-                string iv = Method.LoadIVFromLocalSettings() ?? Method.GenerateRandomIV();
+                if (SSHPasswd.Password != "")
+                {
+                    CMSData.SSHKeyIsOpen = "False";
+                    // 检查是否已经存在密钥和初始化向量，如果不存在则生成新的
+                    string key = Method.LoadKeyFromLocalSettings() ?? Method.GenerateRandomKey();
+                    string iv = Method.LoadIVFromLocalSettings() ?? Method.GenerateRandomIV();
 
-                // 将密钥和初始化向量保存到 localSettings 中
-                Method.SaveKeyToLocalSettings(key);
-                Method.SaveIVToLocalSettings(iv);
+                    // 将密钥和初始化向量保存到 localSettings 中
+                    Method.SaveKeyToLocalSettings(key);
+                    Method.SaveIVToLocalSettings(iv);
 
-                // 使用的对称加密算法
-                SymmetricAlgorithm symmetricAlgorithm = new AesManaged();
+                    // 使用的对称加密算法
+                    SymmetricAlgorithm symmetricAlgorithm = new AesManaged();
 
-                // 设置加密密钥和初始化向量
-                symmetricAlgorithm.Key = Convert.FromBase64String(key);
-                symmetricAlgorithm.IV = Convert.FromBase64String(iv);
+                    // 设置加密密钥和初始化向量
+                    symmetricAlgorithm.Key = Convert.FromBase64String(key);
+                    symmetricAlgorithm.IV = Convert.FromBase64String(iv);
 
-                // 加密字符串
-                string encrypted = Method.EncryptString(SSHPasswd.Password, symmetricAlgorithm);
+                    // 加密字符串
+                    string encrypted = Method.EncryptString(SSHPasswd.Password, symmetricAlgorithm);
 
-                CMSData.SSHPasswd = encrypted;
+                    CMSData.SSHPasswd = encrypted;
+                }
             }
         }
 

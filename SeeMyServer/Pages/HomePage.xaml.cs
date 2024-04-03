@@ -99,20 +99,34 @@ namespace SeeMyServer.Pages
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
             // 定义异步任务
-            Task<string[]> usages = Method.GetLinuxUsageAsync(cmsModel);
+            Task<List<string>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
+            Task<List<string>> memUsages = Method.GetLinuxMEMUsageAsync(cmsModel);
+            Task<string[]> loadAverage = Method.GetLinuxLoadAverageAsync(cmsModel);
+
+            //Task<string[]> usages = Method.GetLinuxUsageAsync(cmsModel);
             Task<string[]> netUsages = Method.GetLinuxNetAsync(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(usages, netUsages);
+            await Task.WhenAll(cpuUsages, memUsages, loadAverage, netUsages);
 
             // 处理获取到的数据
-            cmsModel.CPUUsage = usages.Result[0];
-            cmsModel.MEMUsage = usages.Result[1];
+            try
+            {
+                cmsModel.CPUUsage = $"{cpuUsages.Result[0].Split(".")[0]}%";
+            }
+            catch (Exception ex) { }
+            try
+            {
+                // 计算内存占用百分比
+                double memUsagesValue = (double.Parse(memUsages.Result[0]) - double.Parse(memUsages.Result[2])) * 100 / double.Parse(memUsages.Result[0]);
+                cmsModel.MEMUsage = $"{memUsagesValue:F0}%";
+            }
+            catch (Exception ex) { }
             cmsModel.NETReceived = netUsages.Result[0];
             cmsModel.NETSent = netUsages.Result[1];
-            cmsModel.Average1Percentage = usages.Result[8];
-            cmsModel.Average5Percentage = usages.Result[9];
-            cmsModel.Average15Percentage = usages.Result[10];
+            cmsModel.Average1Percentage = loadAverage.Result[3];
+            cmsModel.Average5Percentage = loadAverage.Result[4];
+            cmsModel.Average15Percentage = loadAverage.Result[5];
         }
 
         // OpenWRT 信息更新

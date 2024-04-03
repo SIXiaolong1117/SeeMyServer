@@ -59,7 +59,7 @@ namespace SeeMyServer.Pages
 
                 // 将ColumnDefinition添加到Grid的ColumnDefinitions集合中
                 container.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
-                container.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
+                container.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(55) });
                 container.ColumnDefinitions.Add(columnDefinition);
             }
 
@@ -80,17 +80,16 @@ namespace SeeMyServer.Pages
                 // 创建 TextBlock 来显示与 ProgressBar 同步的值
                 TextBlock textBlock = new TextBlock();
                 TextBlock textCPUBlock = new TextBlock();
-                textBlock.Text = $"{progressBar.Value.ToString().Split(".")[0]}%";
+                textBlock.Text = $"{CPUCoreUsageTokens[i]}%";
                 textCPUBlock.Text = $"CPU{i}";
                 textCPUBlock.Margin = new Thickness(0, 4, 8, 6);
                 // 监听 ProgressBar 的值改变事件，更新 TextBlock 的内容
                 progressBar.ValueChanged += (sender, e) =>
                 {
-                    textBlock.Text = $"{progressBar.Value.ToString().Split(".")[0]}%";
+                    textBlock.Text = $"{CPUCoreUsageTokens[i]}%";
                     textCPUBlock.Text = $"CPU{i}";
                 };
-                textBlock.Margin = new Thickness(8, 4, 0, 6);
-                textBlock.Width = 40;
+                textBlock.Margin = new Thickness(0, 4, 8, 6);
                 textBlock.HorizontalAlignment = HorizontalAlignment.Right;
 
                 // 设置位置
@@ -145,23 +144,58 @@ namespace SeeMyServer.Pages
         // Linux 信息更新
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
-            Task<string[]> usages = Method.GetLinuxUsageAsync(cmsModel);
-            Task<string> HostName = Method.GetLinuxHostName(cmsModel);
+            // 定义异步任务
+            Task<List<string>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
+            Task<List<string>> memUsages = Method.GetLinuxMEMUsageAsync(cmsModel);
+            Task<string> HostName;
+            if (cmsModel.OSType == "OpenWRT")
+            {
+                HostName = Method.GetOpenWRTHostName(cmsModel);
+            }
+            else
+            {
+                HostName = Method.GetLinuxHostName(cmsModel);
+            }
             Task<string> UpTime = Method.GetLinuxUpTime(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(usages, HostName, UpTime);
+            await Task.WhenAll(cpuUsages, memUsages, HostName, UpTime);
 
             // 处理获取到的数据
-            cmsModel.CPUUsage = usages.Result[0];
-            cmsModel.MEMUsage = usages.Result[1];
-            cmsModel.HostName = HostName.Result;
-            cmsModel.UpTime = UpTime.Result;
-            if (!string.IsNullOrEmpty(usages.Result[4]))
+            try
             {
-                cmsModel.TotalMEM = $" of {usages.Result[4].Substring(0, usages.Result[4].Length - 1)} GB";
+                cmsModel.CPUUsage = $"{cpuUsages.Result[0]}%";
             }
-            string[] tokens = usages.Result[2].Split(", ");
+            catch (Exception ex) { }
+            try
+            {
+                // 计算内存占用百分比
+                double memUsagesValue = (double.Parse(memUsages.Result[0]) - double.Parse(memUsages.Result[2])) * 100 / double.Parse(memUsages.Result[0]);
+                cmsModel.MEMUsage = $"{memUsagesValue:F2}%";
+            }
+            catch (Exception ex) { }
+            // 只有HostName和UpTime为空才更新
+            if (cmsModel.HostName == null)
+            {
+                cmsModel.HostName = HostName.Result;
+            }
+            if (cmsModel.UpTime == null)
+            {
+                cmsModel.UpTime = UpTime.Result;
+            }
+            try
+            {
+                cmsModel.TotalMEM = $" of {Method.NetUnitConversion(decimal.Parse(memUsages.Result[0]) * 1024)}";
+            }
+            catch (Exception ex) { }
+
+            string[] tokens = new string[] { "0" };
+            try
+            {
+                tokens = cpuUsages.Result.GetRange(1, cpuUsages.Result.Count - 1).ToArray();
+            }
+            catch (Exception ex) { }
+
             CreateProgressBars(progressBarsGrid, tokens);
 
             // 只有当 ItemsSource 未绑定时才进行绑定
@@ -182,6 +216,8 @@ namespace SeeMyServer.Pages
         // OpenWRT 信息更新
         private async Task UpdateOpenWRTCMSModelAsync(CMSModel cmsModel)
         {
+            Task<List<string>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
+            Task<List<string>> memUsages = Method.GetLinuxMEMUsageAsync(cmsModel);
             Task<string[]> usages = Method.GetOpenWRTUsageAsync(cmsModel);
             Task<string> HostName = Method.GetOpenWRTHostName(cmsModel);
             Task<string> CPUCoreUsage = Method.GetOpenWRTCPUCoreUsageAsync(cmsModel);
@@ -190,21 +226,38 @@ namespace SeeMyServer.Pages
             Task<string> UpTime = Method.GetLinuxUpTime(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(usages, HostName, netUsages, UpTime, CPUCoreUsage);
+            await Task.WhenAll(cpuUsages, memUsages, usages, HostName, netUsages, UpTime, CPUCoreUsage);
 
             // 处理获取到的数据
-            //cmsModel.CPUUsage = usages.Result[0];
-            cmsModel.CPUUsage = $"{Math.Round(double.Parse(usages.Result[0]))}%";
-            //cmsModel.MEMUsage = usages.Result[1];
-            cmsModel.MEMUsage = $"{Math.Round(double.Parse(usages.Result[1]))}%";
+            try
+            {
+                cmsModel.CPUUsage = $"{cpuUsages.Result[0]}%";
+            }
+            catch (Exception ex) { }
+            //cmsModel.CPUUsage = $"{Math.Round(double.Parse(usages.Result[0]))}%";
+            try
+            {
+                // 计算内存占用百分比
+                int memUsagesValue = (int.Parse(memUsages.Result[0]) - int.Parse(memUsages.Result[2])) * 100 / int.Parse(memUsages.Result[0]);
+                cmsModel.MEMUsage = $"{memUsagesValue}%";
+            }
+            catch (Exception ex) { }
+            //cmsModel.MEMUsage = $"{Math.Round(double.Parse(usages.Result[1]))}%";
             cmsModel.TotalMEM = $" of {usages.Result[8]}";
             cmsModel.NETReceived = netUsages.Result[0];
             cmsModel.NETSent = netUsages.Result[1];
             cmsModel.Average1Percentage = usages.Result[5];
             cmsModel.Average5Percentage = usages.Result[6];
             cmsModel.Average15Percentage = usages.Result[7];
-            cmsModel.HostName = HostName.Result;
-            cmsModel.UpTime = UpTime.Result;
+            // 只有HostName和UpTime为空才更新
+            if (cmsModel.HostName == null)
+            {
+                cmsModel.HostName = HostName.Result;
+            }
+            if (cmsModel.UpTime == null)
+            {
+                cmsModel.UpTime = UpTime.Result;
+            }
 
             // OpenWRT的Top无法查看单独核心占用
             string[] tokens = CPUCoreUsage.Result.Split(", ");
@@ -232,7 +285,7 @@ namespace SeeMyServer.Pages
             Task updateTask = dataList.OSType switch
             {
                 "Linux" => UpdateLinuxCMSModelAsync(dataList),
-                "OpenWRT" => UpdateOpenWRTCMSModelAsync(dataList),
+                "OpenWRT" => UpdateLinuxCMSModelAsync(dataList),
                 _ => Task.CompletedTask
             };
 
