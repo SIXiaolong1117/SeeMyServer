@@ -154,7 +154,7 @@
     <value>Mem Usage</value>
   </data>
   <data name="AboutServerMountInfos.Text" xml:space="preserve">
-    <value>Mount Infos</value>
+    <value>Mount</value>
   </data>
   <data name="AboutServerNetworkInfos.Text" xml:space="preserve">
     <value>Network</value>
@@ -301,7 +301,7 @@
     <value>Password</value>
   </data>
   <data name="SSHPasswd.PlaceholderText" xml:space="preserve">
-    <value>eg: Password</value>
+    <value>eg: R9$Wk@3Zp#56sL!</value>
   </data>
   <data name="SSHUser.Header" xml:space="preserve">
     <value>User</value>

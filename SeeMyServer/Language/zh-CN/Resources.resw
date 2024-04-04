@@ -141,6 +141,27 @@
   <data name="AboutReference.Text" xml:space="preserve">
     <value>依赖</value>
   </data>
+  <data name="AboutServer.Text" xml:space="preserve">
+    <value>关于</value>
+  </data>
+  <data name="AboutServerCPUUsage.Text" xml:space="preserve">
+    <value>CPU 占用</value>
+  </data>
+  <data name="AboutServerHostName.Text" xml:space="preserve">
+    <value>主机名</value>
+  </data>
+  <data name="AboutServerMEMUsage.Text" xml:space="preserve">
+    <value>内存占用</value>
+  </data>
+  <data name="AboutServerMountInfos.Text" xml:space="preserve">
+    <value>挂载</value>
+  </data>
+  <data name="AboutServerNetworkInfos.Text" xml:space="preserve">
+    <value>网络</value>
+  </data>
+  <data name="AboutServerUpTime.Text" xml:space="preserve">
+    <value>启动时长</value>
+  </data>
   <data name="AboutSetting.Text" xml:space="preserve">
     <value>关于</value>
   </data>
@@ -262,7 +283,7 @@
     <value>密码</value>
   </data>
   <data name="SSHPasswd.PlaceholderText" xml:space="preserve">
-    <value>例如：密码</value>
+    <value>例如：R9$Wk@3Zp#56sL!</value>
   </data>
   <data name="SSHUser.Header" xml:space="preserve">
     <value>用户</value>
