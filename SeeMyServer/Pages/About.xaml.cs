@@ -13,7 +13,8 @@ namespace SeeMyServer.Pages
             var package = Package.Current;
             var version = package.Id.Version;
 
-            APPVersion.Text = $"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
+            // {version.Major}.{version.Minor}.{version.Build}.{version.Revision}
+            APPVersion.Text = $"{version.Major}.{version.Minor}.{version.Build}";
         }
     }
 }

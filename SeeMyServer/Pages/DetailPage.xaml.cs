@@ -180,6 +180,10 @@ namespace SeeMyServer.Pages
                 // 计算内存占用百分比
                 double memUsagesValue = (double.Parse(memUsages.Result[0]) - double.Parse(memUsages.Result[2])) * 100 / double.Parse(memUsages.Result[0]);
                 cmsModel.MEMUsage = $"{memUsagesValue:F2}%";
+                double memFreeValue = double.Parse(memUsages.Result[1]) * 100 / double.Parse(memUsages.Result[0]);
+                cmsModel.MEMFree = $"{memFreeValue:F2}%";
+                double memAvailableValue = double.Parse(memUsages.Result[2]) * 100 / double.Parse(memUsages.Result[0]);
+                cmsModel.MEMAvailable = $"{memAvailableValue:F2}%";
             }
             catch (Exception ex) { }
             // 只有HostName和UpTime为空才更新

@@ -9,6 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using System.IO;
 
 
 namespace SeeMyServer.Pages.Dialogs
@@ -37,10 +38,21 @@ namespace SeeMyServer.Pages.Dialogs
             HostIPTextBox.Text = cmsModel.HostIP;
             HostPortTextBox.Text = cmsModel.HostPort;
             SSHUserTextBox.Text = cmsModel.SSHUser;
-            SSHKeyTextBox.Text = cmsModel.SSHKey;
             SSHKeyOrPasswdToggleSwitch.IsOn = cmsModel.SSHKeyIsOpen == "True";
             SSHPasswd.PlaceholderText = cmsModel.SSHPasswd != null ? "<Not Changed>" : SSHPasswd.PlaceholderText;
             logger.LogInfo("Dialog field initialization completed.");
+
+            if (cmsModel.SSHKey == "" || cmsModel.SSHKey == null)
+            {
+                string userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                string logFolder = Path.Combine(userFolderPath, ".ssh");
+                string logFilePath = Path.Combine(logFolder, "id_rsa");
+                SSHKeyTextBox.Text = logFilePath;
+            }
+            else
+            {
+                SSHKeyTextBox.Text = cmsModel.SSHKey;
+            }
 
             // 添加操作系统类型
             //OSTypeComboBox.Items.Add("Windows");
@@ -73,6 +85,7 @@ namespace SeeMyServer.Pages.Dialogs
             {
                 CMSData.SSHKeyIsOpen = "True";
                 CMSData.SSHKey = SSHKeyTextBox.Text;
+                CMSData.SSHPasswd = "";
             }
             else
             {
@@ -98,6 +111,7 @@ namespace SeeMyServer.Pages.Dialogs
                     string encrypted = Method.EncryptString(SSHPasswd.Password, symmetricAlgorithm);
 
                     CMSData.SSHPasswd = encrypted;
+                    CMSData.SSHKey = "";
                 }
             }
         }

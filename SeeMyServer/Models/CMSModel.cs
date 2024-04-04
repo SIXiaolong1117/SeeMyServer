@@ -14,6 +14,8 @@ namespace SeeMyServer.Models
         private string _average5Percentage;
         private string _average15Percentage;
         private string _memUsage;
+        private string _memFree;
+        private string _memAvailable;
         private string _netReceived;
         private string _netSent;
         private string _hostName;
@@ -137,6 +139,32 @@ namespace SeeMyServer.Models
                 {
                     _memUsage = value;
                     OnPropertyChanged(nameof(MEMUsage));
+                }
+            }
+        }
+
+        public string MEMFree
+        {
+            get { return _memFree; }
+            set
+            {
+                if (_memFree != value)
+                {
+                    _memFree = value;
+                    OnPropertyChanged(nameof(MEMFree));
+                }
+            }
+        }
+
+        public string MEMAvailable
+        {
+            get { return _memAvailable; }
+            set
+            {
+                if (_memAvailable != value)
+                {
+                    _memAvailable = value;
+                    OnPropertyChanged(nameof(MEMAvailable));
                 }
             }
         }
