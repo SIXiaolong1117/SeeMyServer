@@ -45,7 +45,7 @@ namespace SeeMyServer.Pages.Dialogs
             // 添加操作系统类型
             //OSTypeComboBox.Items.Add("Windows");
             OSTypeComboBox.Items.Add("Linux");
-            OSTypeComboBox.Items.Add("OpenWRT");
+            //OSTypeComboBox.Items.Add("OpenWRT");
             if (cmsModel.OSType == null)
             {
                 OSTypeComboBox.SelectedItem = "Linux";

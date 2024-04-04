@@ -34,6 +34,9 @@ namespace SeeMyServer.Pages
         {
             this.InitializeComponent();
 
+            this.Loaded += Page_Loaded;
+            this.Unloaded += Page_Unloaded;
+
             // 设置日志，最大1MB
             logger = new Logger(1);
 
@@ -127,19 +130,26 @@ namespace SeeMyServer.Pages
             dataList.MEMUsage = "0%";
             dataList.NETSent = "0 B/s ↑";
             dataList.NETReceived = "0 B/s ↓";
-
-            // 创建并配置DispatcherTimer
+        }
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            // 创建 DispatcherTimer 并启动
             timer = new DispatcherTimer();
-            timer.Tick += Timer_Tick;
-
             // 先执行一次事件处理方法
             Timer_Tick(null, null);
-
-            // 每隔段时间触发一次
             timer.Interval = TimeSpan.FromSeconds(3);
-
-            // 启动计时器
+            timer.Tick += Timer_Tick;
             timer.Start();
+        }
+        private void Page_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // 页面卸载时停止并销毁 DispatcherTimer
+            if (timer != null)
+            {
+                timer.Stop();
+                timer.Tick -= Timer_Tick;
+                timer = null;
+            }
         }
 
         // Linux 信息更新
@@ -211,71 +221,6 @@ namespace SeeMyServer.Pages
             }
         }
 
-        // OpenWRT 信息更新
-        private async Task UpdateOpenWRTCMSModelAsync(CMSModel cmsModel)
-        {
-            Task<List<List<string>>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
-            Task<List<string>> memUsages = Method.GetLinuxMEMUsageAsync(cmsModel);
-            Task<string[]> usages = Method.GetOpenWRTUsageAsync(cmsModel);
-            Task<string> HostName = Method.GetOpenWRTHostName(cmsModel);
-            Task<string> CPUCoreUsage = Method.GetOpenWRTCPUCoreUsageAsync(cmsModel);
-            // OpenWRT也可以用部分Linux命令
-            Task<string[]> netUsages = Method.GetLinuxNetAsync(cmsModel);
-            Task<string> UpTime = Method.GetLinuxUpTime(cmsModel);
-
-            // 同时执行异步任务
-            await Task.WhenAll(cpuUsages, memUsages, usages, HostName, netUsages, UpTime, CPUCoreUsage);
-
-            // 处理获取到的数据
-            try
-            {
-                cmsModel.CPUUsage = $"{cpuUsages.Result[0]}%";
-            }
-            catch (Exception ex) { }
-            //cmsModel.CPUUsage = $"{Math.Round(double.Parse(usages.Result[0]))}%";
-            try
-            {
-                // 计算内存占用百分比
-                int memUsagesValue = (int.Parse(memUsages.Result[0]) - int.Parse(memUsages.Result[2])) * 100 / int.Parse(memUsages.Result[0]);
-                cmsModel.MEMUsage = $"{memUsagesValue}%";
-            }
-            catch (Exception ex) { }
-            //cmsModel.MEMUsage = $"{Math.Round(double.Parse(usages.Result[1]))}%";
-            cmsModel.TotalMEM = $" of {usages.Result[8]}";
-            cmsModel.NETReceived = netUsages.Result[0];
-            cmsModel.NETSent = netUsages.Result[1];
-            cmsModel.Average1Percentage = usages.Result[5];
-            cmsModel.Average5Percentage = usages.Result[6];
-            cmsModel.Average15Percentage = usages.Result[7];
-            // 只有HostName和UpTime为空才更新
-            if (cmsModel.HostName == null)
-            {
-                cmsModel.HostName = HostName.Result;
-            }
-            if (cmsModel.UpTime == null)
-            {
-                cmsModel.UpTime = UpTime.Result;
-            }
-
-            // OpenWRT的Top无法查看单独核心占用
-            string[] tokens = CPUCoreUsage.Result.Split(", ");
-            CreateProgressBars(progressBarsGrid, tokens);
-
-            // 只有当 ItemsSource 未绑定时才进行绑定
-            if (MountInfosListView.ItemsSource == null)
-            {
-                List<MountInfo> MountInfos = await Method.GetLinuxMountInfo(cmsModel);
-                MountInfosListView.ItemsSource = cmsModel.MountInfos;
-                cmsModel.MountInfos = MountInfos;
-            }
-            if (NetworkInfosListView.ItemsSource == null)
-            {
-                List<NetworkInterfaceInfo> NetworkInterfaceInfos = await Method.GetLinuxNetworkInterfaceInfo(cmsModel);
-                cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
-                NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
-            }
-        }
-
         private async void Timer_Tick(object sender, object e)
         {
             List<Task> tasks = new List<Task>();
@@ -283,7 +228,6 @@ namespace SeeMyServer.Pages
             Task updateTask = dataList.OSType switch
             {
                 "Linux" => UpdateLinuxCMSModelAsync(dataList),
-                "OpenWRT" => UpdateLinuxCMSModelAsync(dataList),
                 _ => Task.CompletedTask
             };
 

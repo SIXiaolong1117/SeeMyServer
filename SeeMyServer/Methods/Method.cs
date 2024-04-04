@@ -96,7 +96,8 @@ namespace SeeMyServer.Methods
                     SshCommand SSHCommand = sshClient.RunCommand(sshCommand);
                     if (!string.IsNullOrEmpty(SSHCommand.Error))
                     {
-                        logger.LogError($"{sshCommand} SSH 命令执行错误：{SSHCommand.Error}");
+                        // 后文的实现会导致这里疯狂写入日志
+                        //logger.LogError($"{sshCommand} SSH 命令执行错误：{SSHCommand.Error}");
                         return "";
                     }
                     else
@@ -479,128 +480,6 @@ namespace SeeMyServer.Methods
 
 
 
-        // OpenWRT系统下的负载查询（CPU占用、内存占用、负载）
-        public static async Task<string[]> GetOpenWRTUsageAsync(CMSModel cmsModel)
-        {
-            // top查询
-            string UsageCMD = "top -bn1";
-            string UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
-            // CPU核心数
-            string CPUCoreCMD = "cat /proc/cpuinfo | grep processor | wc -l";
-            string CPUCoreRes = await SendSSHCommandAsync(CPUCoreCMD, cmsModel);
-
-            // 使用正则取出CPU占用信息
-            Regex cpuRegex = new Regex(@"CPU:\s+(\d+)% usr\s+(\d+)% sys\s+(\d+)% nic\s+(\d+)% idle\s+(\d+)% io\s+(\d+)% irq\s+(\d+)% sirq");
-            // 使用正则取出内存占用信息
-            Regex memRegex = new Regex(@"Mem:\s+(\d+)K used,\s+(\d+)K free");
-            // 使用正则取出负载信息
-            Regex loadRegex = new Regex(@"Load average: (\d+\.\d+) (\d+\.\d+) (\d+\.\d+) (\d+)/(\d+) (\d+)");
-
-
-            Match cpuMatch = cpuRegex.Match(UsageRes);
-            Match memMatch = memRegex.Match(UsageRes);
-            Match loadMatch = loadRegex.Match(UsageRes);
-
-            // CPU 都无法匹配，则后续工作毫无意义。
-            if (cpuMatch.Success)
-            {
-                // 获取使用内存容量
-                double usedMemory = double.Parse(memMatch.Groups[1].Value);
-                // 获取空闲内存容量
-                double freeMemory = double.Parse(memMatch.Groups[2].Value);
-                // 获取1分钟内负载
-                double average1 = double.Parse(loadMatch.Groups[1].Value);
-                // 获取5分钟内负载
-                double average5 = double.Parse(loadMatch.Groups[2].Value);
-                // 获取15分钟内负载
-                double average15 = double.Parse(loadMatch.Groups[3].Value);
-
-                // 计算内存占用百分比
-                double memoryPercentage = (usedMemory / (usedMemory + freeMemory)) * 100;
-                // 计算物理内存大小
-                double totalMemory = usedMemory + freeMemory;
-                // 单位换算（原本是KB单位）
-                string totalMemoryStr = NetUnitConversion(decimal.Parse($"{totalMemory * 1024}"));
-
-
-                // 计算负载
-                double average1Percentage = 0.0;
-                double average5Percentage = 0.0;
-                double average15Percentage = 0.0;
-                try
-                {
-                    // 此处的计算基于Load average定义，每个核心有一个任务在执行是最佳满载状态(100%)
-                    // 1分钟内
-                    average1Percentage = average1 * 100 / double.Parse(CPUCoreRes);
-                    // 5分钟内
-                    average5Percentage = average5 * 100 / double.Parse(CPUCoreRes);
-                    // 15分钟内
-                    average15Percentage = average15 * 100 / double.Parse(CPUCoreRes);
-                }
-                catch
-                {
-                    //double.Parse(CPUCoreRes)失败
-                }
-
-                // 返回结果要单纯的数字，百分号或其他单位应在View处理添加
-                return new string[] {
-                    $"{cpuMatch.Groups[1].Value}",          //0 CPU占用
-                    $"{memoryPercentage}",                  //1 内存占用
-                    $"{average1}",                          //2 1分钟内负载
-                    $"{average5}",                          //3 5分钟内负载
-                    $"{average15}",                         //4 15分钟内负载
-                    $"{average1Percentage}",                //5 1分钟负载百分比
-                    $"{average5Percentage}",                //6 5分钟内负载百分比
-                    $"{average15Percentage}",               //7 15分钟内负载百分比
-                    $"{totalMemoryStr}"                    //8 物理内存大小
-                };
-            }
-            else
-            {
-                return new string[] {
-                    "0",
-                    "0",
-                    "0",
-                    "0",
-                    "0",
-                    "0",
-                    "0",
-                    "0",
-                    "0"
-                };
-            }
-        }
-        public static async Task<string> GetOpenWRTCPUCoreUsageAsync(CMSModel cmsModel)
-        {
-            // 各CPU核心占用（mpstat通常包含在sysstat软件包中）
-            string CPUUsageCMD = "mpstat -P ALL";
-            string CPUUsageRes = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
-
-            List<string> cpuUsageList = new List<string>();
-
-            // 使用换行符分割输出
-            string[] lines = CPUUsageRes.Split('\n');
-
-            // 遍历每行，忽略首行标题行
-            for (int i = 4; i < lines.Length - 1; i++)
-            {
-                // 使用空格分割每行，并取得最后一列（%idle）
-                string[] columns = lines[i].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                string cpuUsage = $"{columns[2]}";
-                cpuUsageList.Add(cpuUsage);
-            }
-
-            //throw new Exception($"{lines[lines.Length - 2]}");
-            return $"{string.Join(", ", cpuUsageList)}";
-        }
-        public static async Task<string> GetOpenWRTHostName(CMSModel cmsModel)
-        {
-            string CMD = "uci get system.@system[0].hostname";
-            CMD = await SendSSHCommandAsync(CMD, cmsModel);
-
-            return CMD.Split('\n')[0];
-        }
-
 
 
 
@@ -715,57 +594,98 @@ namespace SeeMyServer.Methods
         // 获取系统1、5、15分钟负载
         public static async Task<string[]> GetLinuxLoadAverageAsync(CMSModel cmsModel)
         {
-
-            // top查询
-            string UsageCMD = "top 1 -bn1";
-            string UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
-
-            // CPU核心数
-            string CPUCoreCMD = "cat /proc/cpuinfo | grep processor | wc -l";
-            string CPUCoreRes = await SendSSHCommandAsync(CPUCoreCMD, cmsModel);
-
-            // 使用正则取出负载信息
-            Regex loadRegex = new Regex(@"load average: (\d+\.\d+), (\d+\.\d+), (\d+\.\d+)");
-
-            Match loadMatch = loadRegex.Match(UsageRes);
-
             double average1 = .0;
             double average5 = .0;
             double average15 = .0;
             double average1Percentage = .0;
             double average5Percentage = .0;
             double average15Percentage = .0;
-            try
-            {
-                // 获取1分钟内负载
-                average1 = double.Parse(loadMatch.Groups[1].Value);
-                // 获取5分钟内负载
-                average5 = double.Parse(loadMatch.Groups[2].Value);
-                // 获取15分钟内负载
-                average15 = double.Parse(loadMatch.Groups[3].Value);
 
-                // 此处的计算基于Load average定义，每个核心有一个任务在执行是最佳满载状态(100%)
-                // 1分钟内
-                average1Percentage = average1 * 100 / double.Parse(CPUCoreRes);
-                // 5分钟内
-                average5Percentage = average5 * 100 / double.Parse(CPUCoreRes);
-                // 15分钟内
-                average15Percentage = average15 * 100 / double.Parse(CPUCoreRes);
-            }
-            catch
+            // top查询
+            string UsageCMD = "top 1 -bn1";
+            string UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
+
+            // 如果这个命令查询成功
+            if (UsageRes != "")
             {
-                //double.Parse(CPUCoreRes)失败
+                // CPU核心数
+                string CPUCoreCMD = "cat /proc/cpuinfo | grep processor | wc -l";
+                string CPUCoreRes = await SendSSHCommandAsync(CPUCoreCMD, cmsModel);
+
+                // 使用正则取出负载信息
+                Regex loadRegex = new Regex(@"load average: (\d+\.\d+), (\d+\.\d+), (\d+\.\d+)");
+
+                Match loadMatch = loadRegex.Match(UsageRes);
+
+                try
+                {
+                    // 获取1分钟内负载
+                    average1 = double.Parse(loadMatch.Groups[1].Value);
+                    // 获取5分钟内负载
+                    average5 = double.Parse(loadMatch.Groups[2].Value);
+                    // 获取15分钟内负载
+                    average15 = double.Parse(loadMatch.Groups[3].Value);
+
+                    // 此处的计算基于Load average定义，每个核心有一个任务在执行是最佳满载状态(100%)
+                    // 1分钟内
+                    average1Percentage = average1 * 100 / double.Parse(CPUCoreRes);
+                    // 5分钟内
+                    average5Percentage = average5 * 100 / double.Parse(CPUCoreRes);
+                    // 15分钟内
+                    average15Percentage = average15 * 100 / double.Parse(CPUCoreRes);
+                }
+                catch
+                {
+                    //double.Parse(CPUCoreRes)失败
+                }
             }
+            // 换一种查询方法
+            else
+            {
+                // top查询
+                UsageCMD = "top -bn1";
+                UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
+                // CPU核心数
+                string CPUCoreCMD = "cat /proc/cpuinfo | grep processor | wc -l";
+                string CPUCoreRes = await SendSSHCommandAsync(CPUCoreCMD, cmsModel);
+
+                // 使用正则取出负载信息
+                Regex loadRegex = new Regex(@"Load average: (\d+\.\d+) (\d+\.\d+) (\d+\.\d+) (\d+)/(\d+) (\d+)");
+
+                Match loadMatch = loadRegex.Match(UsageRes);
+                try
+                {
+                    // 获取1分钟内负载
+                    average1 = double.Parse(loadMatch.Groups[1].Value);
+                    // 获取5分钟内负载
+                    average5 = double.Parse(loadMatch.Groups[2].Value);
+                    // 获取15分钟内负载
+                    average15 = double.Parse(loadMatch.Groups[3].Value);
+
+                    // 计算负载
+                    // 此处的计算基于Load average定义，每个核心有一个任务在执行是最佳满载状态(100%)
+                    // 1分钟内
+                    average1Percentage = average1 * 100 / double.Parse(CPUCoreRes);
+                    // 5分钟内
+                    average5Percentage = average5 * 100 / double.Parse(CPUCoreRes);
+                    // 15分钟内
+                    average15Percentage = average15 * 100 / double.Parse(CPUCoreRes);
+                }
+                catch
+                {
+                    //double.Parse(CPUCoreRes)失败
+                }
+            }
+            // 返回结果要单纯的数字，百分号或其他单位应在View处理添加
             return new string[] {
-                    $"{average1}",                                      //0 1分钟内负载
-                    $"{average5}",                                      //1 5分钟内负载
-                    $"{average15}",                                     //2 15分钟内负载
-                    $"{average1Percentage}",                            //3 1分钟负载百分比
-                    $"{average5Percentage}",                            //4 5分钟内负载百分比
-                    $"{average15Percentage}",                           //5 15分钟内负载百分比
+                    $"{average1}",                          //0 1分钟内负载
+                    $"{average5}",                          //1 5分钟内负载
+                    $"{average15}",                         //2 15分钟内负载
+                    $"{average1Percentage}",                //3 1分钟负载百分比
+                    $"{average5Percentage}",                //4 5分钟内负载百分比
+                    $"{average15Percentage}",               //5 15分钟内负载百分比
                 };
         }
-
 
 
 

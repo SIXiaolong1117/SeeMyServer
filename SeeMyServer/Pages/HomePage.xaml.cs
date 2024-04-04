@@ -33,6 +33,9 @@ namespace SeeMyServer.Pages
         {
             this.InitializeComponent();
 
+            this.Loaded += Page_Loaded;
+            this.Unloaded += Page_Unloaded;
+
             // 设置日志，最大1MB
             logger = new Logger(1);
 
@@ -79,20 +82,27 @@ namespace SeeMyServer.Pages
                 cmsModel.NETSent = "0 B/s ↑";
                 cmsModel.NETReceived = "0 B/s ↓";
             }
+        }
 
-            // 创建并配置DispatcherTimer
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            // 创建 DispatcherTimer 并启动
             timer = new DispatcherTimer();
-            timer.Tick += Timer_Tick;
-
             // 先执行一次事件处理方法
             Timer_Tick(null, null);
-
-            // 每隔段时间触发一次
             timer.Interval = TimeSpan.FromSeconds(3);
-
-            // 启动计时器
+            timer.Tick += Timer_Tick;
             timer.Start();
-            logger.LogInfo("Timer_Tick starts.");
+        }
+        private void Page_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // 页面卸载时停止并销毁 DispatcherTimer
+            if (timer != null)
+            {
+                timer.Stop();
+                timer.Tick -= Timer_Tick;
+                timer = null;
+            }
         }
 
         // Linux 信息更新
@@ -129,29 +139,6 @@ namespace SeeMyServer.Pages
             cmsModel.Average15Percentage = loadAverage.Result[5];
         }
 
-        // OpenWRT 信息更新
-        private async Task UpdateOpenWRTCMSModelAsync(CMSModel cmsModel)
-        {
-            // 定义异步任务
-            Task<string[]> usages = Method.GetOpenWRTUsageAsync(cmsModel);
-            // OpenWRT也可以用ifconfig查询网速
-            Task<string[]> netUsages = Method.GetLinuxNetAsync(cmsModel);
-
-            // 同时执行异步任务
-            await Task.WhenAll(usages, netUsages);
-
-            // 处理获取到的数据
-            //cmsModel.CPUUsage = usages.Result[0];
-            cmsModel.CPUUsage = $"{Math.Round(double.Parse(usages.Result[0]))}%";
-            //cmsModel.MEMUsage = usages.Result[1];
-            cmsModel.MEMUsage = $"{Math.Round(double.Parse(usages.Result[1]))}%";
-            cmsModel.NETReceived = netUsages.Result[0];
-            cmsModel.NETSent = netUsages.Result[1];
-            cmsModel.Average1Percentage = usages.Result[5];
-            cmsModel.Average5Percentage = usages.Result[6];
-            cmsModel.Average15Percentage = usages.Result[7];
-        }
-
         private async void Timer_Tick(object sender, object e)
         {
             List<Task> tasks = new List<Task>();
@@ -161,7 +148,6 @@ namespace SeeMyServer.Pages
                 Task updateTask = cmsModel.OSType switch
                 {
                     "Linux" => UpdateLinuxCMSModelAsync(cmsModel),
-                    "OpenWRT" => UpdateOpenWRTCMSModelAsync(cmsModel),
                     _ => Task.CompletedTask
                 };
 
@@ -170,6 +156,21 @@ namespace SeeMyServer.Pages
 
             await Task.WhenAll(tasks);
         }
+        //private async void Timer_Tick(object sender, object e)
+        //{
+        //    foreach (CMSModel cmsModel in dataList)
+        //    {
+        //        switch (cmsModel.OSType)
+        //        {
+        //            case "Linux":
+        //                await UpdateLinuxCMSModelAsync(cmsModel);
+        //                break;
+        //            default:
+        //                break;
+        //        }
+        //    }
+        //}
+
 
         // 添加/修改配置按钮点击
         private async void AddConfigButton_Click(object sender, RoutedEventArgs e)
