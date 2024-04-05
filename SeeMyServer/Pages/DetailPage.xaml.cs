@@ -62,8 +62,8 @@ namespace SeeMyServer.Pages
                 columnDefinition.Width = new GridLength(1, GridUnitType.Star);
 
                 // 将ColumnDefinition添加到Grid的ColumnDefinitions集合中
-                container.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
-                container.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(55) });
+                container.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(50) });
+                container.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(65) });
                 container.ColumnDefinitions.Add(columnDefinition);
             }
 
@@ -75,6 +75,10 @@ namespace SeeMyServer.Pages
                 ProgressBar progressBar = new ProgressBar();
 
                 progressBar.Margin = new Thickness(0, 4, 0, 4);
+
+                // 设置ProgressBar的前景色为指定的SolidColorBrush对象
+                progressBar.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(0xFF, 0x42, 0xCD, 0xEF));
+
                 try
                 {
                     progressBar.Value = double.Parse(CPUCoreUsageTokens[i]);
@@ -91,6 +95,7 @@ namespace SeeMyServer.Pages
                 progressBar.ValueChanged += (sender, e) =>
                 {
                     textBlock.Text = $"{CPUCoreUsageTokens[i]}%";
+                    //textBlock.Text = "100.00%";
                     textCPUBlock.Text = $"CPU{i}";
                 };
                 textBlock.Margin = new Thickness(0, 4, 8, 6);
@@ -158,12 +163,12 @@ namespace SeeMyServer.Pages
             // 定义异步任务
             Task<List<List<string>>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
             Task<List<string>> memUsages = Method.GetLinuxMEMUsageAsync(cmsModel);
-            Task<string> HostName;
-            HostName = Method.GetLinuxHostName(cmsModel);
+            Task<string[]> loadAverage = Method.GetLinuxLoadAverageAsync(cmsModel);
+            Task<string> HostName = Method.GetLinuxHostName(cmsModel);
             Task<string> UpTime = Method.GetLinuxUpTime(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(cpuUsages, memUsages, HostName, UpTime);
+            await Task.WhenAll(cpuUsages, memUsages, loadAverage, HostName, UpTime);
 
             // 处理获取到的数据
             try
@@ -175,6 +180,15 @@ namespace SeeMyServer.Pages
                 cmsModel.CPUIOUsage = $"{cpuUsages.Result[0][4]}%";
             }
             catch (Exception ex) { }
+
+            // 获取结果失败不更新
+            if (loadAverage.Result[3] != "0" || loadAverage.Result[4] != "0" || loadAverage.Result[5] != "0")
+            {
+                cmsModel.Average1Percentage = loadAverage.Result[3];
+                cmsModel.Average5Percentage = loadAverage.Result[4];
+                cmsModel.Average15Percentage = loadAverage.Result[5];
+            }
+
             try
             {
                 // 计算内存占用百分比
@@ -184,6 +198,9 @@ namespace SeeMyServer.Pages
                 cmsModel.MEMFree = $"{memFreeValue:F2}%";
                 double memAvailableValue = double.Parse(memUsages.Result[2]) * 100 / double.Parse(memUsages.Result[0]);
                 cmsModel.MEMAvailable = $"{memAvailableValue:F2}%";
+                // 页面缓存
+                double memUsagePageCacheValue = memUsagesValue + (memAvailableValue - memFreeValue);
+                cmsModel.MEMUsagePageCache = $"{memUsagePageCacheValue:F2}%";
             }
             catch (Exception ex) { }
             // 只有HostName和UpTime为空才更新
@@ -208,7 +225,10 @@ namespace SeeMyServer.Pages
             }
             catch (Exception ex) { }
 
-            CreateProgressBars(progressBarsGrid, tokens);
+            if (tokens != new string[] { "0" })
+            {
+                CreateProgressBars(progressBarsGrid, tokens);
+            }
 
             // 只有当 ItemsSource 未绑定时才进行绑定
             if (MountInfosListView.ItemsSource == null)

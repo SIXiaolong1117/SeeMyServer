@@ -3,6 +3,7 @@
     x:Class="SeeMyServer.Pages.DetailPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:SeeMyServer.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -91,6 +92,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -101,11 +103,13 @@
                         x:Uid="AboutServerHostName"
                         Grid.Row="0"
                         Grid.Column="0"
+                        Margin="0,4,0,4"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center" />
                     <TextBlock
                         Grid.Row="0"
                         Grid.Column="1"
+                        Margin="0,4,0,4"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
                         Text="{Binding HostName}" />
@@ -113,11 +117,13 @@
                         x:Uid="AboutServerUpTime"
                         Grid.Row="1"
                         Grid.Column="0"
+                        Margin="0,4,0,4"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center" />
                     <TextBlock
                         Grid.Row="1"
                         Grid.Column="1"
+                        Margin="0,4,0,4"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
                         Text="{Binding UpTime}" />
@@ -159,60 +165,52 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="80" />
                             </Grid.ColumnDefinitions>
 
                             <TextBlock
                                 Grid.Column="0"
-                                Margin="0,0,16,0"
                                 HorizontalAlignment="Right"
                                 Text="{Binding CPUUserUsage}" />
                             <TextBlock
                                 Grid.Row="1"
                                 Grid.Column="0"
-                                Margin="0,0,16,0"
                                 HorizontalAlignment="Right"
                                 FontSize="12"
                                 Foreground="DarkGray"
                                 Text="User" />
                             <TextBlock
                                 Grid.Column="1"
-                                Margin="0,0,16,0"
                                 HorizontalAlignment="Right"
                                 Text="{Binding CPUSysUsage}" />
                             <TextBlock
                                 Grid.Row="1"
                                 Grid.Column="1"
-                                Margin="0,0,16,0"
                                 HorizontalAlignment="Right"
                                 FontSize="12"
                                 Foreground="DarkGray"
                                 Text="Sys" />
                             <TextBlock
                                 Grid.Column="2"
-                                Margin="0,0,16,0"
                                 HorizontalAlignment="Right"
                                 Text="{Binding CPUIdleUsage}" />
                             <TextBlock
                                 Grid.Row="1"
                                 Grid.Column="2"
-                                Margin="0,0,16,0"
                                 HorizontalAlignment="Right"
                                 FontSize="12"
                                 Foreground="DarkGray"
                                 Text="Idle" />
                             <TextBlock
                                 Grid.Column="3"
-                                Margin="0,0,16,0"
                                 HorizontalAlignment="Right"
                                 Text="{Binding CPUIOUsage}" />
                             <TextBlock
                                 Grid.Row="1"
                                 Grid.Column="3"
-                                Margin="0,0,16,0"
                                 HorizontalAlignment="Right"
                                 FontSize="12"
                                 Foreground="DarkGray"
@@ -237,6 +235,7 @@
                     BorderThickness="0"
                     CornerRadius="4,4,4,4">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
@@ -271,34 +270,28 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="80" />
                             </Grid.ColumnDefinitions>
 
                             <TextBlock
                                 Grid.Column="0"
-                                Margin="0,0,16,0"
                                 HorizontalAlignment="Right"
                                 Text="{Binding MEMFree}" />
                             <TextBlock
                                 Grid.Row="1"
                                 Grid.Column="0"
-                                Margin="0,0,16,0"
                                 HorizontalAlignment="Right"
                                 FontSize="12"
                                 Foreground="DarkGray"
                                 Text="Free" />
                             <TextBlock
                                 Grid.Column="1"
-                                Margin="0,0,16,0"
                                 HorizontalAlignment="Right"
                                 Text="{Binding MEMAvailable}" />
                             <TextBlock
                                 Grid.Row="1"
                                 Grid.Column="1"
-                                Margin="0,0,16,0"
                                 HorizontalAlignment="Right"
                                 FontSize="12"
                                 Foreground="DarkGray"
@@ -311,20 +304,93 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="50" />
+                            <ColumnDefinition Width="65" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <!--<TextBlock
+                        <TextBlock
                             Grid.Column="0"
-                            Width="40"
-                            Margin="8,4,0,6"
-                            HorizontalAlignment="Right"
-                            Text="{Binding MEMUsage}" />-->
-                        <ProgressBar
+                            Margin="0,4,8,6"
+                            HorizontalAlignment="Left"
+                            Text="Mem" />
+                        <TextBlock
                             Grid.Column="1"
+                            Margin="0,4,8,6"
+                            HorizontalAlignment="Right"
+                            Text="{Binding MEMUsage}" />
+                        <ProgressBar
+                            Grid.Column="2"
                             Margin="0,4,0,4"
+                            Foreground="#FDBF60"
+                            Value="{Binding MEMUsagePageCache}" />
+                        <ProgressBar
+                            Grid.Column="2"
+                            Margin="0,4,0,4"
+                            Background="Transparent"
+                            Foreground="#849aff"
                             Value="{Binding MEMUsage}" />
+                        <Grid
+                            Grid.Row="1"
+                            Grid.Column="2"
+                            HorizontalAlignment="Right">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="80" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel
+                                Grid.Column="0"
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal">
+                                <FontIcon
+                                    Margin="0,0,4,0"
+                                    HorizontalAlignment="Right"
+                                    FontSize="12"
+                                    Foreground="#849aff"
+                                    Glyph="&#xE938;" />
+                                <TextBlock HorizontalAlignment="Right" Text="Mem" />
+                            </StackPanel>
+                            <StackPanel
+                                Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal">
+                                <FontIcon
+                                    Margin="0,0,4,0"
+                                    HorizontalAlignment="Right"
+                                    FontSize="12"
+                                    Foreground="#FDBF60"
+                                    Glyph="&#xE938;" />
+                                <TextBlock HorizontalAlignment="Right" Text="Cache" />
+                            </StackPanel>
+                        </Grid>
                     </Grid>
+                    <!--<Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="40" />
+                            <ColumnDefinition Width="65" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Column="0"
+                            Margin="0,4,8,6"
+                            HorizontalAlignment="Right"
+                            Text="Swap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            Margin="0,4,8,6"
+                            HorizontalAlignment="Right"
+                            Text="{Binding MEMUsage}" />
+                        <ProgressBar
+                            Grid.Column="2"
+                            Margin="0,4,0,4"
+                            Foreground="#849aff"
+                            Value="{Binding MEMUsage}" />
+                    </Grid>-->
                 </Grid>
 
                 <TextBlock
@@ -421,7 +487,7 @@
                                         Height="40"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        Foreground="#849aff"
+                                        Foreground="#3cbdbd"
                                         IsIndeterminate="False"
                                         Value="{Binding UsePercentage}" />
                                     <TextBlock

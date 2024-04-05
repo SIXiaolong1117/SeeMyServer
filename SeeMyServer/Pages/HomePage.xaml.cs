@@ -112,8 +112,6 @@ namespace SeeMyServer.Pages
             Task<List<List<string>>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
             Task<List<string>> memUsages = Method.GetLinuxMEMUsageAsync(cmsModel);
             Task<string[]> loadAverage = Method.GetLinuxLoadAverageAsync(cmsModel);
-
-            //Task<string[]> usages = Method.GetLinuxUsageAsync(cmsModel);
             Task<string[]> netUsages = Method.GetLinuxNetAsync(cmsModel);
 
             // 同时执行异步任务

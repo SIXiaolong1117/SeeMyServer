@@ -14,6 +14,7 @@ namespace SeeMyServer.Models
         private string _average5Percentage;
         private string _average15Percentage;
         private string _memUsage;
+        private string _memUsagePageCache;
         private string _memFree;
         private string _memAvailable;
         private string _netReceived;
@@ -139,6 +140,19 @@ namespace SeeMyServer.Models
                 {
                     _memUsage = value;
                     OnPropertyChanged(nameof(MEMUsage));
+                }
+            }
+        }
+
+        public string MEMUsagePageCache
+        {
+            get { return _memUsagePageCache; }
+            set
+            {
+                if (_memUsagePageCache != value)
+                {
+                    _memUsagePageCache = value;
+                    OnPropertyChanged(nameof(MEMUsagePageCache));
                 }
             }
         }
