@@ -19,6 +19,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.Devices.Power;
+using Windows.Networking;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Provider;
@@ -269,7 +270,7 @@ namespace SeeMyServer.Methods
 
 
 
-        
+
         public static async Task<string[]> GetLinuxNetAsync(CMSModel cmsModel)
         {
             string netSentCMD = "ifconfig";
@@ -312,50 +313,6 @@ namespace SeeMyServer.Methods
                 return new string[] { "0", "0" };
             }
         }
-        public static async Task<string> GetLinuxHostName(CMSModel cmsModel)
-        {
-            string CMD = "hostname";
-            CMD = await SendSSHCommandAsync(CMD, cmsModel);
-
-            if (CMD == "")
-            {
-                CMD = "uci get system.@system[0].hostname";
-                CMD = await SendSSHCommandAsync(CMD, cmsModel);
-            }
-
-            return CMD.Split('\n')[0];
-        }
-        public static async Task<string> GetLinuxUpTime(CMSModel cmsModel)
-        {
-            string CMD = "uptime | awk '{print $3 \" \" $4}'";
-            CMD = await SendSSHCommandAsync(CMD, cmsModel);
-
-            return CMD.Split(',')[0];
-        }
-
-        // 获取Linux挂载情况
-        public static async Task<List<MountInfo>> GetLinuxMountInfo(CMSModel cmsModel)
-        {
-            // P - 防止换行
-            // 2>&1 - 将标准错误输出重定向到标准输出，这样可以在管道中处理错误消息。
-            string CMD = "df -hP 2>&1";
-            CMD = await SendSSHCommandAsync(CMD, cmsModel);
-
-            List<MountInfo> mountInfos = MountInfoParse(CMD);
-
-            return mountInfos;
-        }
-
-        // 获取Linux网络情况 
-        public static async Task<List<NetworkInterfaceInfo>> GetLinuxNetworkInterfaceInfo(CMSModel cmsModel)
-        {
-            string CMD = "ifconfig";
-            CMD = await SendSSHCommandAsync(CMD, cmsModel);
-
-            List<NetworkInterfaceInfo> networkInterfaceInfos = NetworkInterfaceInfoParse(CMD);
-
-            return networkInterfaceInfos;
-        }
 
 
 
@@ -387,9 +344,32 @@ namespace SeeMyServer.Methods
 
 
         // 获取Linux系统CPU占用百分比
-        public static async Task<List<List<string>>> GetLinuxCPUUsageAsync(CMSModel cmsModel)
+        public static async Task<Tuple<
+            List<List<string>>,
+            List<string>,
+            List<NetworkInterfaceInfo>,
+            List<MountInfo>,
+            string,
+            string,
+            List<string>
+            >> GetLinuxCPUUsageAsync(CMSModel cmsModel)
         {
-            // 结果格式如下：
+            // OpenWRT不能用hostname，可以用"uci get system.@system[0].hostname"。
+            // 用户应自己设置命令别名以兼容
+            string CPUUsageCMD = "cat /proc/stat | grep cpu 2>&1 ; echo '-' ; cat /proc/meminfo | grep -E 'Mem|Swap' 2>&1 ; echo '-' ; ifconfig 2>&1 ; echo '-' ; df -hP 2>&1 ; echo '-' ; uptime | awk '{print $3 \" \" $4}' 2>&1 ; echo '-' ; hostname 2>&1 ; echo '-' ; top -bn1 2>&1 ; echo '-' ; cat /proc/cpuinfo | grep processor | wc -l";
+            string CPUUsageRes = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
+
+            // 以 - 分割
+            string[] result = CPUUsageRes.Split("-\n");
+
+            // 用于保存结果的List
+            List<List<string>> cpuUsageList = new List<List<string>>();
+            List<string> parsedResults = new List<string>();
+            List<NetworkInterfaceInfo> networkInterfaceInfos = new List<NetworkInterfaceInfo>();
+            List<MountInfo> mountInfos = new List<MountInfo>();
+            List<string> loadResults = new List<string>();
+
+            // 第一部分是CPU占用，结果格式如下：
             // cpu  697687 0 1332141 93898629 1722210 0 840664 0 0 0
             // cpu0 171727 0 309858 23571901 565476 0 3820 0 0 0
             // cpu1 163341 0 297540 23583515 578130 0 277 0 0 0
@@ -397,192 +377,209 @@ namespace SeeMyServer.Methods
             // cpu3 206787 0 425078 23540165 448718 0 2103 0 0 0
             //
             // CPU 用户态 用户态低优先级 系统态 空闲 I/O等待 无意义 硬件中断 软件中断 steal_time guest_nice进程
-            string CPUUsageCMD = "cat /proc/stat | grep cpu";
-            string CPUUsageRes = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
 
-            // 解析结果
-            // 用于保存结果的List
-            List<List<string>> cpuUsageList = new List<List<string>>();
-
-            // 以换行符为准，按行分割结果
-            string[] lines = CPUUsageRes.Split('\n');
-
-            // 遍历每行
-            foreach (string line in lines)
             {
-                // 检查是否以 cpu 开头
-                if (line.StartsWith("cpu"))
+                // 解析结果
+
+                // 以换行符为准，按行分割结果
+                string[] lines = result[0].Split('\n');
+
+                // 遍历每行
+                foreach (string line in lines)
                 {
-                    // 以空格分割，并去除空白项
-                    string[] fields = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    // 保存当前 CPU 的使用情况
-                    List<string> cpuUsage = new List<string>();
-
-                    // 计算CPU总事件（单行之和）
-                    long totalCpuTime = 0;
-                    for (int i = 1; i < fields.Length; i++)
+                    // 检查是否以 cpu 开头
+                    if (line.StartsWith("cpu"))
                     {
-                        if (long.TryParse(fields[i], out long cpuTime))
+                        // 以空格分割，并去除空白项
+                        string[] fields = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        // 保存当前 CPU 的使用情况
+                        List<string> cpuUsage = new List<string>();
+
+                        // 计算CPU总事件（单行之和）
+                        long totalCpuTime = 0;
+                        for (int i = 1; i < fields.Length; i++)
                         {
-                            totalCpuTime += cpuTime;
+                            if (long.TryParse(fields[i], out long cpuTime))
+                            {
+                                totalCpuTime += cpuTime;
+                            }
                         }
+
+                        // 计算CPU占用率百分比
+                        double user1 = (double)long.Parse(fields[1]) / totalCpuTime * 100; // 用户态
+                        double user2 = (double)long.Parse(fields[2]) / totalCpuTime * 100; // 用户态低优先级
+
+                        // 添加 CPU 用户态 用户态低优先级 系统态 空闲 I/O等待 无意义 硬件中断 软件中断 steal_time guest_nice进程的占用百分比
+                        cpuUsage.Add(((double)(totalCpuTime - long.Parse(fields[4])) / totalCpuTime * 100).ToString("F2"));//0 总占比
+                        cpuUsage.Add((user1 + user2).ToString("F2")); //1 用户态 + 用户态低优先级
+                        cpuUsage.Add(((double)long.Parse(fields[3]) / totalCpuTime * 100).ToString("F2")); // 系统态
+                        cpuUsage.Add(((double)long.Parse(fields[4]) / totalCpuTime * 100).ToString("F2")); // 空闲
+                        cpuUsage.Add(((double)long.Parse(fields[5]) / totalCpuTime * 100).ToString("F2")); // I/O等待
+                        cpuUsage.Add(((double)long.Parse(fields[6]) / totalCpuTime * 100).ToString("F2")); // 无意义
+                        cpuUsage.Add(((double)long.Parse(fields[7]) / totalCpuTime * 100).ToString("F2")); // 硬件中断
+                        cpuUsage.Add(((double)long.Parse(fields[8]) / totalCpuTime * 100).ToString("F2")); // 软件中断
+                        cpuUsage.Add(((double)long.Parse(fields[9]) / totalCpuTime * 100).ToString("F2")); // steal_time
+                        cpuUsage.Add(((double)long.Parse(fields[10]) / totalCpuTime * 100).ToString("F2")); // guest_nice进程
+
+                        cpuUsageList.Add(cpuUsage);
                     }
-
-                    // 计算CPU占用率百分比
-                    double user1 = (double)long.Parse(fields[1]) / totalCpuTime * 100; // 用户态
-                    double user2 = (double)long.Parse(fields[2]) / totalCpuTime * 100; // 用户态低优先级
-
-                    // 添加 CPU 用户态 用户态低优先级 系统态 空闲 I/O等待 无意义 硬件中断 软件中断 steal_time guest_nice进程的占用百分比
-                    cpuUsage.Add(((double)(totalCpuTime - long.Parse(fields[4])) / totalCpuTime * 100).ToString("F2"));//0 总占比
-                    cpuUsage.Add((user1 + user2).ToString("F2")); //1 用户态 + 用户态低优先级
-                    cpuUsage.Add(((double)long.Parse(fields[3]) / totalCpuTime * 100).ToString("F2")); // 系统态
-                    cpuUsage.Add(((double)long.Parse(fields[4]) / totalCpuTime * 100).ToString("F2")); // 空闲
-                    cpuUsage.Add(((double)long.Parse(fields[5]) / totalCpuTime * 100).ToString("F2")); // I/O等待
-                    cpuUsage.Add(((double)long.Parse(fields[6]) / totalCpuTime * 100).ToString("F2")); // 无意义
-                    cpuUsage.Add(((double)long.Parse(fields[7]) / totalCpuTime * 100).ToString("F2")); // 硬件中断
-                    cpuUsage.Add(((double)long.Parse(fields[8]) / totalCpuTime * 100).ToString("F2")); // 软件中断
-                    cpuUsage.Add(((double)long.Parse(fields[9]) / totalCpuTime * 100).ToString("F2")); // steal_time
-                    cpuUsage.Add(((double)long.Parse(fields[10]) / totalCpuTime * 100).ToString("F2")); // guest_nice进程
-
-                    cpuUsageList.Add(cpuUsage);
                 }
+                //return cpuUsageList;
             }
 
-            return cpuUsageList;
-        }
-
-        // 获取Linux系统内存占用百分比
-        public static async Task<List<string>> GetLinuxMEMUsageAsync(CMSModel cmsModel)
-        {
-            // 结果格式如下
+            // 第二部分是内存和swap占用，结果格式如下：
             // MemTotal:        3902716 kB
             // MemFree:          151924 kB
             // MemAvailable:    2799072 kB
             // SwapCached:        66680 kB
             // SwapTotal:       4439980 kB
             // SwapFree:        3741944 kB
-            string MEMUsageCMD = "cat /proc/meminfo | grep -E 'Mem|Swap'";
-            string MEMUsageRes = await SendSSHCommandAsync(MEMUsageCMD, cmsModel);
 
-            List<string> parsedResults = new List<string>();
-
-            // 定义正则表达式模式
-            Regex pattern = new Regex(@"(\w+):\s+(\d+)\s+(\w+)");
-
-            // 使用正则表达式进行匹配
-            MatchCollection matches = pattern.Matches(MEMUsageRes);
-
-            // 遍历匹配结果
-            foreach (Match match in matches)
             {
-                // 检查匹配是否成功
-                if (match.Success)
+
+                // 定义正则表达式模式
+                Regex pattern = new Regex(@"(\w+):\s+(\d+)\s+(\w+)");
+
+                // 使用正则表达式进行匹配
+                MatchCollection matches = pattern.Matches(result[1]);
+
+                // 遍历匹配结果
+                foreach (Match match in matches)
                 {
-                    // 构造解析结果字符串并添加到列表中
-                    //string result = $"{match.Groups[1].Value}: {match.Groups[2].Value} {match.Groups[3].Value}";
-                    string result = $"{match.Groups[2].Value}";
-                    parsedResults.Add(result);
+                    // 检查匹配是否成功
+                    if (match.Success)
+                    {
+                        // 构造解析结果字符串并添加到列表中
+                        //string result = $"{match.Groups[1].Value}: {match.Groups[2].Value} {match.Groups[3].Value}";
+                        string matchResult = $"{match.Groups[2].Value}";
+                        parsedResults.Add(matchResult);
+                    }
+                }
+                //return parsedResults;
+            }
+
+            // 网卡信息
+            {
+                networkInterfaceInfos = NetworkInterfaceInfoParse(result[2]);
+            }
+
+            // 挂载信息
+            {
+                // P - 防止换行
+                // 2>&1 - 将标准错误输出重定向到标准输出，这样可以在管道中处理错误消息。
+                //string CMD = "df -hP 2>&1";
+                //CMD = await SendSSHCommandAsync(CMD, cmsModel);
+
+                mountInfos = MountInfoParse(result[3]);
+
+                //return mountInfos;
+            }
+
+            // 启动时长
+            {
+                //result[4].Split(',')[0]
+            }
+
+            // 主机名
+            {
+                //result[5].Split('\n')[0];
+                //// 单独处理OpenWRT的情况
+                if (result[5].Split('\n')[0] == "ash: hostname: not found")
+                {
+                    string CMD = "uci get system.@system[0].hostname";
+                    result[5] = await SendSSHCommandAsync(CMD, cmsModel);
                 }
             }
 
-            return parsedResults;
-        }
-
-        // 获取系统1、5、15分钟负载
-        public static async Task<string[]> GetLinuxLoadAverageAsync(CMSModel cmsModel)
-        {
-            double average1 = .0;
-            double average5 = .0;
-            double average15 = .0;
-            double average1Percentage = .0;
-            double average5Percentage = .0;
-            double average15Percentage = .0;
-
-            // top查询
-            string UsageCMD = "top 1 -bn1";
-            string UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
-
-            // 如果这个命令查询成功
-            if (UsageRes != "")
+            // 负载信息
+            // 不同主机的top格式可能不同，大多数Linux发行版可能相同，OpenWRT一般不同，这里注意特殊处理。
             {
-                // CPU核心数
-                string CPUCoreCMD = "cat /proc/cpuinfo | grep processor | wc -l";
-                string CPUCoreRes = await SendSSHCommandAsync(CPUCoreCMD, cmsModel);
+                double average1 = .0;
+                double average5 = .0;
+                double average15 = .0;
+                double average1Percentage = .0;
+                double average5Percentage = .0;
+                double average15Percentage = .0;
+                string CPUCoreRes = result[7];
 
-                // 使用正则取出负载信息
-                Regex loadRegex = new Regex(@"load average: (\d+\.\d+), (\d+\.\d+), (\d+\.\d+)");
-
-                Match loadMatch = loadRegex.Match(UsageRes);
-
-                try
+                // OpenWRT单独适配
+                if (result[6].StartsWith("Mem"))
                 {
-                    // 获取1分钟内负载
-                    average1 = double.Parse(loadMatch.Groups[1].Value);
-                    // 获取5分钟内负载
-                    average5 = double.Parse(loadMatch.Groups[2].Value);
-                    // 获取15分钟内负载
-                    average15 = double.Parse(loadMatch.Groups[3].Value);
+                    // 使用正则取出负载信息
+                    Regex loadRegex = new Regex(@"Load average: (\d+\.\d+) (\d+\.\d+) (\d+\.\d+) (\d+)/(\d+) (\d+)");
 
-                    // 此处的计算基于Load average定义，每个核心有一个任务在执行是最佳满载状态(100%)
-                    // 1分钟内
-                    average1Percentage = average1 * 100 / double.Parse(CPUCoreRes);
-                    // 5分钟内
-                    average5Percentage = average5 * 100 / double.Parse(CPUCoreRes);
-                    // 15分钟内
-                    average15Percentage = average15 * 100 / double.Parse(CPUCoreRes);
+                    Match loadMatch = loadRegex.Match(result[6]);
+                    try
+                    {
+                        // 获取1分钟内负载
+                        average1 = double.Parse(loadMatch.Groups[1].Value);
+                        // 获取5分钟内负载
+                        average5 = double.Parse(loadMatch.Groups[2].Value);
+                        // 获取15分钟内负载
+                        average15 = double.Parse(loadMatch.Groups[3].Value);
+
+                        // 计算负载
+                        // 此处的计算基于Load average定义，每个核心有一个任务在执行是最佳满载状态(100%)
+                        // 1分钟内
+                        average1Percentage = average1 * 100 / double.Parse(CPUCoreRes);
+                        // 5分钟内
+                        average5Percentage = average5 * 100 / double.Parse(CPUCoreRes);
+                        // 15分钟内
+                        average15Percentage = average15 * 100 / double.Parse(CPUCoreRes);
+                    }
+                    catch
+                    {
+                        //double.Parse(CPUCoreRes)失败
+                    }
                 }
-                catch
+                // 一般Linux
+                else
                 {
-                    //double.Parse(CPUCoreRes)失败
+                    // 使用正则取出负载信息
+                    Regex loadRegex = new Regex(@"load average: (\d+\.\d+), (\d+\.\d+), (\d+\.\d+)");
+
+                    Match loadMatch = loadRegex.Match(result[6]);
+
+                    try
+                    {
+                        // 获取1分钟内负载
+                        average1 = double.Parse(loadMatch.Groups[1].Value);
+                        // 获取5分钟内负载
+                        average5 = double.Parse(loadMatch.Groups[2].Value);
+                        // 获取15分钟内负载
+                        average15 = double.Parse(loadMatch.Groups[3].Value);
+
+                        // 此处的计算基于Load average定义，每个核心有一个任务在执行是最佳满载状态(100%)
+                        // 1分钟内
+                        average1Percentage = average1 * 100 / double.Parse(CPUCoreRes);
+                        // 5分钟内
+                        average5Percentage = average5 * 100 / double.Parse(CPUCoreRes);
+                        // 15分钟内
+                        average15Percentage = average15 * 100 / double.Parse(CPUCoreRes);
+                    }
+                    catch
+                    {
+                        //double.Parse(CPUCoreRes)失败
+                    }
                 }
+                // 将结果添加到 List<string> 中
+                loadResults.Add($"{average1}");
+                loadResults.Add($"{average5}");
+                loadResults.Add($"{average15}");
+                loadResults.Add($"{average1Percentage}");
+                loadResults.Add($"{average5Percentage}");
+                loadResults.Add($"{average15Percentage}");
             }
-            // 换一种查询方法
-            else
-            {
-                // top查询
-                UsageCMD = "top -bn1";
-                UsageRes = await SendSSHCommandAsync(UsageCMD, cmsModel);
-                // CPU核心数
-                string CPUCoreCMD = "cat /proc/cpuinfo | grep processor | wc -l";
-                string CPUCoreRes = await SendSSHCommandAsync(CPUCoreCMD, cmsModel);
 
-                // 使用正则取出负载信息
-                Regex loadRegex = new Regex(@"Load average: (\d+\.\d+) (\d+\.\d+) (\d+\.\d+) (\d+)/(\d+) (\d+)");
-
-                Match loadMatch = loadRegex.Match(UsageRes);
-                try
-                {
-                    // 获取1分钟内负载
-                    average1 = double.Parse(loadMatch.Groups[1].Value);
-                    // 获取5分钟内负载
-                    average5 = double.Parse(loadMatch.Groups[2].Value);
-                    // 获取15分钟内负载
-                    average15 = double.Parse(loadMatch.Groups[3].Value);
-
-                    // 计算负载
-                    // 此处的计算基于Load average定义，每个核心有一个任务在执行是最佳满载状态(100%)
-                    // 1分钟内
-                    average1Percentage = average1 * 100 / double.Parse(CPUCoreRes);
-                    // 5分钟内
-                    average5Percentage = average5 * 100 / double.Parse(CPUCoreRes);
-                    // 15分钟内
-                    average15Percentage = average15 * 100 / double.Parse(CPUCoreRes);
-                }
-                catch
-                {
-                    //double.Parse(CPUCoreRes)失败
-                }
-            }
-            // 返回结果要单纯的数字，百分号或其他单位应在View处理添加
-            return new string[] {
-                    $"{average1}",                          //0 1分钟内负载
-                    $"{average5}",                          //1 5分钟内负载
-                    $"{average15}",                         //2 15分钟内负载
-                    $"{average1Percentage}",                //3 1分钟负载百分比
-                    $"{average5Percentage}",                //4 5分钟内负载百分比
-                    $"{average15Percentage}",               //5 15分钟内负载百分比
-                };
+            return Tuple.Create(
+                cpuUsageList,
+                parsedResults,
+                networkInterfaceInfos,
+                mountInfos,
+                result[4].Split(',')[0],
+                result[5].Split('\n')[0],
+                loadResults);
         }
 
 

@@ -17,6 +17,7 @@ using Windows.ApplicationModel.Resources;
 using Windows.Storage;
 using CommunityToolkit.WinUI.Controls;
 using static PInvoke.User32;
+using PInvoke;
 
 namespace SeeMyServer.Pages
 {
@@ -109,28 +110,31 @@ namespace SeeMyServer.Pages
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
             // 定义异步任务
-            Task<List<List<string>>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
-            Task<List<string>> memUsages = Method.GetLinuxMEMUsageAsync(cmsModel);
-            Task<string[]> loadAverage = Method.GetLinuxLoadAverageAsync(cmsModel);
+            var Usages = Method.GetLinuxCPUUsageAsync(cmsModel);
             Task<string[]> netUsages = Method.GetLinuxNetAsync(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(cpuUsages, memUsages, loadAverage, netUsages);
+            await Task.WhenAll(Usages, netUsages);
+
+            // 解析结果
+            var cpuUsages = Usages.Result.Item1;
+            var memUsages = Usages.Result.Item2;
+            var loadAverage = Usages.Result.Item7;
 
             // 处理获取到的数据
             try
             {
                 // 获取结果失败不更新
-                if (cpuUsages.Result[0][0] != "0.00")
+                if (cpuUsages[0][0] != "0.00")
                 {
-                    cmsModel.CPUUsage = $"{cpuUsages.Result[0][0].Split(".")[0]}%";
+                    cmsModel.CPUUsage = $"{cpuUsages[0][0].Split(".")[0]}%";
                 }
             }
             catch (Exception ex) { }
             try
             {
                 // 计算内存占用百分比
-                double memUsagesValue = (double.Parse(memUsages.Result[0]) - double.Parse(memUsages.Result[2])) * 100 / double.Parse(memUsages.Result[0]);
+                double memUsagesValue = (double.Parse(memUsages[0]) - double.Parse(memUsages[2])) * 100 / double.Parse(memUsages[0]);
                 cmsModel.MEMUsage = $"{memUsagesValue:F0}%";
             }
             catch (Exception ex) { }
@@ -143,11 +147,11 @@ namespace SeeMyServer.Pages
             }
 
             // 获取结果失败不更新
-            if (loadAverage.Result[3] != "0" || loadAverage.Result[4] != "0" || loadAverage.Result[5] != "0")
+            if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
             {
-                cmsModel.Average1Percentage = loadAverage.Result[3];
-                cmsModel.Average5Percentage = loadAverage.Result[4];
-                cmsModel.Average15Percentage = loadAverage.Result[5];
+                cmsModel.Average1Percentage = loadAverage[3];
+                cmsModel.Average5Percentage = loadAverage[4];
+                cmsModel.Average15Percentage = loadAverage[5];
             }
         }
 

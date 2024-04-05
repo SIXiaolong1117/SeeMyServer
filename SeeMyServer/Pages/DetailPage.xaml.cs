@@ -161,42 +161,47 @@ namespace SeeMyServer.Pages
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
             // 定义异步任务
-            Task<List<List<string>>> cpuUsages = Method.GetLinuxCPUUsageAsync(cmsModel);
-            Task<List<string>> memUsages = Method.GetLinuxMEMUsageAsync(cmsModel);
-            Task<string[]> loadAverage = Method.GetLinuxLoadAverageAsync(cmsModel);
-            Task<string> HostName = Method.GetLinuxHostName(cmsModel);
-            Task<string> UpTime = Method.GetLinuxUpTime(cmsModel);
+            var Usages = Method.GetLinuxCPUUsageAsync(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(cpuUsages, memUsages, loadAverage, HostName, UpTime);
+            await Task.WhenAll(Usages);
+
+            // 解析结果
+            var cpuUsages = Usages.Result.Item1;
+            var memUsages = Usages.Result.Item2;
+            var NetworkInterfaceInfos = Usages.Result.Item3;
+            var MountInfos = Usages.Result.Item4;
+            var UpTime = Usages.Result.Item5;
+            var HostName = Usages.Result.Item6;
+            var loadAverage = Usages.Result.Item7;
 
             // 处理获取到的数据
             try
             {
-                cmsModel.CPUUsage = $"{cpuUsages.Result[0][0]}%";
-                cmsModel.CPUUserUsage = $"{cpuUsages.Result[0][1]}%";
-                cmsModel.CPUSysUsage = $"{cpuUsages.Result[0][2]}%";
-                cmsModel.CPUIdleUsage = $"{cpuUsages.Result[0][3]}%";
-                cmsModel.CPUIOUsage = $"{cpuUsages.Result[0][4]}%";
+                cmsModel.CPUUsage = $"{cpuUsages[0][0]}%";
+                cmsModel.CPUUserUsage = $"{cpuUsages[0][1]}%";
+                cmsModel.CPUSysUsage = $"{cpuUsages[0][2]}%";
+                cmsModel.CPUIdleUsage = $"{cpuUsages[0][3]}%";
+                cmsModel.CPUIOUsage = $"{cpuUsages[0][4]}%";
             }
             catch (Exception ex) { }
 
             // 获取结果失败不更新
-            if (loadAverage.Result[3] != "0" || loadAverage.Result[4] != "0" || loadAverage.Result[5] != "0")
+            if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
             {
-                cmsModel.Average1Percentage = loadAverage.Result[3];
-                cmsModel.Average5Percentage = loadAverage.Result[4];
-                cmsModel.Average15Percentage = loadAverage.Result[5];
+                cmsModel.Average1Percentage = loadAverage[3];
+                cmsModel.Average5Percentage = loadAverage[4];
+                cmsModel.Average15Percentage = loadAverage[5];
             }
 
             try
             {
                 // 计算内存占用百分比
-                double memUsagesValue = (double.Parse(memUsages.Result[0]) - double.Parse(memUsages.Result[2])) * 100 / double.Parse(memUsages.Result[0]);
+                double memUsagesValue = (double.Parse(memUsages[0]) - double.Parse(memUsages[2])) * 100 / double.Parse(memUsages[0]);
                 cmsModel.MEMUsage = $"{memUsagesValue:F2}%";
-                double memFreeValue = double.Parse(memUsages.Result[1]) * 100 / double.Parse(memUsages.Result[0]);
+                double memFreeValue = double.Parse(memUsages[1]) * 100 / double.Parse(memUsages[0]);
                 cmsModel.MEMFree = $"{memFreeValue:F2}%";
-                double memAvailableValue = double.Parse(memUsages.Result[2]) * 100 / double.Parse(memUsages.Result[0]);
+                double memAvailableValue = double.Parse(memUsages[2]) * 100 / double.Parse(memUsages[0]);
                 cmsModel.MEMAvailable = $"{memAvailableValue:F2}%";
                 // 页面缓存
                 double memUsagePageCacheValue = memUsagesValue + (memAvailableValue - memFreeValue);
@@ -206,22 +211,22 @@ namespace SeeMyServer.Pages
             // 只有HostName和UpTime为空才更新
             if (cmsModel.HostName == null)
             {
-                cmsModel.HostName = HostName.Result;
+                cmsModel.HostName = HostName;
             }
             if (cmsModel.UpTime == null)
             {
-                cmsModel.UpTime = UpTime.Result;
+                cmsModel.UpTime = UpTime;
             }
             try
             {
-                cmsModel.TotalMEM = $" of {Method.NetUnitConversion(decimal.Parse(memUsages.Result[0]) * 1024)}";
+                cmsModel.TotalMEM = $" of {Method.NetUnitConversion(decimal.Parse(memUsages[0]) * 1024)}";
             }
             catch (Exception ex) { }
 
             string[] tokens = new string[] { "0" };
             try
             {
-                tokens = cpuUsages.Result.Skip(1).Select(cpuUsage => cpuUsage[0]).ToArray();
+                tokens = cpuUsages.Skip(1).Select(cpuUsage => cpuUsage[0]).ToArray();
             }
             catch (Exception ex) { }
 
@@ -233,13 +238,11 @@ namespace SeeMyServer.Pages
             // 只有当 ItemsSource 未绑定时才进行绑定
             if (MountInfosListView.ItemsSource == null)
             {
-                List<MountInfo> MountInfos = await Method.GetLinuxMountInfo(cmsModel);
                 cmsModel.MountInfos = MountInfos;
                 MountInfosListView.ItemsSource = cmsModel.MountInfos;
             }
             if (NetworkInfosListView.ItemsSource == null)
             {
-                List<NetworkInterfaceInfo> NetworkInterfaceInfos = await Method.GetLinuxNetworkInterfaceInfo(cmsModel);
                 cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
                 NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
             }
