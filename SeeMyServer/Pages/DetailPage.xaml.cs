@@ -162,9 +162,10 @@ namespace SeeMyServer.Pages
         {
             // 定义异步任务
             var Usages = Method.GetLinuxCPUUsageAsync(cmsModel);
+            Task<string[]> netUsages = Method.GetLinuxNetAsync(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(Usages);
+            await Task.WhenAll(Usages, netUsages);
 
             // 解析结果
             var cpuUsages = Usages.Result.Item1;
@@ -245,6 +246,24 @@ namespace SeeMyServer.Pages
             {
                 cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
                 NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
+            }
+
+            // 获取结果失败不更新
+            if (netUsages.Result[0] != "0" || netUsages.Result[1] != "0")
+            {
+                cmsModel.NETReceived = netUsages.Result[0];
+                cmsModel.NETSent = netUsages.Result[1];
+            }
+
+            // 获取结果失败不更新
+            if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
+            {
+                cmsModel.Average1Percentage = loadAverage[3];
+                cmsModel.Average5Percentage = loadAverage[4];
+                cmsModel.Average15Percentage = loadAverage[5];
+                CPULoadAverage1.Text = $"{loadAverage[0]}";
+                CPULoadAverage5.Text = $"{loadAverage[1]}";
+                CPULoadAverage15.Text = $"{loadAverage[2]}";
             }
         }
 

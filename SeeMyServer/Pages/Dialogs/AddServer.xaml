@@ -94,14 +94,6 @@
                         Grid.Column="0"
                         Margin="0,4,0,0"
                         HorizontalAlignment="Stretch" />
-                    <TextBlock
-                        x:Uid="OSTypeTips"
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        Margin="0,4,0,0"
-                        FontSize="12"
-                        Foreground="Gray"
-                        TextWrapping="Wrap" />
                 </Grid>
 
                 <Grid

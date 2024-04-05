@@ -143,6 +143,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -159,66 +160,187 @@
                             Grid.Column="0"
                             FontSize="30"
                             Text="{Binding CPUUsage}" />
-                        <Grid Grid.Column="1" HorizontalAlignment="Right">
+
+                        <Grid Grid.Row="0" Grid.Column="1">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80" />
-                                <ColumnDefinition Width="80" />
-                                <ColumnDefinition Width="80" />
-                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="60" />
                             </Grid.ColumnDefinitions>
-
-                            <TextBlock
+                            <Grid
+                                Grid.Row="2"
                                 Grid.Column="0"
                                 HorizontalAlignment="Right"
-                                Text="{Binding CPUUserUsage}" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                HorizontalAlignment="Right"
-                                FontSize="12"
-                                Foreground="DarkGray"
-                                Text="User" />
-                            <TextBlock
+                                VerticalAlignment="Center">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40" />
+                                        <ColumnDefinition Width="40" />
+                                        <ColumnDefinition Width="40" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        x:Name="CPULoadAverage1"
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center" />
+                                    <TextBlock
+                                        x:Name="CPULoadAverage5"
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center" />
+                                    <TextBlock
+                                        x:Name="CPULoadAverage15"
+                                        Grid.Row="0"
+                                        Grid.Column="2"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center" />
+                                </Grid>
+                                <TextBlock
+                                    x:Uid="CPULoadAverageText"
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    FontSize="12"
+                                    Foreground="DarkGray" />
+                                <TextBlock
+                                    x:Uid="CPULoadAverageTextTips"
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    FontSize="12"
+                                    Foreground="DarkGray" />
+                            </Grid>
+                            <controls:RadialGauge
                                 Grid.Column="1"
+                                Width="50"
                                 HorizontalAlignment="Right"
-                                Text="{Binding CPUSysUsage}" />
-                            <TextBlock
-                                Grid.Row="1"
+                                IsInteractive="False"
+                                MaxAngle="0"
+                                Maximum="100"
+                                MinAngle="0"
+                                NeedleLength="0"
+                                ScalePadding="0"
+                                ScaleWidth="15"
+                                TickLength="0"
+                                TrailBrush="#42cdef"
+                                ValueStringFormat=" "
+                                Value="{Binding Average1Percentage}" />
+                            <controls:RadialGauge
                                 Grid.Column="1"
+                                Width="50"
                                 HorizontalAlignment="Right"
-                                FontSize="12"
-                                Foreground="DarkGray"
-                                Text="Sys" />
-                            <TextBlock
-                                Grid.Column="2"
+                                IsInteractive="False"
+                                MaxAngle="0"
+                                Maximum="100"
+                                MinAngle="0"
+                                NeedleLength="0"
+                                ScalePadding="20"
+                                ScaleWidth="15"
+                                TickLength="0"
+                                TrailBrush="#42cdef"
+                                ValueStringFormat=" "
+                                Value="{Binding Average5Percentage}" />
+                            <controls:RadialGauge
+                                Grid.Column="1"
+                                Width="50"
                                 HorizontalAlignment="Right"
-                                Text="{Binding CPUIdleUsage}" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="2"
-                                HorizontalAlignment="Right"
-                                FontSize="12"
-                                Foreground="DarkGray"
-                                Text="Idle" />
-                            <TextBlock
-                                Grid.Column="3"
-                                HorizontalAlignment="Right"
-                                Text="{Binding CPUIOUsage}" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="3"
-                                HorizontalAlignment="Right"
-                                FontSize="12"
-                                Foreground="DarkGray"
-                                Text="IO" />
+                                IsInteractive="False"
+                                MaxAngle="0"
+                                Maximum="100"
+                                MinAngle="0"
+                                NeedleLength="0"
+                                ScalePadding="40"
+                                ScaleWidth="15"
+                                TickLength="0"
+                                TrailBrush="#42cdef"
+                                ValueStringFormat=" "
+                                Value="{Binding Average15Percentage}" />
                         </Grid>
+
                     </Grid>
                     <Grid x:Name="progressBarsGrid" Grid.Row="1">
                         <!--  ProgressBars will be dynamically added here  -->
+                    </Grid>
+                    <Grid
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        HorizontalAlignment="Right">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="80" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock
+                            Grid.Column="0"
+                            HorizontalAlignment="Right"
+                            Text="{Binding CPUUserUsage}" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            HorizontalAlignment="Right"
+                            FontSize="12"
+                            Foreground="DarkGray"
+                            Text="User" />
+                        <TextBlock
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Text="{Binding CPUSysUsage}" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            FontSize="12"
+                            Foreground="DarkGray"
+                            Text="Sys" />
+                        <TextBlock
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            Text="{Binding CPUIdleUsage}" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            FontSize="12"
+                            Foreground="DarkGray"
+                            Text="Idle" />
+                        <TextBlock
+                            Grid.Column="3"
+                            HorizontalAlignment="Right"
+                            Text="{Binding CPUIOUsage}" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="3"
+                            HorizontalAlignment="Right"
+                            FontSize="12"
+                            Foreground="DarkGray"
+                            Text="IO" />
                     </Grid>
                 </Grid>
 
@@ -264,38 +386,42 @@
                             FontSize="20"
                             Foreground="DarkGray"
                             Text="{Binding TotalMEM}" />
-                        <Grid Grid.Column="2" HorizontalAlignment="Right">
+                        <Grid
+                            Grid.Row="0"
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="80" />
                                 <ColumnDefinition Width="80" />
                             </Grid.ColumnDefinitions>
-
-                            <TextBlock
+                            <StackPanel
                                 Grid.Column="0"
                                 HorizontalAlignment="Right"
-                                Text="{Binding MEMFree}" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                HorizontalAlignment="Right"
-                                FontSize="12"
-                                Foreground="DarkGray"
-                                Text="Free" />
-                            <TextBlock
+                                Orientation="Horizontal">
+                                <FontIcon
+                                    Margin="0,0,4,0"
+                                    HorizontalAlignment="Right"
+                                    FontSize="12"
+                                    Foreground="#849aff"
+                                    Glyph="&#xE938;" />
+                                <TextBlock HorizontalAlignment="Right" Text="Mem" />
+                            </StackPanel>
+                            <StackPanel
                                 Grid.Column="1"
                                 HorizontalAlignment="Right"
-                                Text="{Binding MEMAvailable}" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                HorizontalAlignment="Right"
-                                FontSize="12"
-                                Foreground="DarkGray"
-                                Text="Avail" />
+                                Orientation="Horizontal">
+                                <FontIcon
+                                    Margin="0,0,4,0"
+                                    HorizontalAlignment="Right"
+                                    FontSize="12"
+                                    Foreground="#FDBF60"
+                                    Glyph="&#xE938;" />
+                                <TextBlock HorizontalAlignment="Right" Text="Cache" />
+                            </StackPanel>
                         </Grid>
                     </Grid>
                     <Grid Grid.Row="1">
@@ -329,41 +455,42 @@
                             Background="Transparent"
                             Foreground="#849aff"
                             Value="{Binding MEMUsage}" />
+
                         <Grid
                             Grid.Row="1"
                             Grid.Column="2"
                             HorizontalAlignment="Right">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="80" />
                                 <ColumnDefinition Width="80" />
                             </Grid.ColumnDefinitions>
-                            <StackPanel
+
+                            <TextBlock
                                 Grid.Column="0"
                                 HorizontalAlignment="Right"
-                                Orientation="Horizontal">
-                                <FontIcon
-                                    Margin="0,0,4,0"
-                                    HorizontalAlignment="Right"
-                                    FontSize="12"
-                                    Foreground="#849aff"
-                                    Glyph="&#xE938;" />
-                                <TextBlock HorizontalAlignment="Right" Text="Mem" />
-                            </StackPanel>
-                            <StackPanel
+                                Text="{Binding MEMFree}" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                HorizontalAlignment="Right"
+                                FontSize="12"
+                                Foreground="DarkGray"
+                                Text="Free" />
+                            <TextBlock
                                 Grid.Column="1"
                                 HorizontalAlignment="Right"
-                                Orientation="Horizontal">
-                                <FontIcon
-                                    Margin="0,0,4,0"
-                                    HorizontalAlignment="Right"
-                                    FontSize="12"
-                                    Foreground="#FDBF60"
-                                    Glyph="&#xE938;" />
-                                <TextBlock HorizontalAlignment="Right" Text="Cache" />
-                            </StackPanel>
+                                Text="{Binding MEMAvailable}" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                FontSize="12"
+                                Foreground="DarkGray"
+                                Text="Avail" />
                         </Grid>
                     </Grid>
                     <!--<Grid Grid.Row="2">
@@ -504,10 +631,33 @@
                     </ListView>
                 </Grid>
 
-                <TextBlock
-                    x:Uid="AboutServerNetworkInfos"
-                    Grid.Row="9"
-                    Margin="0,18,0,8" />
+                <Grid Grid.Row="9" Margin="0,18,0,8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="80" />
+                        <ColumnDefinition Width="80" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Uid="AboutServerNetworkInfos" Grid.Column="0" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Padding="0,4,0,4"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        FontSize="12"
+                        Text="{Binding NETSent}" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        Padding="0,4,0,4"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        FontSize="12"
+                        Text="{Binding NETReceived}" />
+                </Grid>
 
                 <Grid
                     Grid.Row="10"

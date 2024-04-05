@@ -255,9 +255,6 @@
   <data name="OSType.PlaceholderText" xml:space="preserve">
     <value>选择您的操作系统类型</value>
   </data>
-  <data name="OSTypeTips.Text" xml:space="preserve">
-    <value>支持 Windows 和大多数 Linux 发行版。</value>
-  </data>
   <data name="PRIVACYLink.Content" xml:space="preserve">
     <value>隐私政策</value>
   </data>

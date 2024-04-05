@@ -189,6 +189,12 @@
   <data name="ConfirmDelete.Text" xml:space="preserve">
     <value>Confirm delete?</value>
   </data>
+  <data name="CPULoadAverageText.Text" xml:space="preserve">
+    <value>Load Average</value>
+  </data>
+  <data name="CPULoadAverageTextTips.Text" xml:space="preserve">
+    <value>(1, 5, 15m)</value>
+  </data>
   <data name="CPUUsageText.Text" xml:space="preserve">
     <value>CPU</value>
   </data>
@@ -269,9 +275,6 @@
   </data>
   <data name="OSType.PlaceholderText" xml:space="preserve">
     <value>Choose your OS type</value>
-  </data>
-  <data name="OSTypeTips.Text" xml:space="preserve">
-    <value>Supports Windows and most Linux distributions.</value>
   </data>
   <data name="PRIVACYLink.Content" xml:space="preserve">
     <value>PRIVACY</value>
