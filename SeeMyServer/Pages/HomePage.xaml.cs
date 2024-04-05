@@ -122,7 +122,11 @@ namespace SeeMyServer.Pages
             // 处理获取到的数据
             try
             {
-                cmsModel.CPUUsage = $"{cpuUsages.Result[0][0].Split(".")[0]}%";
+                // 获取结果失败不更新
+                if (cpuUsages.Result[0][0] != "0.00")
+                {
+                    cmsModel.CPUUsage = $"{cpuUsages.Result[0][0].Split(".")[0]}%";
+                }
             }
             catch (Exception ex) { }
             try
@@ -132,44 +136,54 @@ namespace SeeMyServer.Pages
                 cmsModel.MEMUsage = $"{memUsagesValue:F0}%";
             }
             catch (Exception ex) { }
-            cmsModel.NETReceived = netUsages.Result[0];
-            cmsModel.NETSent = netUsages.Result[1];
-            cmsModel.Average1Percentage = loadAverage.Result[3];
-            cmsModel.Average5Percentage = loadAverage.Result[4];
-            cmsModel.Average15Percentage = loadAverage.Result[5];
-        }
 
-        private async void Timer_Tick(object sender, object e)
-        {
-            List<Task> tasks = new List<Task>();
-
-            foreach (CMSModel cmsModel in dataList)
+            // 获取结果失败不更新
+            if (netUsages.Result[0] != "0" || netUsages.Result[1] != "0")
             {
-                Task updateTask = cmsModel.OSType switch
-                {
-                    "Linux" => UpdateLinuxCMSModelAsync(cmsModel),
-                    _ => Task.CompletedTask
-                };
-
-                tasks.Add(updateTask);
+                cmsModel.NETReceived = netUsages.Result[0];
+                cmsModel.NETSent = netUsages.Result[1];
             }
 
-            await Task.WhenAll(tasks);
+            // 获取结果失败不更新
+            if (loadAverage.Result[3] != "0" || loadAverage.Result[4] != "0" || loadAverage.Result[5] != "0")
+            {
+                cmsModel.Average1Percentage = loadAverage.Result[3];
+                cmsModel.Average5Percentage = loadAverage.Result[4];
+                cmsModel.Average15Percentage = loadAverage.Result[5];
+            }
         }
+
         //private async void Timer_Tick(object sender, object e)
         //{
+        //    List<Task> tasks = new List<Task>();
+
         //    foreach (CMSModel cmsModel in dataList)
         //    {
-        //        switch (cmsModel.OSType)
+        //        Task updateTask = cmsModel.OSType switch
         //        {
-        //            case "Linux":
-        //                await UpdateLinuxCMSModelAsync(cmsModel);
-        //                break;
-        //            default:
-        //                break;
-        //        }
+        //            "Linux" => UpdateLinuxCMSModelAsync(cmsModel),
+        //            _ => Task.CompletedTask
+        //        };
+
+        //        tasks.Add(updateTask);
         //    }
+
+        //    await Task.WhenAll(tasks);
         //}
+        private async void Timer_Tick(object sender, object e)
+        {
+            foreach (CMSModel cmsModel in dataList)
+            {
+                switch (cmsModel.OSType)
+                {
+                    case "Linux":
+                        await UpdateLinuxCMSModelAsync(cmsModel);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
 
 
         // 添加/修改配置按钮点击
