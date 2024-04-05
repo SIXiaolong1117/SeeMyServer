@@ -43,7 +43,7 @@ namespace SeeMyServer.Pages
             LoadData();
         }
 
-        public static void CreateProgressBars(Grid container, string[] CPUCoreUsageTokens)
+        public static List<ProgressBar> CreateProgressBars(Grid container, string[] CPUCoreUsageTokens)
         {
             int numberOfBars = CPUCoreUsageTokens.Length;
 
@@ -66,6 +66,8 @@ namespace SeeMyServer.Pages
                 container.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(65) });
                 container.ColumnDefinitions.Add(columnDefinition);
             }
+
+            List<ProgressBar> progressBars = new List<ProgressBar>();
 
             for (int i = 0; i < numberOfBars; i++)
             {
@@ -94,7 +96,7 @@ namespace SeeMyServer.Pages
                 // 监听 ProgressBar 的值改变事件，更新 TextBlock 的内容
                 progressBar.ValueChanged += (sender, e) =>
                 {
-                    textBlock.Text = $"{CPUCoreUsageTokens[i]}%";
+                    textBlock.Text = $"{progressBar.Value}%";
                     //textBlock.Text = "100.00%";
                     textCPUBlock.Text = $"CPU{i}";
                 };
@@ -115,8 +117,16 @@ namespace SeeMyServer.Pages
                 container.Children.Add(textCPUBlock);
                 container.Children.Add(progressBar);
                 container.Children.Add(textBlock);
+
+                // 将创建的ProgressBar添加到列表中
+                progressBars.Add(progressBar);
             }
+
+            return progressBars;
         }
+
+
+
 
         CMSModel dataList;
         private void LoadData()

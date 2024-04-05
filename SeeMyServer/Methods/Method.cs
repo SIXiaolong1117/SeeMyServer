@@ -354,13 +354,30 @@ namespace SeeMyServer.Methods
             List<string>
             >> GetLinuxCPUUsageAsync(CMSModel cmsModel)
         {
-            // OpenWRT不能用hostname，可以用"uci get system.@system[0].hostname"。
+            // 创建 Stopwatch 实例
+            Stopwatch stopwatch = new Stopwatch();
+
+            // OpenWRT不能用hostname，可以用"uci get system.@system[0].hostname"
             // 用户应自己设置命令别名以兼容
             string CPUUsageCMD = "cat /proc/stat | grep cpu 2>&1 ; echo '-' ; cat /proc/meminfo | grep -E 'Mem|Swap' 2>&1 ; echo '-' ; ifconfig 2>&1 ; echo '-' ; df -hP 2>&1 ; echo '-' ; uptime | awk '{print $3 \" \" $4}' 2>&1 ; echo '-' ; hostname 2>&1 ; echo '-' ; top -bn1 2>&1 ; echo '-' ; cat /proc/cpuinfo | grep processor | wc -l";
             string CPUUsageRes = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
 
+            // 开始计时
+            stopwatch.Start();
+
+            // 为了加快第一次更新的速度，代价是第一次的结果误差极大
+            if (cmsModel.CPUUsage != "0%")
+            {
+                await Task.Delay(1000);
+            }
+
+            string CPUUsageRes2 = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
+            // 停止计时
+            stopwatch.Stop();
+
             // 以 - 分割
             string[] result = CPUUsageRes.Split("-\n");
+            string[] result2 = CPUUsageRes2.Split("-\n");
 
             // 用于保存结果的List
             List<List<string>> cpuUsageList = new List<List<string>>();
@@ -380,10 +397,9 @@ namespace SeeMyServer.Methods
 
             {
                 // 解析结果
-
                 // 以换行符为准，按行分割结果
                 string[] lines = result[0].Split('\n');
-
+                List<List<string>> cpuUsageList0s = new List<List<string>>();
                 // 遍历每行
                 foreach (string line in lines)
                 {
@@ -406,26 +422,81 @@ namespace SeeMyServer.Methods
                             }
                         }
 
-                        // 计算CPU占用率百分比
-                        double user1 = (double)long.Parse(fields[1]) / totalCpuTime * 100; // 用户态
-                        double user2 = (double)long.Parse(fields[2]) / totalCpuTime * 100; // 用户态低优先级
+                        cpuUsage.Add(fields[1]);    //0 用户态
+                        cpuUsage.Add(fields[2]);    //1 用户态低优先级
+                        cpuUsage.Add(fields[3]);    //2 系统态
+                        cpuUsage.Add(fields[4]);    //3 空闲
+                        cpuUsage.Add(fields[5]);    //4 I/O等待
+                        cpuUsage.Add(fields[6]);    //5 无意义
+                        cpuUsage.Add(fields[7]);    //6 硬件中断
+                        cpuUsage.Add(fields[8]);    //7 软件中断
+                        cpuUsage.Add(fields[9]);    //8 steal_time
+                        cpuUsage.Add(fields[10]);   //9 guest_nice进程
+                        cpuUsage.Add($"{totalCpuTime}"); //10 总时间
 
-                        // 添加 CPU 用户态 用户态低优先级 系统态 空闲 I/O等待 无意义 硬件中断 软件中断 steal_time guest_nice进程的占用百分比
-                        cpuUsage.Add(((double)(totalCpuTime - long.Parse(fields[4])) / totalCpuTime * 100).ToString("F2"));//0 总占比
-                        cpuUsage.Add((user1 + user2).ToString("F2")); //1 用户态 + 用户态低优先级
-                        cpuUsage.Add(((double)long.Parse(fields[3]) / totalCpuTime * 100).ToString("F2")); // 系统态
-                        cpuUsage.Add(((double)long.Parse(fields[4]) / totalCpuTime * 100).ToString("F2")); // 空闲
-                        cpuUsage.Add(((double)long.Parse(fields[5]) / totalCpuTime * 100).ToString("F2")); // I/O等待
-                        cpuUsage.Add(((double)long.Parse(fields[6]) / totalCpuTime * 100).ToString("F2")); // 无意义
-                        cpuUsage.Add(((double)long.Parse(fields[7]) / totalCpuTime * 100).ToString("F2")); // 硬件中断
-                        cpuUsage.Add(((double)long.Parse(fields[8]) / totalCpuTime * 100).ToString("F2")); // 软件中断
-                        cpuUsage.Add(((double)long.Parse(fields[9]) / totalCpuTime * 100).ToString("F2")); // steal_time
-                        cpuUsage.Add(((double)long.Parse(fields[10]) / totalCpuTime * 100).ToString("F2")); // guest_nice进程
-
-                        cpuUsageList.Add(cpuUsage);
+                        cpuUsageList0s.Add(cpuUsage);
                     }
                 }
-                //return cpuUsageList;
+
+                // 以换行符为准，按行分割结果
+                string[] lines2 = result2[0].Split('\n');
+                List<List<int>> cpuUsageListAbs = new List<List<int>>();
+                // 遍历每行
+                int index = 0;
+                foreach (string line in lines2)
+                {
+                    // 检查是否以 cpu 开头
+                    if (line.StartsWith("cpu"))
+                    {
+                        // 以空格分割，并去除空白项
+                        string[] fields = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        // 保存当前 CPU 的使用情况
+                        List<int> cpuUsage = new List<int>();
+
+                        // 计算CPU总事件（单行之和）
+                        long totalCpuTime = 0;
+                        for (int i = 1; i < fields.Length; i++)
+                        {
+                            if (long.TryParse(fields[i], out long cpuTime))
+                            {
+                                totalCpuTime += cpuTime;
+                            }
+                        }
+
+                        // 计算差值
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][0]) - int.Parse(fields[1])));    //0 用户态
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][1]) - int.Parse(fields[2])));    //1 用户态低优先级
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][2]) - int.Parse(fields[3])));    //2 系统态
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][3]) - int.Parse(fields[4])));    //3 空闲
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][4]) - int.Parse(fields[5])));    //4 I/O等待
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][5]) - int.Parse(fields[6])));    //5 无意义
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][6]) - int.Parse(fields[7])));    //6 硬件中断
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][7]) - int.Parse(fields[8])));    //7 软件中断
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][8]) - int.Parse(fields[9])));    //8 steal_time
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][9]) - int.Parse(fields[10])));   //9 guest_nice进程
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][10]) - (int)totalCpuTime));      //10 总时间
+
+                        cpuUsageListAbs.Add(cpuUsage);
+
+                        index++;
+                    }
+                }
+
+                // 计算占用率
+                foreach (List<int> cpuUsageAbs in cpuUsageListAbs)
+                {
+                    // 保存当前 CPU 的使用情况
+                    List<string> cpuUsage = new List<string>();
+                    // 占用率计算
+                    cpuUsage.Add($"{100 - ((double)cpuUsageAbs[3] / (double)cpuUsageAbs[10] * 100):F2}");    //0 CPU占用率
+                    cpuUsage.Add($"{((double)cpuUsageAbs[0]) / (double)cpuUsageAbs[10] * 100:F2}");    //0 CPUUser占用率
+                    cpuUsage.Add($"{((double)cpuUsageAbs[2]) / (double)cpuUsageAbs[10] * 100:F2}");    //0 CPUSys占用率
+                    cpuUsage.Add($"{((double)cpuUsageAbs[3]) / (double)cpuUsageAbs[10] * 100:F2}");    //0 CPUIdle占用率
+                    cpuUsage.Add($"{((double)cpuUsageAbs[4]) / (double)cpuUsageAbs[10] * 100:F2}");    //0 CPUIO占用率
+
+                    cpuUsageList.Add(cpuUsage);
+                }
             }
 
             // 第二部分是内存和swap占用，结果格式如下：
