@@ -127,6 +127,20 @@
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
                         Text="{Binding UpTime}" />
+                    <TextBlock
+                        x:Uid="AboutServerCPUCoreNum"
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Margin="0,4,0,4"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Margin="0,4,0,4"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Text="{Binding CPUCoreNum}" />
                 </Grid>
 
                 <TextBlock

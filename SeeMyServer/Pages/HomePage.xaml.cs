@@ -119,7 +119,7 @@ namespace SeeMyServer.Pages
             // 解析结果
             var cpuUsages = Usages.Result.Item1;
             var memUsages = Usages.Result.Item2;
-            var loadAverage = Usages.Result.Item7;
+            var loadAverage = Usages.Result.Item6;
 
             // 处理获取到的数据
             try

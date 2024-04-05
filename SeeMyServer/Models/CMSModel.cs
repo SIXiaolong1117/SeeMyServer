@@ -6,6 +6,7 @@ namespace SeeMyServer.Models
     public class CMSModel : INotifyPropertyChanged
     {
         private string _cpuUsage;
+        private string _cpuCoreNum;
         private string _cpuUserUsage;
         private string _cpuSysUsage;
         private string _cpuIdleUsage;
@@ -92,6 +93,18 @@ namespace SeeMyServer.Models
                 {
                     _cpuIOUsage = value;
                     OnPropertyChanged(nameof(CPUIOUsage));
+                }
+            }
+        }
+        public string CPUCoreNum
+        {
+            get { return _cpuCoreNum; }
+            set
+            {
+                if (_cpuCoreNum != value)
+                {
+                    _cpuCoreNum = value;
+                    OnPropertyChanged(nameof(CPUCoreNum));
                 }
             }
         }

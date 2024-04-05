@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Newtonsoft.Json.Linq;
 using SeeMyServer.Datas;
 using SeeMyServer.Helper;
 using SeeMyServer.Methods;
@@ -11,6 +12,7 @@ using SeeMyServer.Models;
 using SeeMyServer.Pages.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -43,13 +45,12 @@ namespace SeeMyServer.Pages
             LoadData();
         }
 
-        public static List<ProgressBar> CreateProgressBars(Grid container, string[] CPUCoreUsageTokens)
+        public static List<ProgressBar> CreateProgressBars(Grid container, string[] CPUCoreUsageTokens, string CPUCoreNum)
         {
-            int numberOfBars = CPUCoreUsageTokens.Length;
+            int numberOfBars = int.Parse(CPUCoreNum);
 
             // 清除 Grid 的行定义和子元素
             container.RowDefinitions.Clear();
-            container.ColumnDefinitions.Clear();
             container.Children.Clear();
 
             // 检查是否需要添加列定义
@@ -90,13 +91,13 @@ namespace SeeMyServer.Pages
                 // 创建 TextBlock 来显示与 ProgressBar 同步的值
                 TextBlock textBlock = new TextBlock();
                 TextBlock textCPUBlock = new TextBlock();
-                textBlock.Text = $"{CPUCoreUsageTokens[i]}%";
+                textBlock.Text = $"{progressBar.Value:F2}%";
                 textCPUBlock.Text = $"CPU{i}";
                 textCPUBlock.Margin = new Thickness(0, 4, 8, 6);
                 // 监听 ProgressBar 的值改变事件，更新 TextBlock 的内容
                 progressBar.ValueChanged += (sender, e) =>
                 {
-                    textBlock.Text = $"{progressBar.Value}%";
+                    textBlock.Text = $"{progressBar.Value:F2}%";
                     //textBlock.Text = "100.00%";
                     textCPUBlock.Text = $"CPU{i}";
                 };
@@ -123,6 +124,17 @@ namespace SeeMyServer.Pages
             }
 
             return progressBars;
+        }
+
+        public static void UpdateProgressBars(List<ProgressBar> progressBars, string[] CPUCoreUsageTokens, string CPUCoreNum)
+        {
+            int numberOfBars = int.Parse(CPUCoreNum);
+
+            for (int i = 0; i < numberOfBars; i++)
+            {
+                //throw new Exception($"{progressBars[0].Value}");
+                progressBars[i].Value = double.Parse(CPUCoreUsageTokens[i]);
+            }
         }
 
 
@@ -168,6 +180,7 @@ namespace SeeMyServer.Pages
         }
 
         // Linux 信息更新
+        List<ProgressBar> progressBars = new List<ProgressBar>();
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
             // 定义异步任务
@@ -182,14 +195,16 @@ namespace SeeMyServer.Pages
             var memUsages = Usages.Result.Item2;
             var NetworkInterfaceInfos = Usages.Result.Item3;
             var MountInfos = Usages.Result.Item4;
-            var UpTime = Usages.Result.Item5;
-            var HostName = Usages.Result.Item6;
-            var loadAverage = Usages.Result.Item7;
+            var UpTime = Usages.Result.Item5[0];
+            var HostName = Usages.Result.Item5[1];
+            var CPUCoreNum = Usages.Result.Item5[2];
+            var loadAverage = Usages.Result.Item6;
 
             // 处理获取到的数据
             try
             {
                 cmsModel.CPUUsage = $"{cpuUsages[0][0]}%";
+                cmsModel.CPUCoreNum = CPUCoreNum.Split('\n')[0];
                 cmsModel.CPUUserUsage = $"{cpuUsages[0][1]}%";
                 cmsModel.CPUSysUsage = $"{cpuUsages[0][2]}%";
                 cmsModel.CPUIdleUsage = $"{cpuUsages[0][3]}%";
@@ -243,7 +258,14 @@ namespace SeeMyServer.Pages
 
             if (tokens != new string[] { "0" })
             {
-                CreateProgressBars(progressBarsGrid, tokens);
+                if (progressBarsGrid.ColumnDefinitions.Count == 0)
+                {
+                    progressBars = CreateProgressBars(progressBarsGrid, tokens, CPUCoreNum);
+                }
+                else if (progressBars != null)
+                {
+                    UpdateProgressBars(progressBars, tokens, CPUCoreNum);
+                }
             }
 
             // 只有当 ItemsSource 未绑定时才进行绑定

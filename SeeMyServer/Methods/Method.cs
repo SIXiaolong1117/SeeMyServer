@@ -349,8 +349,7 @@ namespace SeeMyServer.Methods
             List<string>,
             List<NetworkInterfaceInfo>,
             List<MountInfo>,
-            string,
-            string,
+            List<string>,
             List<string>
             >> GetLinuxCPUUsageAsync(CMSModel cmsModel)
         {
@@ -385,6 +384,7 @@ namespace SeeMyServer.Methods
             List<NetworkInterfaceInfo> networkInterfaceInfos = new List<NetworkInterfaceInfo>();
             List<MountInfo> mountInfos = new List<MountInfo>();
             List<string> loadResults = new List<string>();
+            List<string> aboutInfo = new List<string>();
 
             // 第一部分是CPU占用，结果格式如下：
             // cpu  697687 0 1332141 93898629 1722210 0 840664 0 0 0
@@ -547,20 +547,22 @@ namespace SeeMyServer.Methods
                 //return mountInfos;
             }
 
-            // 启动时长
+            // 启动时长、主机名、CPU核心数量
             {
+                // 启动时长
                 //result[4].Split(',')[0]
-            }
 
-            // 主机名
-            {
+                // 主机名
                 //result[5].Split('\n')[0];
-                //// 单独处理OpenWRT的情况
+                // 单独处理OpenWRT的情况
                 if (result[5].Split('\n')[0] == "ash: hostname: not found")
                 {
                     string CMD = "uci get system.@system[0].hostname";
                     result[5] = await SendSSHCommandAsync(CMD, cmsModel);
                 }
+                aboutInfo.Add(result[4].Split(',')[0]);
+                aboutInfo.Add(result[5].Split('\n')[0]);
+                aboutInfo.Add(result[7]);
             }
 
             // 负载信息
@@ -643,20 +645,9 @@ namespace SeeMyServer.Methods
                 loadResults.Add($"{average15Percentage}");
             }
 
-            return Tuple.Create(
-                cpuUsageList,
-                parsedResults,
-                networkInterfaceInfos,
-                mountInfos,
-                result[4].Split(',')[0],
-                result[5].Split('\n')[0],
-                loadResults);
+
+            return Tuple.Create(cpuUsageList, parsedResults, networkInterfaceInfos, mountInfos, aboutInfo, loadResults);
         }
-
-
-
-
-
 
 
 

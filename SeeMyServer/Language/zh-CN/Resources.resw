@@ -144,6 +144,9 @@
   <data name="AboutServer.Text" xml:space="preserve">
     <value>关于</value>
   </data>
+  <data name="AboutServerCPUCoreNum.Text" xml:space="preserve">
+    <value>CPU 核心数量</value>
+  </data>
   <data name="AboutServerCPUUsage.Text" xml:space="preserve">
     <value>CPU 占用</value>
   </data>
