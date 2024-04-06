@@ -85,11 +85,11 @@ namespace SeeMyServer.Pages.Dialogs
             {
                 CMSData.SSHKeyIsOpen = "True";
                 CMSData.SSHKey = SSHKeyTextBox.Text;
-                CMSData.SSHPasswd = "";
+                CMSData.SSHPasswd = null;
             }
             else
             {
-                if (SSHPasswd.Password != "")
+                if (SSHPasswd.Password != "" && CMSData.SSHPasswd != null)
                 {
                     CMSData.SSHKeyIsOpen = "False";
                     // 检查是否已经存在密钥和初始化向量，如果不存在则生成新的
@@ -111,7 +111,7 @@ namespace SeeMyServer.Pages.Dialogs
                     string encrypted = Method.EncryptString(SSHPasswd.Password, symmetricAlgorithm);
 
                     CMSData.SSHPasswd = encrypted;
-                    CMSData.SSHKey = "";
+                    CMSData.SSHKey = null;
                 }
             }
         }
