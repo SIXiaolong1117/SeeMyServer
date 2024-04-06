@@ -11,29 +11,6 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <!--  定义 ScrollViewer 的样式  -->
-        <Style x:Key="TransparentScrollViewerStyle" TargetType="ScrollViewer">
-            <!--  设置背景  -->
-            <Setter Property="Background" Value="#11FFFFFF" />
-            <!--  设置边框  -->
-            <Setter Property="BorderBrush" Value="#11FFFFFF" />
-            <!--  设置边框厚度  -->
-            <Setter Property="BorderThickness" Value="0" />
-            <!--  设置圆角  -->
-            <Setter Property="CornerRadius" Value="4" />
-        </Style>
-        <!--  定义 Item 的样式  -->
-        <Style x:Key="TransparentItemStyle" TargetType="Grid">
-            <!--  设置背景  -->
-            <Setter Property="Background" Value="#11FFFFFF" />
-            <!--  设置边框  -->
-            <Setter Property="BorderBrush" Value="#11FFFFFF" />
-            <!--  设置边框厚度  -->
-            <Setter Property="BorderThickness" Value="0" />
-            <!--  设置圆角  -->
-            <Setter Property="CornerRadius" Value="4" />
-        </Style>
-
         <Flyout x:Name="confirmationDelFlyout" Placement="Right">
             <StackPanel>
                 <TextBlock x:Uid="ConfirmDelete" Margin="0,0,0,8" />
@@ -83,9 +60,9 @@
                         <!--  Background="Transparent"之后，整个Grid才算是一个“区域”。DoubleTapped和RightTapped就可以在整个Gird中使用了。  -->
                         <Grid
                             HorizontalAlignment="Center"
+                            Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
                             DoubleTapped="OnListViewDoubleTapped"
                             RightTapped="OnListViewRightTapped"
-                            Style="{StaticResource TransparentItemStyle}"
                             Tapped="OnListViewTapped">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -217,7 +194,7 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         FontSize="12"
-                                        Foreground="DarkGray" />
+                                        Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}" />
                                 </Grid>
                                 <!--  MEM Usage  -->
                                 <Grid
@@ -266,7 +243,7 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         FontSize="12"
-                                        Foreground="DarkGray" />
+                                        Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}" />
                                 </Grid>
 
                                 <!--  NET Usage  -->
@@ -316,7 +293,7 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         FontSize="12"
-                                        Foreground="DarkGray" />
+                                        Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}" />
                                 </Grid>
                             </Grid>
                         </Grid>

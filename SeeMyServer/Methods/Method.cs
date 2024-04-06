@@ -191,7 +191,7 @@ namespace SeeMyServer.Methods
                     cmsModel.SSHKeyIsOpen,
                     cmsModel.CPUUsage,
                     cmsModel.MEMUsage,
-                    cmsModel.NETSent ,
+                    cmsModel.NETSent,
                     cmsModel.NETReceived,
                 });
 
@@ -608,11 +608,15 @@ namespace SeeMyServer.Methods
 
         public static string NetUnitConversion(decimal netValue)
         {
-            if (netValue >= (1000 * 1000 * 1000))
+            if (netValue >= (1000000000000))
+            {
+                return (netValue / 1024 / 1024 / 1024 / 1024).ToString("F2") + " TB";
+            }
+            else if (netValue >= (1000000000))
             {
                 return (netValue / 1024 / 1024 / 1024).ToString("F2") + " GB";
             }
-            else if (netValue >= (1000 * 1000))
+            else if (netValue >= (1000000))
             {
                 return (netValue / 1024 / 1024).ToString("F2") + " MB";
             }
@@ -706,8 +710,8 @@ namespace SeeMyServer.Methods
                 interfaceInfo.TXCarrier = ExtractValue(infoText, @"carrier:(\S+)");
                 interfaceInfo.Collisions = ExtractValue(infoText, @"collisions:(\S+)");
                 interfaceInfo.TXQueueLen = ExtractValue(infoText, @"txqueuelen:(\S+)");
-                interfaceInfo.RXBytes = NetUnitConversion(decimal.Parse(ExtractValue(infoText, @"RX bytes:(\S+)")));
-                interfaceInfo.TXBytes = NetUnitConversion(decimal.Parse(ExtractValue(infoText, @"TX bytes:(\S+)")));
+                interfaceInfo.RXBytes = $"{NetUnitConversion(decimal.Parse(ExtractValue(infoText, @"RX bytes:(\S+)")))}";
+                interfaceInfo.TXBytes = $"{NetUnitConversion(decimal.Parse(ExtractValue(infoText, @"TX bytes:(\S+)")))}";
 
                 interfaceInfos.Add(interfaceInfo);
             }

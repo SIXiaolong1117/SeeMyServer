@@ -309,6 +309,9 @@
   <data name="SSHPasswd.PlaceholderText" xml:space="preserve">
     <value>eg: R9$Wk@3Zp#56sL!</value>
   </data>
+  <data name="SSHPasswdTips.Text" xml:space="preserve">
+    <value>Password has low security. It is recommended to use SSH Key and turn off Password login.</value>
+  </data>
   <data name="SSHUser.Header" xml:space="preserve">
     <value>User</value>
   </data>

@@ -171,11 +171,15 @@ namespace SeeMyServer.Pages.Dialogs
             {
                 AddSSHKey.Visibility = Visibility.Visible;
                 AddSSHPasswd.Visibility = Visibility.Collapsed;
+                SSHKeyTips.Visibility = Visibility.Visible;
+                SSHPasswdTips.Visibility = Visibility.Collapsed;
             }
             else
             {
                 AddSSHKey.Visibility = Visibility.Collapsed;
                 AddSSHPasswd.Visibility = Visibility.Visible;
+                SSHKeyTips.Visibility = Visibility.Collapsed;
+                SSHPasswdTips.Visibility = Visibility.Visible;
             }
             logger.LogInfo("PrivateKeyIsOpen() completed.");
         }

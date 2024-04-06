@@ -204,12 +204,22 @@
                 </Grid>
 
                 <TextBlock
+                    x:Name="SSHKeyTips"
                     x:Uid="SSHKeyTips"
                     Grid.Row="3"
                     Grid.Column="0"
                     Margin="0,4,0,0"
                     FontSize="12"
                     Foreground="Gray"
+                    TextWrapping="Wrap" />
+                <TextBlock
+                    x:Name="SSHPasswdTips"
+                    x:Uid="SSHPasswdTips"
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    Margin="0,4,0,0"
+                    FontSize="12"
+                    Foreground="IndianRed"
                     TextWrapping="Wrap" />
 
 
