@@ -215,7 +215,9 @@
                                         Grid.Row="1"
                                         Grid.Column="0"
                                         HorizontalAlignment="Center"
-                                        VerticalAlignment="Center" />
+                                        VerticalAlignment="Center"
+                                        FontSize="12"
+                                        Foreground="DarkGray" />
                                 </Grid>
                                 <!--  MEM Usage  -->
                                 <Grid
@@ -262,7 +264,9 @@
                                         Grid.Row="1"
                                         Grid.Column="0"
                                         HorizontalAlignment="Center"
-                                        VerticalAlignment="Center" />
+                                        VerticalAlignment="Center"
+                                        FontSize="12"
+                                        Foreground="DarkGray" />
                                 </Grid>
 
                                 <!--  NET Usage  -->
@@ -310,7 +314,9 @@
                                         Grid.Row="1"
                                         Grid.Column="0"
                                         HorizontalAlignment="Center"
-                                        VerticalAlignment="Center" />
+                                        VerticalAlignment="Center"
+                                        FontSize="12"
+                                        Foreground="DarkGray" />
                                 </Grid>
                             </Grid>
                         </Grid>

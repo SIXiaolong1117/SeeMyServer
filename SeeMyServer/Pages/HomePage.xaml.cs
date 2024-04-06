@@ -111,10 +111,9 @@ namespace SeeMyServer.Pages
         {
             // 定义异步任务
             var Usages = Method.GetLinuxCPUUsageAsync(cmsModel);
-            Task<string[]> netUsages = Method.GetLinuxNetAsync(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(Usages, netUsages);
+            await Task.WhenAll(Usages);
 
             // 解析结果
             var cpuUsages = Usages.Result.Item1;
@@ -140,10 +139,10 @@ namespace SeeMyServer.Pages
             catch (Exception ex) { }
 
             // 获取结果失败不更新
-            if (netUsages.Result[0] != "0" || netUsages.Result[1] != "0")
+            if (loadAverage[6] != "0" || loadAverage[7] != "0")
             {
-                cmsModel.NETReceived = netUsages.Result[0];
-                cmsModel.NETSent = netUsages.Result[1];
+                cmsModel.NETReceived = loadAverage[6];
+                cmsModel.NETSent = loadAverage[7];
             }
 
             // 获取结果失败不更新
@@ -156,18 +155,35 @@ namespace SeeMyServer.Pages
         }
         private async void Timer_Tick(object sender, object e)
         {
+            List<Task> tasks = new List<Task>();
+
             foreach (CMSModel cmsModel in dataList)
             {
-                switch (cmsModel.OSType)
+                Task updateTask = cmsModel.OSType switch
                 {
-                    case "Linux":
-                        await UpdateLinuxCMSModelAsync(cmsModel);
-                        break;
-                    default:
-                        break;
-                }
+                    "Linux" => UpdateLinuxCMSModelAsync(cmsModel),
+                    _ => Task.CompletedTask
+                };
+
+                tasks.Add(updateTask);
             }
+
+            await Task.WhenAll(tasks);
         }
+        //private async void Timer_Tick(object sender, object e)
+        //{
+        //    foreach (CMSModel cmsModel in dataList)
+        //    {
+        //        switch (cmsModel.OSType)
+        //        {
+        //            case "Linux":
+        //                await UpdateLinuxCMSModelAsync(cmsModel);
+        //                break;
+        //            default:
+        //                break;
+        //        }
+        //    }
+        //}
 
 
         // 添加/修改配置按钮点击

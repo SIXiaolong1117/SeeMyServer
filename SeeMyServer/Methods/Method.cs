@@ -142,23 +142,6 @@ namespace SeeMyServer.Methods
             });
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         // 导出配置
         public static async Task<string> ExportConfig(CMSModel cmsModel)
         {
@@ -267,81 +250,6 @@ namespace SeeMyServer.Methods
                 return null;
             }
         }
-
-
-
-
-        public static async Task<string[]> GetLinuxNetAsync(CMSModel cmsModel)
-        {
-            string netSentCMD = "ifconfig";
-
-            // 创建 Stopwatch 实例
-            Stopwatch stopwatch = new Stopwatch();
-
-            string result0s = await SendSSHCommandAsync(netSentCMD, cmsModel);
-            // 开始计时
-            stopwatch.Start();
-            string result1s = await SendSSHCommandAsync(netSentCMD, cmsModel);
-            // 停止计时
-            stopwatch.Stop();
-            // 获取经过的时间
-            decimal elapsedTime = stopwatch.ElapsedMilliseconds;
-
-            Regex XPattern = new Regex(@"eth0\s+Link.*?RX\s+bytes:(\d+)\s+\(.*?\)\s+TX\s+bytes:(\d+)\s+\(.*?\)", RegexOptions.Singleline);
-
-            Match XMatch0s = XPattern.Match(result0s);
-            Match XMatch1s = XPattern.Match(result1s);
-
-            if (XMatch0s.Success && XMatch1s.Success)
-            {
-                // 解析结果
-                decimal netReceivedValue0s = decimal.Parse(XMatch0s.Groups[1].Value);
-                decimal netReceivedValue1s = decimal.Parse(XMatch1s.Groups[1].Value);
-                decimal netSentValue0s = decimal.Parse(XMatch0s.Groups[2].Value);
-                decimal netSentValue1s = decimal.Parse(XMatch1s.Groups[2].Value);
-
-                decimal netReceivedValue = (netReceivedValue1s - netReceivedValue0s) * 1000 / elapsedTime;
-                decimal netSentValue = (netSentValue1s - netSentValue0s) * 1000 / elapsedTime;
-
-                string netReceivedRes = NetUnitConversion(netReceivedValue);
-                string netSentRes = NetUnitConversion(netSentValue);
-                return new string[] { $"{netReceivedRes + "/s ↓"}", $"{netSentRes + "/s ↑"}" };
-            }
-            else
-            {
-                // 返回不带单位，方便前端处理丢弃结果
-                return new string[] { "0", "0" };
-            }
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         // 获取Linux系统CPU占用百分比
         public static async Task<Tuple<
@@ -645,16 +553,44 @@ namespace SeeMyServer.Methods
                 loadResults.Add($"{average15Percentage:F2}");
             }
 
+            {
+                // 获取经过的时间
+                decimal elapsedTime = stopwatch.ElapsedMilliseconds;
+
+                Regex XPattern = new Regex(@"eth0\s+Link.*?RX\s+bytes:(\d+)\s+\(.*?\)\s+TX\s+bytes:(\d+)\s+\(.*?\)", RegexOptions.Singleline);
+
+                Match XMatch0s = XPattern.Match(CPUUsageRes);
+                Match XMatch1s = XPattern.Match(CPUUsageRes2);
+
+                if (XMatch0s.Success && XMatch1s.Success)
+                {
+                    // 解析结果
+                    decimal netReceivedValue0s = decimal.Parse(XMatch0s.Groups[1].Value);
+                    decimal netReceivedValue1s = decimal.Parse(XMatch1s.Groups[1].Value);
+                    decimal netSentValue0s = decimal.Parse(XMatch0s.Groups[2].Value);
+                    decimal netSentValue1s = decimal.Parse(XMatch1s.Groups[2].Value);
+
+                    decimal netReceivedValue = (netReceivedValue1s - netReceivedValue0s) * 1000 / elapsedTime;
+                    decimal netSentValue = (netSentValue1s - netSentValue0s) * 1000 / elapsedTime;
+
+                    string netReceivedRes = NetUnitConversion(netReceivedValue);
+                    string netSentRes = NetUnitConversion(netSentValue);
+                    //return new string[] { $"{netReceivedRes + "/s ↓"}", $"{netSentRes + "/s ↑"}" };
+                    loadResults.Add($"{netReceivedRes + "/s ↓"}");
+                    loadResults.Add($"{netSentRes + "/s ↑"}");
+                }
+                else
+                {
+                    // 返回不带单位，方便前端处理丢弃结果
+                    //return new string[] { "0", "0" };
+                    loadResults.Add("0");
+                    loadResults.Add("0");
+                }
+            }
+
 
             return Tuple.Create(cpuUsageList, parsedResults, networkInterfaceInfos, mountInfos, aboutInfo, loadResults);
         }
-
-
-
-
-
-
-
 
         public static string NetUnitConversion(decimal netValue)
         {
@@ -774,31 +710,6 @@ namespace SeeMyServer.Methods
             return null;
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         public static string EncryptString(string plainText, SymmetricAlgorithm symmetricAlgorithm)
         {
             // 创建加密器
@@ -889,42 +800,7 @@ namespace SeeMyServer.Methods
             }
             return Convert.ToBase64String(iv);
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        
         public static void SSHTerminal(CMSModel cmsModel)
         {
             //string KeyPath, string User, string Domain, string Port

@@ -199,10 +199,9 @@ namespace SeeMyServer.Pages
         {
             // 定义异步任务
             var Usages = Method.GetLinuxCPUUsageAsync(cmsModel);
-            Task<string[]> netUsages = Method.GetLinuxNetAsync(cmsModel);
 
             // 同时执行异步任务
-            await Task.WhenAll(Usages, netUsages);
+            await Task.WhenAll(Usages);
 
             // 解析结果
             var cpuUsages = Usages.Result.Item1;
@@ -295,10 +294,10 @@ namespace SeeMyServer.Pages
             }
 
             // 获取结果失败不更新
-            if (netUsages.Result[0] != "0" || netUsages.Result[1] != "0")
+            if (loadAverage[6] != "0" || loadAverage[7] != "0")
             {
-                cmsModel.NETReceived = netUsages.Result[0];
-                cmsModel.NETSent = netUsages.Result[1];
+                cmsModel.NETReceived = loadAverage[6];
+                cmsModel.NETSent = loadAverage[7];
             }
 
             // 获取结果失败不更新
