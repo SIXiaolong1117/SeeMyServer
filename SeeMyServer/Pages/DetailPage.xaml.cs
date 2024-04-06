@@ -2,6 +2,7 @@
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Newtonsoft.Json.Linq;
@@ -337,6 +338,10 @@ namespace SeeMyServer.Pages
             EditThisConfig(dataList);
         }
 
+        private async void ReloadPage_Click(object sender, RoutedEventArgs e)
+        {
+            App.m_window.NavigateToPage(typeof(DetailPage));
+        }
         private async void EditThisConfig(CMSModel cmsModel)
         {
             // 创建一个新的dialog对象

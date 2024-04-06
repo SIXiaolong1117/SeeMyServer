@@ -182,20 +182,35 @@ namespace SeeMyServer
         public void NavigateToPage(Type pageType)
         {
             contentFrame.Navigate(pageType);
+            // 更新选中的导航项
+            var selectedItem = FindSelectedItemByTag(contentFrame.CurrentSourcePageType.Name);
+            if (selectedItem != null)
+            {
+                NavView.SelectedItem = selectedItem;
+            }
+            else
+            {
+                NavView.SelectedItem = null;
+            }
         }
         private void BackButton_Click(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {
-            if (contentFrame.CanGoBack)
-            {
-                contentFrame.GoBack();
+            NavigateToPage(typeof(HomePage));
+            //if (contentFrame.CanGoBack)
+            //{
+            //    contentFrame.GoBack();
 
-                // 更新选中的导航项
-                var selectedItem = FindSelectedItemByTag(contentFrame.CurrentSourcePageType.Name);
-                if (selectedItem != null)
-                {
-                    NavView.SelectedItem = selectedItem;
-                }
-            }
+            //    // 更新选中的导航项
+            //    var selectedItem = FindSelectedItemByTag(contentFrame.CurrentSourcePageType.Name);
+            //    if (selectedItem != null)
+            //    {
+            //        NavView.SelectedItem = selectedItem;
+            //    }
+            //    else
+            //    {
+            //        NavView.SelectedItem = null;
+            //    }
+            //}
         }
         private NavigationViewItem FindSelectedItemByTag(string tag)
         {

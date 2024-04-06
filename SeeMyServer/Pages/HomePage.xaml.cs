@@ -154,24 +154,6 @@ namespace SeeMyServer.Pages
                 cmsModel.Average15Percentage = loadAverage[5];
             }
         }
-
-        //private async void Timer_Tick(object sender, object e)
-        //{
-        //    List<Task> tasks = new List<Task>();
-
-        //    foreach (CMSModel cmsModel in dataList)
-        //    {
-        //        Task updateTask = cmsModel.OSType switch
-        //        {
-        //            "Linux" => UpdateLinuxCMSModelAsync(cmsModel),
-        //            _ => Task.CompletedTask
-        //        };
-
-        //        tasks.Add(updateTask);
-        //    }
-
-        //    await Task.WhenAll(tasks);
-        //}
         private async void Timer_Tick(object sender, object e)
         {
             foreach (CMSModel cmsModel in dataList)
@@ -236,6 +218,10 @@ namespace SeeMyServer.Pages
                 logger.LogInfo("Import Config is completed.");
             }
             HomePageImportConfig.IsEnabled = true;
+        }
+        private async void ReloadPage_Click(object sender, RoutedEventArgs e)
+        {
+            App.m_window.NavigateToPage(typeof(HomePage));
         }
         private async void EditThisConfig(CMSModel cmsModel)
         {

@@ -323,7 +323,7 @@
             Grid.Row="2"
             Grid.Column="0"
             Margin="18,0,0,4"
-            HorizontalAlignment="Left"
+            HorizontalAlignment="Right"
             Background="Transparent"
             DefaultLabelPosition="Right"
             IsOpen="False">
@@ -334,7 +334,7 @@
                 Grid.Column="0"
                 Click="AddConfigButton_Click">
                 <AppBarButton.Icon>
-                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xECC8;" />
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE710;" />
                 </AppBarButton.Icon>
             </AppBarButton>
             <AppBarButton
@@ -345,6 +345,15 @@
                 Click="ImportConfig_Click">
                 <AppBarButton.Icon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8B5;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton
+                x:Uid="HomePageReloadPage"
+                Grid.Row="0"
+                Grid.Column="1"
+                Click="ReloadPage_Click">
+                <AppBarButton.Icon>
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE895;" />
                 </AppBarButton.Icon>
             </AppBarButton>
         </CommandBar>

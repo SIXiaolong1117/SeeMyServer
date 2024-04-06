@@ -772,23 +772,6 @@
                                                 Text="{Binding TXBytes}" />
                                         </Grid>
                                     </Grid>
-
-                                    <controls:RadialGauge
-                                        Grid.Column="1"
-                                        Width="40"
-                                        Height="40"
-                                        HorizontalAlignment="Right"
-                                        IsInteractive="False"
-                                        MaxAngle="0"
-                                        Maximum="100"
-                                        MinAngle="0"
-                                        NeedleLength="0"
-                                        ScalePadding="0"
-                                        ScaleWidth="15"
-                                        TickLength="0"
-                                        TrailBrush="#42cdef"
-                                        ValueStringFormat=" "
-                                        Value="50" />
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
@@ -842,7 +825,7 @@
                 Grid.Column="0"
                 Click="OpenSSHTerminal_Click">
                 <AppBarButton.Icon>
-                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF117;" />
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE756;" />
                 </AppBarButton.Icon>
             </AppBarButton>
             <AppBarButton
@@ -853,6 +836,15 @@
                 Click="EditConfig_Click">
                 <AppBarButton.Icon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE70F;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton
+                x:Uid="HomePageReloadPage"
+                Grid.Row="0"
+                Grid.Column="1"
+                Click="ReloadPage_Click">
+                <AppBarButton.Icon>
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE895;" />
                 </AppBarButton.Icon>
             </AppBarButton>
         </CommandBar>
