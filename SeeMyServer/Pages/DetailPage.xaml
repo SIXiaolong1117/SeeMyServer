@@ -621,15 +621,22 @@
                                                 Text="{Binding Size}" />
                                         </Grid>
                                     </Grid>
-                                    <ProgressRing
+                                    <controls:RadialGauge
                                         Grid.Row="0"
                                         Grid.Column="1"
                                         Width="40"
                                         Height="40"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Foreground="#3cbdbd"
-                                        IsIndeterminate="False"
+                                        HorizontalAlignment="Right"
+                                        IsInteractive="False"
+                                        MaxAngle="0"
+                                        Maximum="100"
+                                        MinAngle="0"
+                                        NeedleLength="0"
+                                        ScalePadding="0"
+                                        ScaleWidth="15"
+                                        TickLength="0"
+                                        TrailBrush="#3cbdbd"
+                                        ValueStringFormat=" "
                                         Value="{Binding UsePercentage}" />
                                     <TextBlock
                                         Grid.Row="0"
@@ -765,24 +772,23 @@
                                                 Text="{Binding TXBytes}" />
                                         </Grid>
                                     </Grid>
-                                    <!--<ProgressRing
-                                        Grid.Row="0"
+
+                                    <controls:RadialGauge
                                         Grid.Column="1"
                                         Width="40"
                                         Height="40"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Foreground="#849aff"
-                                        IsIndeterminate="False"
-                                        Value="{Binding UsePercentage}" />
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="1"
-                                        Padding="0,4,0,4"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        FontSize="12"
-                                        Text="{Binding UsePercentage}" />-->
+                                        HorizontalAlignment="Right"
+                                        IsInteractive="False"
+                                        MaxAngle="0"
+                                        Maximum="100"
+                                        MinAngle="0"
+                                        NeedleLength="0"
+                                        ScalePadding="0"
+                                        ScaleWidth="15"
+                                        TickLength="0"
+                                        TrailBrush="#42cdef"
+                                        ValueStringFormat=" "
+                                        Value="50" />
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>

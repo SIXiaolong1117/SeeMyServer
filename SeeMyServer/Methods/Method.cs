@@ -637,12 +637,12 @@ namespace SeeMyServer.Methods
                     }
                 }
                 // 将结果添加到 List<string> 中
-                loadResults.Add($"{average1}");
-                loadResults.Add($"{average5}");
-                loadResults.Add($"{average15}");
-                loadResults.Add($"{average1Percentage}");
-                loadResults.Add($"{average5Percentage}");
-                loadResults.Add($"{average15Percentage}");
+                loadResults.Add($"{average1:F2}");
+                loadResults.Add($"{average5:F2}");
+                loadResults.Add($"{average15:F2}");
+                loadResults.Add($"{average1Percentage:F2}");
+                loadResults.Add($"{average5Percentage:F2}");
+                loadResults.Add($"{average15Percentage:F2}");
             }
 
 

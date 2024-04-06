@@ -145,7 +145,7 @@
     <value>About</value>
   </data>
   <data name="AboutServerCPUCoreNum.Text" xml:space="preserve">
-    <value>CPU Core Number</value>
+    <value>Number Of Cores</value>
   </data>
   <data name="AboutServerCPUUsage.Text" xml:space="preserve">
     <value>CPU Usage</value>

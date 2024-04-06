@@ -128,13 +128,17 @@ namespace SeeMyServer.Pages
 
         public static void UpdateProgressBars(List<ProgressBar> progressBars, string[] CPUCoreUsageTokens, string CPUCoreNum)
         {
-            int numberOfBars = int.Parse(CPUCoreNum);
-
-            for (int i = 0; i < numberOfBars; i++)
+            try
             {
-                //throw new Exception($"{progressBars[0].Value}");
-                progressBars[i].Value = double.Parse(CPUCoreUsageTokens[i]);
+                int numberOfBars = int.Parse(CPUCoreNum);
+
+                for (int i = 0; i < numberOfBars; i++)
+                {
+                    //throw new Exception($"{progressBars[0].Value}");
+                    progressBars[i].Value = double.Parse(CPUCoreUsageTokens[i]);
+                }
             }
+            catch { }
         }
 
 
@@ -157,6 +161,15 @@ namespace SeeMyServer.Pages
             dataList.MEMUsage = "0%";
             dataList.NETSent = "0 B/s ↑";
             dataList.NETReceived = "0 B/s ↓";
+            dataList.CPUUserUsage = "0.00%";
+            dataList.CPUSysUsage = "0.00%";
+            dataList.CPUIdleUsage = "0.00%";
+            dataList.CPUIOUsage = "0.00%";
+            dataList.MEMFree = "0.00%";
+            dataList.MEMAvailable = "0.00%";
+            CPULoadAverage1.Text = $"0.00";
+            CPULoadAverage5.Text = $"0.00";
+            CPULoadAverage15.Text = $"0.00";
         }
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
