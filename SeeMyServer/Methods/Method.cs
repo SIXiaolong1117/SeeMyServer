@@ -179,7 +179,21 @@ namespace SeeMyServer.Methods
                 }
 
                 // 将数据序列化为 JSON 格式
-                string jsonData = JsonConvert.SerializeObject(cmsModel);
+                //string jsonData = JsonConvert.SerializeObject(cmsModel);
+                var jsonData = JsonConvert.SerializeObject(new
+                {
+                    cmsModel.Name,
+                    cmsModel.HostIP,
+                    cmsModel.HostPort,
+                    cmsModel.SSHUser,
+                    cmsModel.SSHKey,
+                    cmsModel.OSType,
+                    cmsModel.SSHKeyIsOpen,
+                    cmsModel.CPUUsage,
+                    cmsModel.MEMUsage,
+                    cmsModel.NETSent ,
+                    cmsModel.NETReceived,
+                });
 
                 // 写入文件
                 await FileIO.WriteTextAsync(file, jsonData);
@@ -800,7 +814,7 @@ namespace SeeMyServer.Methods
             }
             return Convert.ToBase64String(iv);
         }
-        
+
         public static void SSHTerminal(CMSModel cmsModel)
         {
             //string KeyPath, string User, string Domain, string Port

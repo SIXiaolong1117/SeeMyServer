@@ -18,6 +18,7 @@ using Windows.Storage;
 using CommunityToolkit.WinUI.Controls;
 using static PInvoke.User32;
 using PInvoke;
+using System.Collections.ObjectModel;
 
 namespace SeeMyServer.Pages
 {
@@ -62,7 +63,7 @@ namespace SeeMyServer.Pages
             subThread.Start();
         }
 
-        private List<CMSModel> dataList;
+        private ObservableCollection<CMSModel> dataList;
 
         private void LoadData()
         {
@@ -70,9 +71,9 @@ namespace SeeMyServer.Pages
             SQLiteHelper dbHelper = new SQLiteHelper();
 
             // 查询数据
-            dataList = dbHelper.QueryData();
+            dataList = new ObservableCollection<CMSModel>(dbHelper.QueryData());
 
-            // 将数据列表绑定到ListView
+            // 设置数据源为 ObservableCollections
             dataListView.ItemsSource = dataList;
 
             // 初始化占用
@@ -83,6 +84,38 @@ namespace SeeMyServer.Pages
                 cmsModel.NETSent = "0 B/s ↑";
                 cmsModel.NETReceived = "0 B/s ↓";
             }
+        }
+
+        // 在某处添加新项
+        private void AddItem(CMSModel newItem)
+        {
+            dataList.Add(newItem);
+            newItem.CPUUsage = "0%";
+            newItem.MEMUsage = "0%";
+            newItem.NETSent = "0 B/s ↑";
+            newItem.NETReceived = "0 B/s ↓";
+            // 手动通知 dataListView 更新
+            RefreshListView();
+        }
+
+        // 在某处移除项
+        private void RemoveItem(CMSModel itemToRemove)
+        {
+            dataList.Remove(itemToRemove);
+            itemToRemove.CPUUsage = "0%";
+            itemToRemove.MEMUsage = "0%";
+            itemToRemove.NETSent = "0 B/s ↑";
+            itemToRemove.NETReceived = "0 B/s ↓";
+
+            // 手动通知 dataListView 更新
+            RefreshListView();
+        }
+
+        // 手动更新 dataListView
+        private void RefreshListView()
+        {
+            dataListView.ItemsSource = null;
+            dataListView.ItemsSource = dataList;
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -213,7 +246,8 @@ namespace SeeMyServer.Pages
                 // 插入新数据
                 dbHelper.InsertData(initialCMSModelData);
                 // 加载数据
-                LoadData();
+                //LoadData();
+                AddItem(initialCMSModelData);
                 logger.LogInfo("Add Config is completed.");
             }
         }
@@ -230,14 +264,16 @@ namespace SeeMyServer.Pages
                 // 插入新数据
                 dbHelper.InsertData(cmsModel);
                 // 重新加载数据
-                LoadData();
+                //LoadData();
+                AddItem(cmsModel);
                 logger.LogInfo("Import Config is completed.");
             }
             HomePageImportConfig.IsEnabled = true;
         }
         private async void ReloadPage_Click(object sender, RoutedEventArgs e)
         {
-            App.m_window.NavigateToPage(typeof(HomePage));
+            //App.m_window.NavigateToPage(typeof(HomePage));
+            RefreshListView();
         }
         private async void EditThisConfig(CMSModel cmsModel)
         {
@@ -262,7 +298,8 @@ namespace SeeMyServer.Pages
                 // 更新数据
                 dbHelper.UpdateData(cmsModel);
                 // 重新加载数据
-                LoadData();
+                //LoadData();
+                RefreshListView();
                 logger.LogInfo("Edit Config is completed.");
             }
         }
@@ -277,7 +314,8 @@ namespace SeeMyServer.Pages
             // 删除数据
             dbHelper.DeleteData(selectedModel);
             // 重新加载数据
-            LoadData();
+            //LoadData();
+            RemoveItem(selectedModel);
             logger.LogInfo("Delete Config is completed.");
         }
         private void CancelDelete_Click(object sender, RoutedEventArgs e)
