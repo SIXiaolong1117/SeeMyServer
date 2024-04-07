@@ -20,13 +20,31 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <TextBlock
-            Grid.Row="0"
-            Grid.Column="0"
-            Margin="24,24,0,8"
-            HorizontalAlignment="Left"
-            FontSize="24"
-            Text="{Binding Name}" />
+        <Grid Grid.Row="0" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="0"
+                Margin="24,24,0,8"
+                HorizontalAlignment="Left"
+                FontSize="24"
+                Text="{Binding Name}" />
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="1"
+                Margin="8,24,0,8"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                Text="{Binding OSRelease}" />
+        </Grid>
 
         <ScrollViewer Grid.Row="1" Padding="24,24,24,0">
             <Grid>

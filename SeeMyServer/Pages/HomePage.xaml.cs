@@ -124,7 +124,7 @@ namespace SeeMyServer.Pages
             timer = new DispatcherTimer();
             // 先执行一次事件处理方法
             Timer_Tick(null, null);
-            timer.Interval = TimeSpan.FromSeconds(3);
+            timer.Interval = TimeSpan.FromSeconds(2);
             timer.Tick += Timer_Tick;
             timer.Start();
         }
@@ -148,42 +148,46 @@ namespace SeeMyServer.Pages
             // 同时执行异步任务
             await Task.WhenAll(Usages);
 
-            // 解析结果
-            var cpuUsages = Usages.Result.Item1;
-            var memUsages = Usages.Result.Item2;
-            var loadAverage = Usages.Result.Item6;
-
-            // 处理获取到的数据
-            try
+            if (Usages != null)
             {
-                // 获取结果失败不更新
-                if (cpuUsages[0][0] != "0.00")
+
+                // 解析结果
+                var cpuUsages = Usages.Result.Item1;
+                var memUsages = Usages.Result.Item2;
+                var loadAverage = Usages.Result.Item6;
+
+                // 处理获取到的数据
+                try
                 {
-                    cmsModel.CPUUsage = $"{cpuUsages[0][0].Split(".")[0]}%";
+                    // 获取结果失败不更新
+                    if (cpuUsages[0][0] != "0.00")
+                    {
+                        cmsModel.CPUUsage = $"{cpuUsages[0][0].Split(".")[0]}%";
+                    }
                 }
-            }
-            catch (Exception ex) { }
-            try
-            {
-                // 计算内存占用百分比
-                double memUsagesValue = (double.Parse(memUsages[0]) - double.Parse(memUsages[2])) * 100 / double.Parse(memUsages[0]);
-                cmsModel.MEMUsage = $"{memUsagesValue:F0}%";
-            }
-            catch (Exception ex) { }
+                catch (Exception ex) { }
+                try
+                {
+                    // 计算内存占用百分比
+                    double memUsagesValue = (double.Parse(memUsages[0]) - double.Parse(memUsages[2])) * 100 / double.Parse(memUsages[0]);
+                    cmsModel.MEMUsage = $"{memUsagesValue:F0}%";
+                }
+                catch (Exception ex) { }
 
-            // 获取结果失败不更新
-            if (loadAverage[6] != "0" || loadAverage[7] != "0")
-            {
-                cmsModel.NETReceived = loadAverage[6];
-                cmsModel.NETSent = loadAverage[7];
-            }
+                // 获取结果失败不更新
+                if (loadAverage[6] != "0" || loadAverage[7] != "0")
+                {
+                    cmsModel.NETReceived = loadAverage[6];
+                    cmsModel.NETSent = loadAverage[7];
+                }
 
-            // 获取结果失败不更新
-            if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
-            {
-                cmsModel.Average1Percentage = loadAverage[3];
-                cmsModel.Average5Percentage = loadAverage[4];
-                cmsModel.Average15Percentage = loadAverage[5];
+                // 获取结果失败不更新
+                if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
+                {
+                    cmsModel.Average1Percentage = loadAverage[3];
+                    cmsModel.Average5Percentage = loadAverage[4];
+                    cmsModel.Average15Percentage = loadAverage[5];
+                }
             }
         }
         private async void Timer_Tick(object sender, object e)

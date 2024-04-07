@@ -5,6 +5,7 @@ namespace SeeMyServer.Models
 {
     public class CMSModel : INotifyPropertyChanged
     {
+        private string _osRelease;
         private string _cpuUsage;
         private string _cpuCoreNum;
         private string _cpuUserUsage;
@@ -35,6 +36,19 @@ namespace SeeMyServer.Models
         public string SSHKey { get; set; }
         public string OSType { get; set; }
         public string SSHKeyIsOpen { get; set; }
+
+        public string OSRelease
+        {
+            get { return _osRelease; }
+            set
+            {
+                if (_osRelease != value)
+                {
+                    _osRelease = value;
+                    OnPropertyChanged(nameof(OSRelease));
+                }
+            }
+        }
 
         public string CPUUsage
         {

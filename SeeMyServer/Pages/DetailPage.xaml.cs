@@ -158,20 +158,24 @@ namespace SeeMyServer.Pages
             // 将数据列表绑定
             dataGrid.DataContext = dataList;
 
-            // 初始化占用
-            dataList.CPUUsage = "0%";
-            dataList.MEMUsage = "0%";
-            dataList.NETSent = "0 B/s ↑";
-            dataList.NETReceived = "0 B/s ↓";
-            dataList.CPUUserUsage = "0.00%";
-            dataList.CPUSysUsage = "0.00%";
-            dataList.CPUIdleUsage = "0.00%";
-            dataList.CPUIOUsage = "0.00%";
-            dataList.MEMFree = "0.00%";
-            dataList.MEMAvailable = "0.00%";
-            CPULoadAverage1.Text = $"0.00";
-            CPULoadAverage5.Text = $"0.00";
-            CPULoadAverage15.Text = $"0.00";
+            // 初始化占用（即便失败也没关系）
+            try
+            {
+                dataList.CPUUsage = "0%";
+                dataList.MEMUsage = "0%";
+                dataList.NETSent = "0 B/s ↑";
+                dataList.NETReceived = "0 B/s ↓";
+                dataList.CPUUserUsage = "0.00%";
+                dataList.CPUSysUsage = "0.00%";
+                dataList.CPUIdleUsage = "0.00%";
+                dataList.CPUIOUsage = "0.00%";
+                dataList.MEMFree = "0.00%";
+                dataList.MEMAvailable = "0.00%";
+                CPULoadAverage1.Text = $"0.00";
+                CPULoadAverage5.Text = $"0.00";
+                CPULoadAverage15.Text = $"0.00";
+            }
+            catch { }
         }
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
@@ -179,7 +183,7 @@ namespace SeeMyServer.Pages
             timer = new DispatcherTimer();
             // 先执行一次事件处理方法
             Timer_Tick(null, null);
-            timer.Interval = TimeSpan.FromSeconds(3);
+            timer.Interval = TimeSpan.FromSeconds(2);
             timer.Tick += Timer_Tick;
             timer.Start();
         }
@@ -213,6 +217,9 @@ namespace SeeMyServer.Pages
             var HostName = Usages.Result.Item5[1];
             var CPUCoreNum = Usages.Result.Item5[2];
             var loadAverage = Usages.Result.Item6;
+            var PRETTY_NAME = Usages.Result.Item5[3];
+
+            cmsModel.OSRelease = PRETTY_NAME;
 
             // 处理获取到的数据
             try

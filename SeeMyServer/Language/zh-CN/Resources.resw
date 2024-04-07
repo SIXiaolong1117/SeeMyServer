@@ -282,6 +282,9 @@
   <data name="SSHPasswd.PlaceholderText" xml:space="preserve">
     <value>例如：R9$Wk@3Zp#56sL!</value>
   </data>
+  <data name="SSHPasswdTips.Text" xml:space="preserve">
+    <value>使用Password的安全性极低， 建议使用SSH Key认证并关闭Password登录。</value>
+  </data>
   <data name="SSHUser.Header" xml:space="preserve">
     <value>用户</value>
   </data>

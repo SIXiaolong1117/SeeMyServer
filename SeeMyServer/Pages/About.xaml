@@ -40,6 +40,12 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -270,6 +276,13 @@
                         Content="PInvoke.User32"
                         NavigateUri="https://www.nuget.org/packages/PInvoke.User32/" />
                 </Grid>
+                <TextBlock
+                    x:Name="TipsTips"
+                    Grid.Row="7"
+                    Grid.Column="0"
+                    Margin="24,8,24,0"
+                    HorizontalAlignment="Center"
+                    Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}" />
             </Grid>
         </ScrollViewer>
     </Grid>
