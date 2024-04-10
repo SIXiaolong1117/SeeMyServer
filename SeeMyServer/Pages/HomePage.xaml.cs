@@ -148,7 +148,7 @@ namespace SeeMyServer.Pages
             // 同时执行异步任务
             await Task.WhenAll(Usages);
 
-            if (Usages != null)
+            if (Usages.Result != null)
             {
 
                 // 解析结果
@@ -188,6 +188,10 @@ namespace SeeMyServer.Pages
                     cmsModel.Average5Percentage = loadAverage[4];
                     cmsModel.Average15Percentage = loadAverage[5];
                 }
+            }
+            else
+            {
+                logger.LogError($"The SSH result for {cmsModel.Name} is empty.");
             }
         }
         private async void Timer_Tick(object sender, object e)

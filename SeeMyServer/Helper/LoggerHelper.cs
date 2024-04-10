@@ -62,24 +62,41 @@ namespace SeeMyServer.Helper
             {
                 if (!writingInProgress && logQueue.Count > 0)
                 {
-                    lock (lockObject)
+                    Monitor.Enter(lockObject);
+                    try
                     {
                         if (!writingInProgress && logQueue.Count > 0)
                         {
                             writingInProgress = true;
+                            string[] logEntries = logQueue.ToArray();
+                            // 立即清空队列以释放锁
+                            logQueue.Clear(); 
+
                             try
                             {
-                                string nextLogEntry;
-                                while (logQueue.TryDequeue(out nextLogEntry))
+                                using (FileStream fileStream = new FileStream(logFilePath, FileMode.Append, FileAccess.Write, FileShare.Read))
+                                using (StreamWriter streamWriter = new StreamWriter(fileStream))
                                 {
-                                    File.AppendAllText(logFilePath, nextLogEntry + Environment.NewLine);
-
-                                    // 检查日志尺寸
-                                    if (new FileInfo(logFilePath).Length > maxLogSize)
+                                    foreach (string nextLogEntry in logEntries)
                                     {
-                                        RotateLogFile();
+                                        streamWriter.WriteLine(nextLogEntry);
                                     }
                                 }
+
+                                // 写入所有条目后检查日志大小
+                                if (new FileInfo(logFilePath).Length > maxLogSize)
+                                {
+                                    RotateLogFile();
+                                }
+                            }
+                            catch (IOException ex)
+                            {
+                                // 处理 IOException（文件正在使用），等待并重试
+                                //throw new Exception($"IOException occurred: {ex.Message}");
+                                // 等待1秒
+                                Thread.Sleep(1000);
+                                // 重试写入
+                                continue; 
                             }
                             finally
                             {
@@ -87,10 +104,16 @@ namespace SeeMyServer.Helper
                             }
                         }
                     }
+                    finally
+                    {
+                        Monitor.Exit(lockObject);
+                    }
                 }
-                Thread.Sleep(100); // 每100毫秒检查一次队列
+                // 每100毫秒检查一次队列
+                Thread.Sleep(100); 
             }
         }
+
 
         private void RotateLogFile()
         {

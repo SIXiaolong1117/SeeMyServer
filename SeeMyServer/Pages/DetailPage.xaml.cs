@@ -208,115 +208,122 @@ namespace SeeMyServer.Pages
             // 同时执行异步任务
             await Task.WhenAll(Usages);
 
-            // 解析结果
-            var cpuUsages = Usages.Result.Item1;
-            var memUsages = Usages.Result.Item2;
-            var NetworkInterfaceInfos = Usages.Result.Item3;
-            var MountInfos = Usages.Result.Item4;
-            var UpTime = Usages.Result.Item5[0];
-            var HostName = Usages.Result.Item5[1];
-            var CPUCoreNum = Usages.Result.Item5[2];
-            var loadAverage = Usages.Result.Item6;
-            var PRETTY_NAME = Usages.Result.Item5[3];
+            if (Usages.Result != null)
+            {
+                // 解析结果
+                var cpuUsages = Usages.Result.Item1;
+                var memUsages = Usages.Result.Item2;
+                var NetworkInterfaceInfos = Usages.Result.Item3;
+                var MountInfos = Usages.Result.Item4;
+                var UpTime = Usages.Result.Item5[0];
+                var HostName = Usages.Result.Item5[1];
+                var CPUCoreNum = Usages.Result.Item5[2];
+                var loadAverage = Usages.Result.Item6;
+                var PRETTY_NAME = Usages.Result.Item5[3];
 
-            cmsModel.OSRelease = PRETTY_NAME;
+                cmsModel.OSRelease = PRETTY_NAME;
 
-            // 处理获取到的数据
-            try
-            {
-                cmsModel.CPUUsage = $"{cpuUsages[0][0]}%";
-                cmsModel.CPUCoreNum = CPUCoreNum.Split('\n')[0];
-                cmsModel.CPUUserUsage = $"{cpuUsages[0][1]}%";
-                cmsModel.CPUSysUsage = $"{cpuUsages[0][2]}%";
-                cmsModel.CPUIdleUsage = $"{cpuUsages[0][3]}%";
-                cmsModel.CPUIOUsage = $"{cpuUsages[0][4]}%";
-            }
-            catch (Exception ex) { }
-
-            // 获取结果失败不更新
-            if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
-            {
-                cmsModel.Average1Percentage = loadAverage[3];
-                cmsModel.Average5Percentage = loadAverage[4];
-                cmsModel.Average15Percentage = loadAverage[5];
-            }
-
-            try
-            {
-                // 计算内存占用百分比
-                double memUsagesValue = (double.Parse(memUsages[0]) - double.Parse(memUsages[2])) * 100 / double.Parse(memUsages[0]);
-                cmsModel.MEMUsage = $"{memUsagesValue:F2}%";
-                double memFreeValue = double.Parse(memUsages[1]) * 100 / double.Parse(memUsages[0]);
-                cmsModel.MEMFree = $"{memFreeValue:F2}%";
-                double memAvailableValue = double.Parse(memUsages[2]) * 100 / double.Parse(memUsages[0]);
-                cmsModel.MEMAvailable = $"{memAvailableValue:F2}%";
-                // 页面缓存
-                double memUsagePageCacheValue = memUsagesValue + (memAvailableValue - memFreeValue);
-                cmsModel.MEMUsagePageCache = $"{memUsagePageCacheValue:F2}%";
-            }
-            catch (Exception ex) { }
-            // 只有HostName和UpTime为空才更新
-            if (cmsModel.HostName == null)
-            {
-                cmsModel.HostName = HostName;
-            }
-            if (cmsModel.UpTime == null)
-            {
-                cmsModel.UpTime = UpTime;
-            }
-            try
-            {
-                cmsModel.TotalMEM = $" of {Method.NetUnitConversion(decimal.Parse(memUsages[0]) * 1024)}";
-            }
-            catch (Exception ex) { }
-
-            string[] tokens = new string[] { "0" };
-            try
-            {
-                tokens = cpuUsages.Skip(1).Select(cpuUsage => cpuUsage[0]).ToArray();
-            }
-            catch (Exception ex) { }
-
-            if (tokens != new string[] { "0" })
-            {
-                if (progressBarsGrid.ColumnDefinitions.Count == 0)
+                // 处理获取到的数据
+                try
                 {
-                    progressBars = CreateProgressBars(progressBarsGrid, tokens, CPUCoreNum);
+                    cmsModel.CPUUsage = $"{cpuUsages[0][0]}%";
+                    cmsModel.CPUCoreNum = CPUCoreNum.Split('\n')[0];
+                    cmsModel.CPUUserUsage = $"{cpuUsages[0][1]}%";
+                    cmsModel.CPUSysUsage = $"{cpuUsages[0][2]}%";
+                    cmsModel.CPUIdleUsage = $"{cpuUsages[0][3]}%";
+                    cmsModel.CPUIOUsage = $"{cpuUsages[0][4]}%";
                 }
-                else if (progressBars != null)
+                catch (Exception ex) { }
+
+                // 获取结果失败不更新
+                if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
                 {
-                    UpdateProgressBars(progressBars, tokens, CPUCoreNum);
+                    cmsModel.Average1Percentage = loadAverage[3];
+                    cmsModel.Average5Percentage = loadAverage[4];
+                    cmsModel.Average15Percentage = loadAverage[5];
+                }
+
+                try
+                {
+                    // 计算内存占用百分比
+                    double memUsagesValue = (double.Parse(memUsages[0]) - double.Parse(memUsages[2])) * 100 / double.Parse(memUsages[0]);
+                    cmsModel.MEMUsage = $"{memUsagesValue:F2}%";
+                    double memFreeValue = double.Parse(memUsages[1]) * 100 / double.Parse(memUsages[0]);
+                    cmsModel.MEMFree = $"{memFreeValue:F2}%";
+                    double memAvailableValue = double.Parse(memUsages[2]) * 100 / double.Parse(memUsages[0]);
+                    cmsModel.MEMAvailable = $"{memAvailableValue:F2}%";
+                    // 页面缓存
+                    double memUsagePageCacheValue = memUsagesValue + (memAvailableValue - memFreeValue);
+                    cmsModel.MEMUsagePageCache = $"{memUsagePageCacheValue:F2}%";
+                }
+                catch (Exception ex) { }
+                // 只有HostName和UpTime为空才更新
+                if (cmsModel.HostName == null)
+                {
+                    cmsModel.HostName = HostName;
+                }
+                if (cmsModel.UpTime == null)
+                {
+                    cmsModel.UpTime = UpTime;
+                }
+                try
+                {
+                    cmsModel.TotalMEM = $" of {Method.NetUnitConversion(decimal.Parse(memUsages[0]) * 1024)}";
+                }
+                catch (Exception ex) { }
+
+                string[] tokens = new string[] { "0" };
+                try
+                {
+                    tokens = cpuUsages.Skip(1).Select(cpuUsage => cpuUsage[0]).ToArray();
+                }
+                catch (Exception ex) { }
+
+                if (tokens != new string[] { "0" })
+                {
+                    if (progressBarsGrid.ColumnDefinitions.Count == 0)
+                    {
+                        progressBars = CreateProgressBars(progressBarsGrid, tokens, CPUCoreNum);
+                    }
+                    else if (progressBars != null)
+                    {
+                        UpdateProgressBars(progressBars, tokens, CPUCoreNum);
+                    }
+                }
+
+                // 只有当 ItemsSource 未绑定时才进行绑定
+                if (MountInfosListView.ItemsSource == null)
+                {
+                    cmsModel.MountInfos = MountInfos;
+                    MountInfosListView.ItemsSource = cmsModel.MountInfos;
+                }
+                if (NetworkInfosListView.ItemsSource == null)
+                {
+                    cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
+                    NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
+                }
+
+                // 获取结果失败不更新
+                if (loadAverage[6] != "0" || loadAverage[7] != "0")
+                {
+                    cmsModel.NETReceived = loadAverage[6];
+                    cmsModel.NETSent = loadAverage[7];
+                }
+
+                // 获取结果失败不更新
+                if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
+                {
+                    cmsModel.Average1Percentage = loadAverage[3];
+                    cmsModel.Average5Percentage = loadAverage[4];
+                    cmsModel.Average15Percentage = loadAverage[5];
+                    CPULoadAverage1.Text = $"{loadAverage[0]}";
+                    CPULoadAverage5.Text = $"{loadAverage[1]}";
+                    CPULoadAverage15.Text = $"{loadAverage[2]}";
                 }
             }
-
-            // 只有当 ItemsSource 未绑定时才进行绑定
-            if (MountInfosListView.ItemsSource == null)
+            else
             {
-                cmsModel.MountInfos = MountInfos;
-                MountInfosListView.ItemsSource = cmsModel.MountInfos;
-            }
-            if (NetworkInfosListView.ItemsSource == null)
-            {
-                cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
-                NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
-            }
-
-            // 获取结果失败不更新
-            if (loadAverage[6] != "0" || loadAverage[7] != "0")
-            {
-                cmsModel.NETReceived = loadAverage[6];
-                cmsModel.NETSent = loadAverage[7];
-            }
-
-            // 获取结果失败不更新
-            if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
-            {
-                cmsModel.Average1Percentage = loadAverage[3];
-                cmsModel.Average5Percentage = loadAverage[4];
-                cmsModel.Average15Percentage = loadAverage[5];
-                CPULoadAverage1.Text = $"{loadAverage[0]}";
-                CPULoadAverage5.Text = $"{loadAverage[1]}";
-                CPULoadAverage15.Text = $"{loadAverage[2]}";
+                logger.LogError($"The SSH result for {cmsModel.Name} is empty.");
             }
         }
 
