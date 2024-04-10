@@ -25,7 +25,7 @@
         </Flyout>
     </Page.Resources>
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Padding="24,24,0,0" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -42,24 +42,22 @@
             x:Uid="HomePageHeader"
             Grid.Row="0"
             Grid.Column="0"
-            Margin="24,24,0,8"
             HorizontalAlignment="Left"
             FontSize="24" />
 
         <ScrollViewer
             Grid.Row="1"
             Grid.Column="0"
-            Margin="24,18,0,0"
+            Margin="0,24,0,0"
             HorizontalAlignment="Stretch">
             <GridView
                 x:Name="dataListView"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch">
+                AllowDrop="True"
+                CanReorderItems="True">
                 <GridView.ItemTemplate>
                     <DataTemplate>
                         <!--  Background="Transparent"之后，整个Grid才算是一个“区域”。DoubleTapped和RightTapped就可以在整个Gird中使用了。  -->
                         <Grid
-                            HorizontalAlignment="Center"
                             Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
                             DoubleTapped="OnListViewDoubleTapped"
                             RightTapped="OnListViewRightTapped"
@@ -103,6 +101,7 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80" />
                                     <ColumnDefinition Width="80" />
                                     <ColumnDefinition Width="80" />
                                     <ColumnDefinition Width="80" />
@@ -250,6 +249,56 @@
                                 <Grid
                                     Grid.Row="0"
                                     Grid.Column="2"
+                                    Margin="8,4,8,8">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        Height="60">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Grid.Column="0"
+                                            Padding="0,4,0,4"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="10"
+                                            Text="{Binding NETSent}" />
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Grid.Column="0"
+                                            Padding="0,4,0,4"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="10"
+                                            Text="{Binding NETReceived}" />
+                                    </Grid>
+                                    <TextBlock
+                                        x:Uid="NETUsageText"
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        FontSize="12"
+                                        Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}" />
+                                </Grid>
+
+                                <!--  NET Usage  -->
+                                <Grid
+                                    Grid.Row="0"
+                                    Grid.Column="3"
                                     Margin="8,4,8,8">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />

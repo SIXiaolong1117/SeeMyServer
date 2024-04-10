@@ -20,6 +20,7 @@ using static PInvoke.User32;
 using PInvoke;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Collections.Specialized;
 
 namespace SeeMyServer.Pages
 {
@@ -68,14 +69,42 @@ namespace SeeMyServer.Pages
 
         private void LoadData()
         {
-            // 实例化SQLiteHelper
-            SQLiteHelper dbHelper = new SQLiteHelper();
+            // 加载数据
+            dataList = new ObservableCollection<CMSModel>(LoadDataFromDatabase());
 
-            // 查询数据
-            dataList = new ObservableCollection<CMSModel>(dbHelper.QueryData());
 
-            // 设置数据源为 ObservableCollections
+            // 解析排序序列字符串为整数列表
+            List<int> sortOrder = new List<int>();
+            string sortOrderString = null;
+            if (localSettings.Values["DataListOrder"] != null)
+            {
+                sortOrderString = localSettings.Values["DataListOrder"] as string;
+                sortOrder = sortOrderString.Split(',')
+                                                     .Select(str => int.Parse(str.Trim()))
+                                                     .ToList();
+            }
+            else
+            {
+                // 获取当前排序序列
+                sortOrder = dataList.Select(item => item.Id).ToList();
+                // 将排序序列转换为逗号分隔的字符串
+                sortOrderString = string.Join(",", sortOrder);
+                // 将排序序列字符串保存在本地设置中
+                localSettings.Values["DataListOrder"] = sortOrderString;
+            }
+
+            // 根据排序序列对 dataList 进行排序
+            dataList = new ObservableCollection<CMSModel>(sortOrder
+                                            .Select(id => dataList.FirstOrDefault(item => item.Id == id))
+                                            .Where(item => item != null));
+
+            // 添加事件处理程序
+            dataList.CollectionChanged += DataList_CollectionChanged;
+
+            // 设置数据源
             dataListView.ItemsSource = dataList;
+
+            string idsString = string.Join(", ", dataList.Select(item => item.Id));
 
             // 初始化占用
             foreach (CMSModel cmsModel in dataList)
@@ -85,6 +114,66 @@ namespace SeeMyServer.Pages
                 cmsModel.NETSent = "0 B/s ↑";
                 cmsModel.NETReceived = "0 B/s ↓";
             }
+        }
+        private void DataList_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            string idsString = "";
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    logger.LogInfo("Items added:");
+                    foreach (var item in e.NewItems)
+                    {
+                        logger.LogInfo($"Id: {(item as CMSModel).Id}, Name: {(item as CMSModel).Name}");
+                    }
+                    idsString = string.Join(", ", dataList.Select(item => item.Id));
+                    logger.LogInfo(idsString);
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    logger.LogInfo("Items removed:");
+                    foreach (var item in e.OldItems)
+                    {
+                        logger.LogInfo($"Id: {(item as CMSModel).Id}, Name: {(item as CMSModel).Name}");
+                    }
+                    //idsString = string.Join(", ", dataList.Select(item => item.Id));
+                    //logger.LogInfo(idsString);
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    logger.LogInfo("Items replaced:");
+                    foreach (var newItem in e.NewItems)
+                    {
+                        logger.LogInfo($"New Id: {(newItem as CMSModel).Id}, New Name: {(newItem as CMSModel).Name}");
+                    }
+                    foreach (var oldItem in e.OldItems)
+                    {
+                        logger.LogInfo($"Old Id: {(oldItem as CMSModel).Id}, Old Name: {(oldItem as CMSModel).Name}");
+                    }
+                    idsString = string.Join(", ", dataList.Select(item => item.Id));
+                    logger.LogInfo(idsString);
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    logger.LogInfo("Collection reset.");
+                    idsString = string.Join(", ", dataList.Select(item => item.Id));
+                    logger.LogInfo(idsString);
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    logger.LogInfo($"Item moved from index {e.OldStartingIndex} to index {e.NewStartingIndex}.");
+                    idsString = string.Join(", ", dataList.Select(item => item.Id));
+                    logger.LogInfo(idsString);
+                    break;
+                default:
+                    break;
+            }
+            localSettings.Values["DataListOrder"] = idsString;
+        }
+
+        private List<CMSModel> LoadDataFromDatabase()
+        {
+            // 实例化 SQLiteHelper
+            SQLiteHelper dbHelper = new SQLiteHelper();
+
+            // 查询数据
+            return dbHelper.QueryData();
         }
 
         // 在某处添加新项

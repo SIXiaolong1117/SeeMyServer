@@ -14,12 +14,5 @@ namespace SeeMyServer.Models
         public string Avail { get; set; }
         public string UsePercentage { get; set; }
         public string MountedOn { get; set; }
-        public string DriveLetter { get; set; }
-        public string FriendlyName { get; set; }
-        public string FileSystemType { get; set; }
-        public string DriveType { get; set; }
-        public string HealthStatus { get; set; }
-        public string OperationalStatus { get; set; }
-        public string SizeRemaining { get; set; }
     }
 }

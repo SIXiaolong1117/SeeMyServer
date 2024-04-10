@@ -557,73 +557,90 @@
                                                 <RowDefinition Height="*" />
                                             </Grid.RowDefinitions>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="180" />
                                             </Grid.ColumnDefinitions>
                                             <TextBlock
-                                                x:Uid="MountInfosUsed"
                                                 Grid.Row="0"
                                                 Grid.Column="0"
-                                                Margin="0,0,4,0"
-                                                Padding="0,4,0,4"
-                                                VerticalAlignment="Center"
-                                                FontSize="12"
-                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}" />
-                                            <TextBlock
-                                                Grid.Row="0"
-                                                Grid.Column="1"
-                                                Margin="0,0,2,0"
                                                 Padding="0,4,0,4"
                                                 VerticalAlignment="Center"
                                                 FontSize="12"
                                                 Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
-                                                Text="{Binding Used}" />
-                                            <TextBlock
-                                                Grid.Row="0"
-                                                Grid.Column="2"
-                                                Margin="0,0,2,0"
-                                                Padding="0,4,0,4"
-                                                VerticalAlignment="Center"
-                                                FontSize="12"
-                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
-                                                Text="/ " />
-                                            <TextBlock
-                                                Grid.Row="0"
-                                                Grid.Column="3"
-                                                Padding="0,4,0,4"
-                                                VerticalAlignment="Center"
-                                                FontSize="12"
-                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
-                                                Text="{Binding Size}" />
+                                                Text="{Binding MountedOn}" />
+
                                         </Grid>
                                     </Grid>
-                                    <controls:RadialGauge
+                                    <Grid
                                         Grid.Row="0"
                                         Grid.Column="1"
-                                        Width="40"
-                                        Height="40"
-                                        HorizontalAlignment="Right"
-                                        IsInteractive="False"
-                                        MaxAngle="0"
-                                        Maximum="100"
-                                        MinAngle="0"
-                                        NeedleLength="0"
-                                        ScalePadding="0"
-                                        ScaleWidth="15"
-                                        TickLength="0"
-                                        TrailBrush="#3cbdbd"
-                                        ValueStringFormat=" "
-                                        Value="{Binding UsePercentage}" />
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="1"
-                                        Padding="0,4,0,4"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        FontSize="12"
-                                        Text="{Binding UsePercentage}" />
+                                        HorizontalAlignment="Right">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Grid.Column="0"
+                                            Margin="0,0,2,0"
+                                            Padding="0,4,0,4"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            FontSize="12"
+                                            Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                            Text="{Binding Used}" />
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Grid.Column="1"
+                                            Margin="0,0,2,0"
+                                            Padding="0,4,0,4"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="12"
+                                            Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                            Text="/ " />
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Grid.Column="2"
+                                            Padding="0,4,0,4"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            FontSize="12"
+                                            Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                            Text="{Binding Size}" />
+                                        <controls:RadialGauge
+                                            Grid.Row="0"
+                                            Grid.Column="3"
+                                            Width="40"
+                                            Height="40"
+                                            Margin="8,0,0,0"
+                                            HorizontalAlignment="Right"
+                                            IsInteractive="False"
+                                            MaxAngle="0"
+                                            Maximum="100"
+                                            MinAngle="0"
+                                            NeedleLength="0"
+                                            ScalePadding="0"
+                                            ScaleWidth="15"
+                                            TickLength="0"
+                                            TrailBrush="#3cbdbd"
+                                            ValueStringFormat=" "
+                                            Value="{Binding UsePercentage}" />
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Grid.Column="3"
+                                            Margin="8,0,0,0"
+                                            Padding="0,4,0,4"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="12"
+                                            Text="{Binding UsePercentage}" />
+                                    </Grid>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
