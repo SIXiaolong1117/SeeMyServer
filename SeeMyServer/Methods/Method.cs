@@ -657,8 +657,9 @@ namespace SeeMyServer.Methods
             // 跳过标题行
             foreach (var line in lines.Skip(1))
             {
-                // 检查是否以 / 开头
-                if (line.StartsWith("/"))
+                // 检查是否以 "/" 开头
+                // 检查是否包含 ":" （兼容WSL）
+                if (line.StartsWith("/")|| line.Substring(1).StartsWith(":"))
                 {
                     var columns = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -679,7 +680,7 @@ namespace SeeMyServer.Methods
                     }
                     else
                     {
-                        Console.WriteLine("Invalid line format: " + line);
+                        logger.LogError($"Invalid line format: {line}");
                     }
                 }
             }

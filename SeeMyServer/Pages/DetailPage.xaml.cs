@@ -100,8 +100,6 @@ namespace SeeMyServer.Pages
                 progressBar.ValueChanged += (sender, e) =>
                 {
                     textBlock.Text = $"{progressBar.Value:F2}%";
-                    //textBlock.Text = "100.00%";
-                    textCPUBlock.Text = $"CPU{i}";
                 };
                 textBlock.Margin = new Thickness(0, 4, 8, 6);
                 textBlock.HorizontalAlignment = HorizontalAlignment.Right;
