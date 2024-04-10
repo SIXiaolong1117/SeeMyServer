@@ -281,14 +281,14 @@ namespace SeeMyServer.Methods
 
             // OpenWRT不能用hostname，可以用"uci get system.@system[0].hostname"
             // 用户应自己设置命令别名以兼容
-            string CPUUsageCMD = "cat /proc/stat | grep cpu 2>&1 ; echo '-' ; cat /proc/meminfo | grep -E 'Mem|Swap' 2>&1 ; echo '-' ; ifconfig 2>&1 ; echo '-' ; df -hP 2>&1 ; echo '-' ; uptime | awk '{print $3 \" \" $4}' 2>&1 ; echo '-' ; hostname 2>&1 ; echo '-' ; top -bn1 2>&1 ; echo '-' ; cat /proc/cpuinfo | grep processor | wc -l ; echo '-' ; cat /etc/*-release 2>&1 | grep PRETTY_NAME";
+            string CPUUsageCMD = "cat /proc/stat | grep cpu 2>&1 ; echo '-' ; cat /proc/meminfo | grep -E 'Mem|Swap' 2>&1 ; echo '-' ; cat /proc/net/dev 2>&1 ; echo '-' ; df -hP 2>&1 ; echo '-' ; uptime | awk '{print $3 \" \" $4}' 2>&1 ; echo '-' ; hostname 2>&1 ; echo '-' ; top -bn1 2>&1 ; echo '-' ; cat /proc/cpuinfo | grep processor | wc -l ; echo '-' ; cat /etc/*-release 2>&1 | grep PRETTY_NAME";
             string CPUUsageRes = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
+
+            // 开始计时
+            stopwatch.Start();
 
             if (CPUUsageRes != "" && CPUUsageRes != null)
             {
-
-                // 开始计时
-                stopwatch.Start();
 
                 // 为了加快第一次更新的速度，代价是第一次的结果误差极大
                 if (cmsModel.CPUUsage != "0%")
@@ -458,7 +458,7 @@ namespace SeeMyServer.Methods
 
                 // 网卡信息
                 {
-                    networkInterfaceInfos = NetworkInterfaceInfoParse(result[2]);
+                    networkInterfaceInfos = NetworkInterfaceInfoParse(result[2], result2[2], stopwatch.ElapsedMilliseconds);
                 }
 
                 // 挂载信息
@@ -540,7 +540,7 @@ namespace SeeMyServer.Methods
                             //double.Parse(CPUCoreRes)失败
                         }
                     }
-                    // 一般Linux
+                    // 负载信息
                     else
                     {
                         // 使用正则取出负载信息
@@ -579,71 +579,101 @@ namespace SeeMyServer.Methods
                     loadResults.Add($"{average15Percentage:F2}");
                 }
 
-                {
-                    // 获取经过的时间
-                    decimal elapsedTime = stopwatch.ElapsedMilliseconds;
+                //{
+                //    // 获取经过的时间
+                //    decimal elapsedTime = stopwatch.ElapsedMilliseconds;
 
-                    Regex XPattern = new Regex(@"eth0\s+Link.*?RX\s+bytes:(\d+)\s+\(.*?\)\s+TX\s+bytes:(\d+)\s+\(.*?\)", RegexOptions.Singleline);
+                //    Regex XPattern = new Regex(@"eth0\s+Link.*?RX\s+bytes:(\d+)\s+\(.*?\)\s+TX\s+bytes:(\d+)\s+\(.*?\)", RegexOptions.Singleline);
 
-                    Match XMatch0s = XPattern.Match(CPUUsageRes);
-                    Match XMatch1s = XPattern.Match(CPUUsageRes2);
+                //    Match XMatch0s = XPattern.Match(result[0]);
+                //    Match XMatch1s = XPattern.Match(result2[0]);
 
-                    if (XMatch0s.Success && XMatch1s.Success)
-                    {
-                        // 解析结果
-                        decimal netReceivedValue0s = decimal.Parse(XMatch0s.Groups[1].Value);
-                        decimal netReceivedValue1s = decimal.Parse(XMatch1s.Groups[1].Value);
-                        decimal netSentValue0s = decimal.Parse(XMatch0s.Groups[2].Value);
-                        decimal netSentValue1s = decimal.Parse(XMatch1s.Groups[2].Value);
+                //    if (XMatch0s.Success && XMatch1s.Success)
+                //    {
+                //        // 解析结果
+                //        decimal netReceivedValue0s = decimal.Parse(XMatch0s.Groups[1].Value);
+                //        decimal netReceivedValue1s = decimal.Parse(XMatch1s.Groups[1].Value);
+                //        decimal netSentValue0s = decimal.Parse(XMatch0s.Groups[2].Value);
+                //        decimal netSentValue1s = decimal.Parse(XMatch1s.Groups[2].Value);
 
-                        decimal netReceivedValue = (netReceivedValue1s - netReceivedValue0s) * 1000 / elapsedTime;
-                        decimal netSentValue = (netSentValue1s - netSentValue0s) * 1000 / elapsedTime;
+                //        decimal netReceivedValue = (netReceivedValue1s - netReceivedValue0s) * 1000 / elapsedTime;
+                //        decimal netSentValue = (netSentValue1s - netSentValue0s) * 1000 / elapsedTime;
 
-                        string netReceivedRes = NetUnitConversion(netReceivedValue);
-                        string netSentRes = NetUnitConversion(netSentValue);
-                        //return new string[] { $"{netReceivedRes + "/s ↓"}", $"{netSentRes + "/s ↑"}" };
-                        loadResults.Add($"{netReceivedRes + "/s ↓"}");
-                        loadResults.Add($"{netSentRes + "/s ↑"}");
-                    }
-                    else
-                    {
-                        // 返回不带单位，方便前端处理丢弃结果
-                        //return new string[] { "0", "0" };
-                        loadResults.Add("0");
-                        loadResults.Add("0");
-                    }
-                }
+                //        string netReceivedRes = NetUnitConversion(netReceivedValue);
+                //        string netSentRes = NetUnitConversion(netSentValue);
+                //        //return new string[] { $"{netReceivedRes + "/s ↓"}", $"{netSentRes + "/s ↑"}" };
+                //        loadResults.Add($"{netReceivedRes + "/s ↓"}");
+                //        loadResults.Add($"{netSentRes + "/s ↑"}");
+                //    }
+                //    else
+                //    {
+                //        // 返回不带单位，方便前端处理丢弃结果
+                //        //return new string[] { "0", "0" };
+                //        loadResults.Add("0");
+                //        loadResults.Add("0");
+                //    }
+                //}
 
 
                 return Tuple.Create(cpuUsageList, parsedResults, networkInterfaceInfos, mountInfos, aboutInfo, loadResults);
             }
             else
             {
+                // 停止计时
+                stopwatch.Stop();
                 return null;
             }
         }
 
         public static string NetUnitConversion(decimal netValue)
         {
-            if (netValue >= (1000000000000))
+            decimal result;
+            string unit;
+
+            switch (netValue)
             {
-                return (netValue / 1024 / 1024 / 1024 / 1024).ToString("F2") + " TB";
+                case decimal n when n >= 1000000000000:
+                    result = netValue / 1024 / 1024 / 1024 / 1024;
+                    unit = "TB";
+                    break;
+                case decimal n when n >= 1000000000:
+                    result = netValue / 1024 / 1024 / 1024;
+                    unit = "GB";
+                    break;
+                case decimal n when n >= 1000000:
+                    result = netValue / 1024 / 1024;
+                    unit = "MB";
+                    break;
+                case decimal n when n >= 1000:
+                    result = netValue / 1024;
+                    unit = "KB";
+                    break;
+                default:
+                    result = netValue;
+                    unit = "B";
+                    break;
             }
-            else if (netValue >= (1000000000))
+
+            return result.ToString("F2") + " " + unit;
+        }
+        public static decimal ReverseNetUnitConversion(string convertedValue)
+        {
+            string[] parts = convertedValue.Split(' ');
+            decimal value = decimal.Parse(parts[0]);
+            string unit = parts[1];
+
+            switch (unit)
             {
-                return (netValue / 1024 / 1024 / 1024).ToString("F2") + " GB";
-            }
-            else if (netValue >= (1000000))
-            {
-                return (netValue / 1024 / 1024).ToString("F2") + " MB";
-            }
-            else if (netValue >= 1000)
-            {
-                return (netValue / 1024).ToString("F2") + " KB";
-            }
-            else
-            {
-                return netValue + " B";
+                case "TB":
+                    return value * 1024m * 1024m * 1024m * 1024m;
+                case "GB":
+                    return value * 1024m * 1024m * 1024m;
+                case "MB":
+                    return value * 1024m * 1024m;
+                case "KB":
+                    return value * 1024m;
+                default:
+                    return value;
             }
         }
         // 处理 df
@@ -659,7 +689,7 @@ namespace SeeMyServer.Methods
             {
                 // 检查是否以 "/" 开头
                 // 检查是否包含 ":" （兼容WSL）
-                if (line.StartsWith("/")|| line.Substring(1).StartsWith(":"))
+                if (line.StartsWith("/") || line.Substring(1).StartsWith(":"))
                 {
                     var columns = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -689,61 +719,70 @@ namespace SeeMyServer.Methods
 
 
         // 处理 ifconfig
-        public static List<NetworkInterfaceInfo> NetworkInterfaceInfoParse(string input)
+        public static List<NetworkInterfaceInfo> NetworkInterfaceInfoParse(string input, string input2, decimal elapsedTime)
         {
-            //throw new Exception($"{input}");
+            var interfaces1 = ParseSingleNetDev(input);
+            var interfaces2 = ParseSingleNetDev(input2);
             var interfaceInfos = new List<NetworkInterfaceInfo>();
 
-            var pattern = @"(\w+)\s+Link encap:(.*?)\s+(?:HWaddr\s+(\S+))?(.*?)((?=\n\n)|(?=$))";
-
-            var matches = Regex.Matches(input, pattern, RegexOptions.Singleline);
-
-            foreach (Match match in matches)
+            foreach (var iface1 in interfaces1)
             {
-                var interfaceInfo = new NetworkInterfaceInfo();
+                var iface2 = interfaces2.FirstOrDefault(x => x.Interface == iface1.Interface);
+                if (iface2 != null)
+                {
+                    //throw new Exception($"{elapsedTime}");
+                    decimal receiveSpeed = (iface2.ReceiveBytesOrigin - iface1.ReceiveBytesOrigin) * 1000 / elapsedTime;
+                    decimal transmitSpeed = (iface2.TransmitBytesOrigin - iface1.TransmitBytesOrigin) * 1000 / elapsedTime;
 
-                interfaceInfo.Name = match.Groups[1].Value;
-                interfaceInfo.LinkEncap = match.Groups[2].Value;
-                interfaceInfo.HWAddr = match.Groups[3].Value;
-
-                var infoText = match.Groups[4].Value;
-
-                interfaceInfo.InetAddr = ExtractValue(infoText, @"inet addr:(\S+)");
-                interfaceInfo.Bcast = ExtractValue(infoText, @"Bcast:(\S+)");
-                interfaceInfo.Mask = ExtractValue(infoText, @"Mask:(\S+)");
-                interfaceInfo.Inet6Addr = ExtractValue(infoText, @"inet6 addr:(\S+)");
-                interfaceInfo.Scope = ExtractValue(infoText, @"Scope:(\S+)");
-                interfaceInfo.Status = infoText.Contains("UP") ? "UP" : "DOWN";
-                interfaceInfo.MTU = ExtractValue(infoText, @"MTU:(\S+)");
-                interfaceInfo.Metric = ExtractValue(infoText, @"Metric:(\S+)");
-                interfaceInfo.RXPackets = ExtractValue(infoText, @"RX packets:(\S+)");
-                interfaceInfo.RXErrors = ExtractValue(infoText, @"errors:(\S+)");
-                interfaceInfo.RXDropped = ExtractValue(infoText, @"dropped:(\S+)");
-                interfaceInfo.RXOverruns = ExtractValue(infoText, @"overruns:(\S+)");
-                interfaceInfo.RXFrame = ExtractValue(infoText, @"frame:(\S+)");
-                interfaceInfo.TXPackets = ExtractValue(infoText, @"TX packets:(\S+)");
-                interfaceInfo.TXErrors = ExtractValue(infoText, @"errors:(\S+)");
-                interfaceInfo.TXDropped = ExtractValue(infoText, @"dropped:(\S+)");
-                interfaceInfo.TXOverruns = ExtractValue(infoText, @"overruns:(\S+)");
-                interfaceInfo.TXCarrier = ExtractValue(infoText, @"carrier:(\S+)");
-                interfaceInfo.Collisions = ExtractValue(infoText, @"collisions:(\S+)");
-                interfaceInfo.TXQueueLen = ExtractValue(infoText, @"txqueuelen:(\S+)");
-                interfaceInfo.RXBytes = $"{NetUnitConversion(decimal.Parse(ExtractValue(infoText, @"RX bytes:(\S+)")))}";
-                interfaceInfo.TXBytes = $"{NetUnitConversion(decimal.Parse(ExtractValue(infoText, @"TX bytes:(\S+)")))}";
-
-                interfaceInfos.Add(interfaceInfo);
+                    interfaceInfos.Add(new NetworkInterfaceInfo
+                    {
+                        Interface = iface2.Interface,
+                        ReceiveBytes = iface2.ReceiveBytes,
+                        ReceivePackets = iface2.ReceivePackets,
+                        TransmitBytes = iface2.TransmitBytes,
+                        TransmitPackets = iface2.TransmitPackets,
+                        ReceiveSpeedByte = receiveSpeed,
+                        TransmitSpeedByte = transmitSpeed,
+                        ReceiveSpeed = $"{NetUnitConversion(receiveSpeed)}/s ↓",
+                        TransmitSpeed = $"{NetUnitConversion(transmitSpeed)}/s ↑"
+                    });
+                }
             }
 
             return interfaceInfos;
         }
-        private static string ExtractValue(string input, string pattern)
+        private static List<NetworkInterfaceInfo> ParseSingleNetDev(string input)
         {
-            var match = Regex.Match(input, pattern);
-            if (match.Success)
+            var lines = input.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            var interfaceInfos = new List<NetworkInterfaceInfo>();
+
+            foreach (var line in lines.Skip(2))
             {
-                return match.Groups[1].Value;
+                var parts = line.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length < 2)
+                    continue;
+
+                var interfaceName = parts[0].Trim();
+                var values = parts[1].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(long.Parse)
+                    .ToArray();
+
+                var info = new NetworkInterfaceInfo
+                {
+                    Interface = interfaceName,
+                    ReceiveBytes = $"{NetUnitConversion(values[0])}",
+                    ReceiveBytesOrigin = values[0],
+                    ReceivePackets = $"{values[1]}",
+                    TransmitBytes = $"{NetUnitConversion(values[8])}",
+                    TransmitBytesOrigin = values[8],
+                    TransmitPackets = $"{values[9]}"
+                };
+
+                interfaceInfos.Add(info);
             }
-            return null;
+
+            //throw new Exception($"{interfaceInfos[0].Interface}");
+            return interfaceInfos;
         }
 
         public static string EncryptString(string plainText, SymmetricAlgorithm symmetricAlgorithm)

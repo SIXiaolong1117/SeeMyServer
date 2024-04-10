@@ -19,6 +19,7 @@ using CommunityToolkit.WinUI.Controls;
 using static PInvoke.User32;
 using PInvoke;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SeeMyServer.Pages
 {
@@ -150,10 +151,15 @@ namespace SeeMyServer.Pages
 
             if (Usages.Result != null)
             {
-
                 // 解析结果
                 var cpuUsages = Usages.Result.Item1;
                 var memUsages = Usages.Result.Item2;
+                var NetworkInterfaceInfos = Usages.Result.Item3;
+                var MountInfos = Usages.Result.Item4;
+                var UpTime = Usages.Result.Item5[0];
+                var HostName = Usages.Result.Item5[1];
+                var CPUCoreNum = Usages.Result.Item5[2];
+                var PRETTY_NAME = Usages.Result.Item5[3];
                 var loadAverage = Usages.Result.Item6;
 
                 // 处理获取到的数据
@@ -174,12 +180,9 @@ namespace SeeMyServer.Pages
                 }
                 catch (Exception ex) { }
 
-                // 获取结果失败不更新
-                if (loadAverage[6] != "0" || loadAverage[7] != "0")
-                {
-                    cmsModel.NETReceived = loadAverage[6];
-                    cmsModel.NETSent = loadAverage[7];
-                }
+                cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
+                cmsModel.NETReceived = cmsModel.NetworkInterfaceInfos.OrderByDescending(iface => iface.ReceiveSpeedByte).FirstOrDefault().ReceiveSpeed;
+                cmsModel.NETSent = cmsModel.NetworkInterfaceInfos.OrderByDescending(iface => iface.TransmitSpeedByte).FirstOrDefault().TransmitSpeed;
 
                 // 获取结果失败不更新
                 if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")

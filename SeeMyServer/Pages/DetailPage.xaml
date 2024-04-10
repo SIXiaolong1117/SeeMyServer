@@ -525,7 +525,8 @@
                     <ListView
                         x:Name="MountInfosListView"
                         HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch">
+                        VerticalAlignment="Stretch"
+                        SelectionMode="None">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid Padding="10,0,18,0">
@@ -645,15 +646,15 @@
                         HorizontalAlignment="Right"
                         VerticalAlignment="Bottom"
                         FontSize="12"
-                        Text="{Binding NETSent}" />
+                        Text="{Binding NETReceived}" />
                     <TextBlock
-                        Grid.Row="1"
+                        Grid.Row="0"
                         Grid.Column="2"
                         Padding="0,4,0,4"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Bottom"
                         FontSize="12"
-                        Text="{Binding NETReceived}" />
+                        Text="{Binding NETSent}" />
                 </Grid>
 
                 <Grid
@@ -666,7 +667,8 @@
                         x:Name="NetworkInfosListView"
                         x:Uid="NetworkInfosListView"
                         HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch">
+                        VerticalAlignment="Stretch"
+                        SelectionMode="None">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid Padding="10,0,18,0">
@@ -690,15 +692,19 @@
                                             Grid.Column="0"
                                             Padding="0,4,0,4"
                                             VerticalAlignment="Center"
-                                            Text="{Binding Name}" />
+                                            Text="{Binding Interface}" />
                                         <Grid Grid.Row="1" Grid.Column="0">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="*" />
                                             </Grid.RowDefinitions>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="40" />
+                                                <ColumnDefinition Width="70" />
+                                                <ColumnDefinition Width="60" />
+                                                <ColumnDefinition Width="60" />
                                                 <ColumnDefinition Width="70" />
                                                 <ColumnDefinition Width="70" />
+                                                <ColumnDefinition Width="80" />
+                                                <ColumnDefinition Width="80" />
                                             </Grid.ColumnDefinitions>
                                             <TextBlock
                                                 Grid.Row="0"
@@ -707,7 +713,7 @@
                                                 VerticalAlignment="Center"
                                                 FontSize="12"
                                                 Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
-                                                Text="RX/TX" />
+                                                Text="RX/TX Bytes:" />
                                             <TextBlock
                                                 Grid.Row="0"
                                                 Grid.Column="1"
@@ -716,7 +722,7 @@
                                                 VerticalAlignment="Center"
                                                 FontSize="12"
                                                 Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
-                                                Text="{Binding RXBytes}" />
+                                                Text="{Binding ReceiveBytes}" />
                                             <TextBlock
                                                 Grid.Row="0"
                                                 Grid.Column="2"
@@ -725,7 +731,33 @@
                                                 VerticalAlignment="Center"
                                                 FontSize="12"
                                                 Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
-                                                Text="{Binding TXBytes}" />
+                                                Text="{Binding TransmitBytes}" />
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="4"
+                                                Padding="0,4,0,4"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                                Text="RX/TX Speed:" />
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="5"
+                                                Padding="0,4,0,4"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                                Text="{Binding ReceiveSpeed}" />
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="6"
+                                                Padding="0,4,0,4"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                                Text="{Binding TransmitSpeed}" />
                                         </Grid>
                                     </Grid>
                                 </Grid>
@@ -733,38 +765,6 @@
                         </ListView.ItemTemplate>
                     </ListView>
                 </Grid>
-
-
-                <!--<Grid
-                Grid.Row="7"
-                Margin="24,0,24,0"
-                Padding="28,16,28,16"
-                Background="#11FFFFFF"
-                BorderThickness="0"
-                CornerRadius="4,4,4,4">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <TextBlock
-                    x:Name="Debug"
-                    Grid.Row="0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center" />
-                <TextBlock
-                    x:Name="Debug2"
-                    Grid.Row="1"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center" />
-            </Grid>-->
             </Grid>
         </ScrollViewer>
         <CommandBar

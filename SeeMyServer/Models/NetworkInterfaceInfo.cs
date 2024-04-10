@@ -8,34 +8,16 @@ namespace SeeMyServer.Models
 {
     public class NetworkInterfaceInfo
     {
-        public string Name { get; set; }
-        public string LinkEncap { get; set; }
-        public string HWAddr { get; set; }
-        public string InetAddr { get; set; }
-        public string Bcast { get; set; }
-        public string Mask { get; set; }
-        public string Inet6Addr { get; set; }
-        public string Scope { get; set; }
-        public string Status { get; set; }
-        public string MTU { get; set; }
-        public string Metric { get; set; }
-        public string RXPackets { get; set; }
-        public string RXErrors { get; set; }
-        public string RXDropped { get; set; }
-        public string RXOverruns { get; set; }
-        public string RXFrame { get; set; }
-        public string TXPackets { get; set; }
-        public string TXErrors { get; set; }
-        public string TXDropped { get; set; }
-        public string TXOverruns { get; set; }
-        public string TXCarrier { get; set; }
-        public string Collisions { get; set; }
-        public string TXQueueLen { get; set; }
-        public string RXBytes { get; set; }
-        public string TXBytes { get; set; }
-        public string InterfaceDescription { get; set; }
-        public int ifIndex { get; set; }
-        public string MacAddress { get; set; }
-        public string LinkSpeed { get; set; }
+        public string Interface { get; set; }
+        public string ReceiveBytes { get; set; }
+        public long ReceiveBytesOrigin { get; set; }
+        public string ReceivePackets { get; set; }
+        public decimal ReceiveSpeedByte { get; set; }
+        public string ReceiveSpeed { get; set; }
+        public string TransmitBytes { get; set; }
+        public long TransmitBytesOrigin { get; set; }
+        public string TransmitPackets { get; set; }
+        public decimal TransmitSpeedByte { get; set; }
+        public string TransmitSpeed { get; set; }
     }
 }

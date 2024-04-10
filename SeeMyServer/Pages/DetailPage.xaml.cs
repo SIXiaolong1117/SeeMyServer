@@ -216,8 +216,8 @@ namespace SeeMyServer.Pages
                 var UpTime = Usages.Result.Item5[0];
                 var HostName = Usages.Result.Item5[1];
                 var CPUCoreNum = Usages.Result.Item5[2];
-                var loadAverage = Usages.Result.Item6;
                 var PRETTY_NAME = Usages.Result.Item5[3];
+                var loadAverage = Usages.Result.Item6;
 
                 cmsModel.OSRelease = PRETTY_NAME;
 
@@ -289,24 +289,14 @@ namespace SeeMyServer.Pages
                     }
                 }
 
-                // 只有当 ItemsSource 未绑定时才进行绑定
-                if (MountInfosListView.ItemsSource == null)
-                {
-                    cmsModel.MountInfos = MountInfos;
-                    MountInfosListView.ItemsSource = cmsModel.MountInfos;
-                }
-                if (NetworkInfosListView.ItemsSource == null)
-                {
-                    cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
-                    NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
-                }
+                // 挂载和网络信息
+                cmsModel.MountInfos = MountInfos;
+                MountInfosListView.ItemsSource = cmsModel.MountInfos;
+                cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
+                NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
 
-                // 获取结果失败不更新
-                if (loadAverage[6] != "0" || loadAverage[7] != "0")
-                {
-                    cmsModel.NETReceived = loadAverage[6];
-                    cmsModel.NETSent = loadAverage[7];
-                }
+                cmsModel.NETReceived = cmsModel.NetworkInterfaceInfos.OrderByDescending(iface => iface.ReceiveSpeedByte).FirstOrDefault().ReceiveSpeed;
+                cmsModel.NETSent= cmsModel.NetworkInterfaceInfos.OrderByDescending(iface => iface.TransmitSpeedByte).FirstOrDefault().TransmitSpeed;
 
                 // 获取结果失败不更新
                 if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
