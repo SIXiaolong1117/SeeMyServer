@@ -88,25 +88,26 @@ namespace SeeMyServer.Pages
         }
 
         // 在某处添加新项
-        private void AddItem(CMSModel newItem)
+        private void AddItem(CMSModel cmsModel)
         {
-            dataList.Add(newItem);
-            newItem.CPUUsage = "0%";
-            newItem.MEMUsage = "0%";
-            newItem.NETSent = "0 B/s ↑";
-            newItem.NETReceived = "0 B/s ↓";
+            dataList.Add(cmsModel);
+            cmsModel.CPUUsage = "0%";
+            cmsModel.MEMUsage = "0%";
+            cmsModel.NETSent = "0 B/s ↑";
+            cmsModel.NETReceived = "0 B/s ↓";
+
             // 手动通知 dataListView 更新
             RefreshListView();
         }
 
         // 在某处移除项
-        private void RemoveItem(CMSModel itemToRemove)
+        private void RemoveItem(CMSModel cmsModel)
         {
-            dataList.Remove(itemToRemove);
-            itemToRemove.CPUUsage = "0%";
-            itemToRemove.MEMUsage = "0%";
-            itemToRemove.NETSent = "0 B/s ↑";
-            itemToRemove.NETReceived = "0 B/s ↓";
+            dataList.Remove(cmsModel);
+            cmsModel.CPUUsage = "0%";
+            cmsModel.MEMUsage = "0%";
+            cmsModel.NETSent = "0 B/s ↑";
+            cmsModel.NETReceived = "0 B/s ↓";
 
             // 手动通知 dataListView 更新
             RefreshListView();
@@ -255,9 +256,10 @@ namespace SeeMyServer.Pages
                 // 实例化SQLiteHelper
                 SQLiteHelper dbHelper = new SQLiteHelper();
                 // 插入新数据
-                dbHelper.InsertData(initialCMSModelData);
+                int id = dbHelper.InsertData(initialCMSModelData);
                 // 加载数据
                 //LoadData();
+                initialCMSModelData.Id = id;
                 AddItem(initialCMSModelData);
                 logger.LogInfo("Add Config is completed.");
             }
@@ -273,9 +275,10 @@ namespace SeeMyServer.Pages
             if (cmsModel != null)
             {
                 // 插入新数据
-                dbHelper.InsertData(cmsModel);
+                int id = dbHelper.InsertData(cmsModel);
                 // 重新加载数据
                 //LoadData();
+                cmsModel.Id = id;
                 AddItem(cmsModel);
                 logger.LogInfo("Import Config is completed.");
             }

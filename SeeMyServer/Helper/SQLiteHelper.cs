@@ -130,15 +130,19 @@ namespace SeeMyServer.Datas
 
         // 插入数据
         // 输入格式CMSModel，在Model中有定义
-        public void InsertData(CMSModel cmsModel)
+        public int InsertData(CMSModel cmsModel)
         {
+            int insertedID = 0;
+
             using (SqliteConnection connection = new SqliteConnection(connectionString))
             {
                 // 连接打开
                 connection.Open();
 
                 var insertCommand = connection.CreateCommand();
-                insertCommand.CommandText = "INSERT INTO CMSTable (Name, HostIP, HostPort, SSHUser, SSHPasswd, SSHKey, OSType, SSHKeyIsOpen) VALUES (@Name, @HostIP, @HostPort, @SSHUser, @SSHPasswd, @SSHKey, @OSType, @SSHKeyIsOpen)";
+                insertCommand.CommandText = "INSERT INTO CMSTable (Name, HostIP, HostPort, SSHUser, SSHPasswd, SSHKey, OSType, SSHKeyIsOpen) " +
+                                            "VALUES (@Name, @HostIP, @HostPort, @SSHUser, @SSHPasswd, @SSHKey, @OSType, @SSHKeyIsOpen);" +
+                                            "SELECT last_insert_rowid();";
 
                 insertCommand.Parameters.AddWithValue("@Name", cmsModel.Name ?? (object)DBNull.Value);
                 insertCommand.Parameters.AddWithValue("@HostIP", cmsModel.HostIP ?? (object)DBNull.Value);
@@ -149,8 +153,11 @@ namespace SeeMyServer.Datas
                 insertCommand.Parameters.AddWithValue("@OSType", cmsModel.OSType ?? (object)DBNull.Value);
                 insertCommand.Parameters.AddWithValue("@SSHKeyIsOpen", cmsModel.SSHKeyIsOpen ?? (object)DBNull.Value);
 
-                insertCommand.ExecuteNonQuery();
+                // 执行插入命令并获取插入行的ID
+                insertedID = Convert.ToInt32(insertCommand.ExecuteScalar());
             }
+
+            return insertedID;
         }
 
         // 删除数据

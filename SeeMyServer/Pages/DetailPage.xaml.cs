@@ -217,9 +217,24 @@ namespace SeeMyServer.Pages
                 var HostName = Usages.Result.Item5[1];
                 var CPUCoreNum = Usages.Result.Item5[2];
                 var PRETTY_NAME = Usages.Result.Item5[3];
+                var TOPRec = Usages.Result.Item5[4];
                 var loadAverage = Usages.Result.Item6;
 
-                cmsModel.OSRelease = PRETTY_NAME;
+
+                // 只有HostName和UpTime为空才更新
+                if (cmsModel.HostName == null)
+                {
+                    cmsModel.HostName = HostName;
+                }
+                if (cmsModel.UpTime == null)
+                {
+                    cmsModel.UpTime = UpTime;
+                }
+                if (cmsModel.OSRelease == null)
+                {
+                    cmsModel.OSRelease = PRETTY_NAME;
+                }
+                TopRec.Text = TOPRec;
 
                 // 处理获取到的数据
                 try
@@ -255,15 +270,6 @@ namespace SeeMyServer.Pages
                     cmsModel.MEMUsagePageCache = $"{memUsagePageCacheValue:F2}%";
                 }
                 catch (Exception ex) { }
-                // 只有HostName和UpTime为空才更新
-                if (cmsModel.HostName == null)
-                {
-                    cmsModel.HostName = HostName;
-                }
-                if (cmsModel.UpTime == null)
-                {
-                    cmsModel.UpTime = UpTime;
-                }
                 try
                 {
                     cmsModel.TotalMEM = $" of {Method.NetUnitConversion(decimal.Parse(memUsages[0]) * 1024)}";
@@ -290,13 +296,19 @@ namespace SeeMyServer.Pages
                 }
 
                 // 挂载和网络信息
-                cmsModel.MountInfos = MountInfos;
-                MountInfosListView.ItemsSource = cmsModel.MountInfos;
-                cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
-                NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
+                if (cmsModel.MountInfos == null)
+                {
+                    cmsModel.MountInfos = MountInfos;
+                    MountInfosListView.ItemsSource = cmsModel.MountInfos;
+                }
+                if (cmsModel.NetworkInterfaceInfos == null)
+                {
+                    cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
+                    NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
+                }
 
-                cmsModel.NETReceived = cmsModel.NetworkInterfaceInfos.OrderByDescending(iface => iface.ReceiveSpeedByte).FirstOrDefault().ReceiveSpeed;
-                cmsModel.NETSent= cmsModel.NetworkInterfaceInfos.OrderByDescending(iface => iface.TransmitSpeedByte).FirstOrDefault().TransmitSpeed;
+                cmsModel.NETReceived = NetworkInterfaceInfos.OrderByDescending(iface => iface.ReceiveSpeedByte).FirstOrDefault().ReceiveSpeed;
+                cmsModel.NETSent = NetworkInterfaceInfos.OrderByDescending(iface => iface.TransmitSpeedByte).FirstOrDefault().TransmitSpeed;
 
                 // 获取结果失败不更新
                 if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")

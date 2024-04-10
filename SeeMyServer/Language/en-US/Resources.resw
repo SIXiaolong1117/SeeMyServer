@@ -159,6 +159,9 @@
   <data name="AboutServerNetworkInfos.Text" xml:space="preserve">
     <value>Network</value>
   </data>
+  <data name="AboutServerTopRec.Text" xml:space="preserve">
+    <value>TOP</value>
+  </data>
   <data name="AboutServerUpTime.Text" xml:space="preserve">
     <value>Up Time</value>
   </data>

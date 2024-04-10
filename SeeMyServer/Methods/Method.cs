@@ -473,7 +473,7 @@ namespace SeeMyServer.Methods
                     //return mountInfos;
                 }
 
-                // 启动时长、主机名、CPU核心数量、系统版本
+                // 启动时长、主机名、CPU核心数量、系统版本、top
                 {
                     // 启动时长
                     //result[4].Split(',')[0]
@@ -497,6 +497,8 @@ namespace SeeMyServer.Methods
                     {
                         aboutInfo.Add(""); // 系统版本
                     }
+
+                    aboutInfo.Add(result[6]); // top
                 }
 
                 // 负载信息
@@ -578,42 +580,6 @@ namespace SeeMyServer.Methods
                     loadResults.Add($"{average5Percentage:F2}");
                     loadResults.Add($"{average15Percentage:F2}");
                 }
-
-                //{
-                //    // 获取经过的时间
-                //    decimal elapsedTime = stopwatch.ElapsedMilliseconds;
-
-                //    Regex XPattern = new Regex(@"eth0\s+Link.*?RX\s+bytes:(\d+)\s+\(.*?\)\s+TX\s+bytes:(\d+)\s+\(.*?\)", RegexOptions.Singleline);
-
-                //    Match XMatch0s = XPattern.Match(result[0]);
-                //    Match XMatch1s = XPattern.Match(result2[0]);
-
-                //    if (XMatch0s.Success && XMatch1s.Success)
-                //    {
-                //        // 解析结果
-                //        decimal netReceivedValue0s = decimal.Parse(XMatch0s.Groups[1].Value);
-                //        decimal netReceivedValue1s = decimal.Parse(XMatch1s.Groups[1].Value);
-                //        decimal netSentValue0s = decimal.Parse(XMatch0s.Groups[2].Value);
-                //        decimal netSentValue1s = decimal.Parse(XMatch1s.Groups[2].Value);
-
-                //        decimal netReceivedValue = (netReceivedValue1s - netReceivedValue0s) * 1000 / elapsedTime;
-                //        decimal netSentValue = (netSentValue1s - netSentValue0s) * 1000 / elapsedTime;
-
-                //        string netReceivedRes = NetUnitConversion(netReceivedValue);
-                //        string netSentRes = NetUnitConversion(netSentValue);
-                //        //return new string[] { $"{netReceivedRes + "/s ↓"}", $"{netSentRes + "/s ↑"}" };
-                //        loadResults.Add($"{netReceivedRes + "/s ↓"}");
-                //        loadResults.Add($"{netSentRes + "/s ↑"}");
-                //    }
-                //    else
-                //    {
-                //        // 返回不带单位，方便前端处理丢弃结果
-                //        //return new string[] { "0", "0" };
-                //        loadResults.Add("0");
-                //        loadResults.Add("0");
-                //    }
-                //}
-
 
                 return Tuple.Create(cpuUsageList, parsedResults, networkInterfaceInfos, mountInfos, aboutInfo, loadResults);
             }

@@ -519,6 +519,7 @@
                 <Grid
                     Grid.Row="8"
                     MinHeight="50"
+                    Padding="0,24,0,24"
                     Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
                     BorderThickness="0"
                     CornerRadius="4,4,4,4">
@@ -660,6 +661,7 @@
                 <Grid
                     Grid.Row="10"
                     MinHeight="50"
+                    Padding="0,24,0,24"
                     Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
                     BorderThickness="0"
                     CornerRadius="4,4,4,4">
@@ -732,38 +734,36 @@
                                                 FontSize="12"
                                                 Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
                                                 Text="{Binding TransmitBytes}" />
-                                            <TextBlock
-                                                Grid.Row="0"
-                                                Grid.Column="4"
-                                                Padding="0,4,0,4"
-                                                VerticalAlignment="Center"
-                                                FontSize="12"
-                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
-                                                Text="RX/TX Speed:" />
-                                            <TextBlock
-                                                Grid.Row="0"
-                                                Grid.Column="5"
-                                                Padding="0,4,0,4"
-                                                HorizontalAlignment="Right"
-                                                VerticalAlignment="Center"
-                                                FontSize="12"
-                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
-                                                Text="{Binding ReceiveSpeed}" />
-                                            <TextBlock
-                                                Grid.Row="0"
-                                                Grid.Column="6"
-                                                Padding="0,4,0,4"
-                                                HorizontalAlignment="Right"
-                                                VerticalAlignment="Center"
-                                                FontSize="12"
-                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
-                                                Text="{Binding TransmitSpeed}" />
                                         </Grid>
                                     </Grid>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+                </Grid>
+                <Grid Grid.Row="11" Margin="0,18,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        x:Uid="AboutServerTopRec"
+                        Grid.Row="0"
+                        Margin="0,0,0,8" />
+                    <Grid
+                        Grid.Row="1"
+                        MinHeight="50"
+                        Padding="24"
+                        Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
+                        BorderThickness="0"
+                        CornerRadius="4,4,4,4">
+                        <ScrollViewer MaxHeight="400">
+                            <TextBlock x:Name="TopRec" FontFamily="Consolas" />
+                        </ScrollViewer>
+                    </Grid>
                 </Grid>
             </Grid>
         </ScrollViewer>
