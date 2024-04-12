@@ -207,6 +207,9 @@
   <data name="DialogClose" xml:space="preserve">
     <value>关闭</value>
   </data>
+  <data name="DISKUsageText.Text" xml:space="preserve">
+    <value>硬盘</value>
+  </data>
   <data name="DisplayName.Header" xml:space="preserve">
     <value>名称</value>
   </data>

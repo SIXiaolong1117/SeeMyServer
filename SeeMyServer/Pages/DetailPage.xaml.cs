@@ -212,7 +212,8 @@ namespace SeeMyServer.Pages
                 var cpuUsages = Usages.Result.Item1;
                 var memUsages = Usages.Result.Item2;
                 var NetworkInterfaceInfos = Usages.Result.Item3;
-                var MountInfos = Usages.Result.Item4;
+                var MountInfos = Usages.Result.Item4[0];
+                var DiskStatus = Usages.Result.Item4[1];
                 var UpTime = Usages.Result.Item5[0];
                 var HostName = Usages.Result.Item5[1];
                 var CPUCoreNum = Usages.Result.Item5[2];
@@ -311,9 +312,11 @@ namespace SeeMyServer.Pages
                 cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
                 NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
 
+                cmsModel.NETSent = $"{Method.NetUnitConversion(cmsModel.NetworkInterfaceInfos.Sum(iface => iface.TransmitSpeedByte))}/s ↑";
+                cmsModel.NETReceived = $"{Method.NetUnitConversion(cmsModel.NetworkInterfaceInfos.Sum(iface => iface.ReceiveSpeedByte))}/s ↓";
 
-                cmsModel.NETReceived = NetworkInterfaceInfos.OrderByDescending(iface => iface.ReceiveSpeedByte).FirstOrDefault().ReceiveSpeed;
-                cmsModel.NETSent = NetworkInterfaceInfos.OrderByDescending(iface => iface.TransmitSpeedByte).FirstOrDefault().TransmitSpeed;
+                cmsModel.DISKRead = $"{Method.NetUnitConversion(DiskStatus.Sum(dstatus => dstatus.SectorsReadPerSecondOrigin))}/s R";
+                cmsModel.DISKWrite = $"{Method.NetUnitConversion(DiskStatus.Sum(dstatus => dstatus.SectorsWrittenPerSecondOrigin))}/s W";
 
                 // 获取结果失败不更新
                 if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")

@@ -271,7 +271,7 @@ namespace SeeMyServer.Methods
             List<List<string>>,
             List<string>,
             List<NetworkInterfaceInfo>,
-            List<MountInfo>,
+            List<List<MountInfo>>,
             List<string>,
             List<string>
             >> GetLinuxCPUUsageAsync(CMSModel cmsModel)
@@ -281,7 +281,16 @@ namespace SeeMyServer.Methods
 
             // OpenWRT不能用hostname，可以用"uci get system.@system[0].hostname"
             // 用户应自己设置命令别名以兼容
-            string CPUUsageCMD = "cat /proc/stat | grep cpu 2>&1 ; echo '-' ; cat /proc/meminfo | grep -E 'Mem|Swap' 2>&1 ; echo '-' ; cat /proc/net/dev 2>&1 ; echo '-' ; df -hP 2>&1 ; echo '-' ; uptime | awk '{print $3 \" \" $4}' 2>&1 ; echo '-' ; hostname 2>&1 ; echo '-' ; top -bn1 2>&1 ; echo '-' ; cat /proc/cpuinfo | grep processor | wc -l ; echo '-' ; cat /etc/*-release 2>&1 | grep PRETTY_NAME";
+            string CPUUsageCMD = "cat /proc/stat | grep cpu 2>&1 ; echo '-' ; " +
+                "cat /proc/meminfo | grep -E 'Mem|Swap' 2>&1 ; echo '-' ; " +
+                "cat /proc/net/dev 2>&1 ; echo '-' ; " +
+                "df -hP 2>&1 ; echo '-' ; " +
+                "uptime | awk '{print $3 \" \" $4}' 2>&1 ; echo '-' ; " +
+                "hostname 2>&1 ; echo '-' ; " +
+                "top -bn1 2>&1 ; echo '-' ; " +
+                "cat /proc/cpuinfo | grep processor | wc -l ; echo '-' ; " +
+                "cat /etc/*-release 2>&1 | grep PRETTY_NAME ; echo '-' ; " +
+                "cat /proc/diskstats 2>&1";
             string CPUUsageRes = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
 
             // 开始计时
@@ -303,12 +312,13 @@ namespace SeeMyServer.Methods
                 // 以 - 分割
                 string[] result = CPUUsageRes.Split("-\n");
                 string[] result2 = CPUUsageRes2.Split("-\n");
+                //throw new Exception($"Invalid argument: {result[8]}");
 
                 // 用于保存结果的List
                 List<List<string>> cpuUsageList = new List<List<string>>();
                 List<string> parsedResults = new List<string>();
                 List<NetworkInterfaceInfo> networkInterfaceInfos = new List<NetworkInterfaceInfo>();
-                List<MountInfo> mountInfos = new List<MountInfo>();
+                List<List<MountInfo>> mountInfos = new List<List<MountInfo>>();
                 List<string> loadResults = new List<string>();
                 List<string> aboutInfo = new List<string>();
 
@@ -468,7 +478,7 @@ namespace SeeMyServer.Methods
                     //string CMD = "df -hP 2>&1";
                     //CMD = await SendSSHCommandAsync(CMD, cmsModel);
 
-                    mountInfos = MountInfoParse(result[3]);
+                    mountInfos = MountInfoParse(result[3], result[9], result2[9], stopwatch.ElapsedMilliseconds);
 
                     //return mountInfos;
                 }
@@ -643,12 +653,14 @@ namespace SeeMyServer.Methods
             }
         }
         // 处理 df
-        public static List<MountInfo> MountInfoParse(string input)
+        public static List<List<MountInfo>> MountInfoParse(string input, string diskStatus1, string diskStatus2, decimal elapsedTime)
         {
             var mountInfos = new List<MountInfo>();
+            var result = new List<List<MountInfo>>();
 
             // 按行分割输入
             var lines = input.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            List<MountInfo> status = ParseDiskSpeed(diskStatus1, diskStatus2, elapsedTime);
 
             // 跳过标题行
             foreach (var line in lines.Skip(1))
@@ -672,16 +684,90 @@ namespace SeeMyServer.Methods
                             MountedOn = columns[5]
                         };
 
+                        // Find corresponding status for the current FileSystem
+                        var correspondingStatus = status.FirstOrDefault(s => s.FileSystem == mountInfo.FileSystem);
+                        if (correspondingStatus != null)
+                        {
+                            mountInfo.SectorsRead = correspondingStatus.SectorsRead;
+                            mountInfo.SectorsWritten = correspondingStatus.SectorsWritten;
+                            mountInfo.SectorsReadBytes = $"{NetUnitConversion(correspondingStatus.SectorsRead)}";
+                            mountInfo.SectorsWrittenBytes = $"{NetUnitConversion(correspondingStatus.SectorsWritten)}";
+                            mountInfo.SectorsReadPerSecondOrigin = correspondingStatus.SectorsReadPerSecondOrigin;
+                            mountInfo.SectorsWrittenPerSecondOrigin = correspondingStatus.SectorsWrittenPerSecondOrigin;
+                            mountInfo.SectorsReadPerSecond = correspondingStatus.SectorsReadPerSecond;
+                            mountInfo.SectorsWrittenPerSecond = correspondingStatus.SectorsWrittenPerSecond;
+                        }
+                        else
+                        {
+                            // Log an error if corresponding status not found
+                            //logger.LogError($"Corresponding status not found for FileSystem: {mountInfo.FileSystem}");
+                        }
+
                         mountInfos.Add(mountInfo);
                     }
                     else
                     {
-                        logger.LogError($"Invalid line format: {line}");
+                        //logger.LogError($"Invalid line format: {line}");
                     }
                 }
             }
-            return mountInfos;
+            result.Add(mountInfos);
+            result.Add(status);
+            return result;
         }
+
+        private static List<MountInfo> ParseSingleDiskStatus(string input)
+        {
+            var lines = input.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            var diskStatusInfos = new List<MountInfo>();
+
+            foreach (var line in lines)
+            {
+                var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                var info = new MountInfo
+                {
+                    FileSystem = $"/dev/{parts[2]}",
+                    SectorsRead = long.Parse(parts[5]),
+                    SectorsWritten = long.Parse(parts[9]),
+                };
+
+                diskStatusInfos.Add(info);
+            }
+
+            //throw new Exception($"{interfaceInfos[0].Interface}");
+            return diskStatusInfos;
+        }
+        private static List<MountInfo> ParseDiskSpeed(string input1, string input2, decimal elapsedTime)
+        {
+            var diskStatus1 = ParseSingleDiskStatus(input1);
+            var diskStatus2 = ParseSingleDiskStatus(input2);
+            var diskStatusInfos = new List<MountInfo>();
+
+            foreach (var dstatus1 in diskStatus1)
+            {
+                var dstatus2 = diskStatus2.FirstOrDefault(x => x.FileSystem == dstatus1.FileSystem);
+                if (dstatus2 != null)
+                {
+                    decimal sectorsReadSpeed = (dstatus2.SectorsRead - dstatus1.SectorsRead) * 1000 / elapsedTime;
+                    decimal sectorsWrittenSpeed = (dstatus2.SectorsWritten - dstatus1.SectorsWritten) * 1000 / elapsedTime;
+
+                    diskStatusInfos.Add(new MountInfo
+                    {
+                        FileSystem = dstatus2.FileSystem,
+                        SectorsRead = dstatus2.SectorsRead,
+                        SectorsWritten = dstatus2.SectorsWritten,
+                        SectorsReadPerSecondOrigin = sectorsReadSpeed,
+                        SectorsWrittenPerSecondOrigin = sectorsWrittenSpeed,
+                        SectorsReadPerSecond = $"{NetUnitConversion(sectorsReadSpeed)}/s R",
+                        SectorsWrittenPerSecond = $"{NetUnitConversion(sectorsWrittenSpeed)}/s W",
+                    });
+                }
+            }
+
+            return diskStatusInfos;
+        }
+
 
 
         // 处理 ifconfig
@@ -719,7 +805,7 @@ namespace SeeMyServer.Methods
         }
         private static List<NetworkInterfaceInfo> ParseSingleNetDev(string input)
         {
-            var lines = input.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            var lines = input.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
             var interfaceInfos = new List<NetworkInterfaceInfo>();
 
             foreach (var line in lines.Skip(2))

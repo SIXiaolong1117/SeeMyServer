@@ -510,11 +510,39 @@
                     </Grid>-->
                 </Grid>
 
-                <TextBlock
-                    x:Name="AboutServerMountInfos"
-                    x:Uid="AboutServerMountInfos"
-                    Grid.Row="7"
-                    Margin="0,18,0,8" />
+
+
+
+                <Grid Grid.Row="7" Margin="0,18,0,8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="80" />
+                        <ColumnDefinition Width="80" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        x:Name="AboutServerMountInfos"
+                        x:Uid="AboutServerMountInfos"
+                        Grid.Column="0" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Padding="0,4,0,4"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        FontSize="12"
+                        Text="{Binding DISKRead}" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Padding="0,4,0,4"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        FontSize="12"
+                        Text="{Binding DISKWrite}" />
+                </Grid>
 
                 <Grid
                     Grid.Row="8"
@@ -546,23 +574,54 @@
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="*" />
                                             <RowDefinition Height="*" />
+                                            <RowDefinition Height="*" />
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock
+                                        <Grid
                                             Grid.Row="0"
                                             Grid.Column="0"
-                                            Padding="0,4,0,4"
-                                            VerticalAlignment="Center"
-                                            Text="{Binding FileSystem}" />
-                                        <Grid Grid.Row="1" Grid.Column="0">
+                                            HorizontalAlignment="Left">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="*" />
                                             </Grid.RowDefinitions>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="0"
+                                                Padding="0,4,0,4"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Text="{Binding FileSystem}" />
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="1"
+                                                Margin="8,0,0,0"
+                                                Padding="0,4,0,4"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                                Text="{Binding MountedOn}" />
+                                        </Grid>
+                                        <Grid
+                                            Grid.Row="1"
+                                            Grid.Column="0"
+                                            HorizontalAlignment="Left">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="70" />
+                                                <ColumnDefinition Width="80" />
+                                                <ColumnDefinition Width="80" />
+                                            </Grid.ColumnDefinitions>
+
                                             <TextBlock
                                                 Grid.Row="0"
                                                 Grid.Column="0"
@@ -570,8 +629,65 @@
                                                 VerticalAlignment="Center"
                                                 FontSize="12"
                                                 Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
-                                                Text="{Binding MountedOn}" />
+                                                Text="R/W Bytes:" />
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="1"
+                                                Padding="0,4,0,4"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                                Text="{Binding SectorsReadBytes}" />
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="2"
+                                                Padding="0,4,0,4"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                                Text="{Binding SectorsWrittenBytes}" />
+                                        </Grid>
+                                        <Grid
+                                            Grid.Row="2"
+                                            Grid.Column="0"
+                                            HorizontalAlignment="Left">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="70" />
+                                                <ColumnDefinition Width="80" />
+                                                <ColumnDefinition Width="80" />
+                                            </Grid.ColumnDefinitions>
 
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="0"
+                                                Padding="0,4,0,4"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                                Text="R/W Speed:" />
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="1"
+                                                Padding="0,4,0,4"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                                Text="{Binding SectorsReadPerSecond}" />
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="2"
+                                                Padding="0,4,0,4"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                                Text="{Binding SectorsWrittenPerSecond}" />
                                         </Grid>
                                     </Grid>
                                     <Grid
@@ -709,6 +825,7 @@
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="*" />
                                             <RowDefinition Height="*" />
+                                            <RowDefinition Height="*" />
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -726,8 +843,8 @@
                                             </Grid.RowDefinitions>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="70" />
-                                                <ColumnDefinition Width="60" />
-                                                <ColumnDefinition Width="60" />
+                                                <ColumnDefinition Width="80" />
+                                                <ColumnDefinition Width="80" />
                                             </Grid.ColumnDefinitions>
                                             <TextBlock
                                                 Grid.Row="0"
@@ -756,64 +873,47 @@
                                                 Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
                                                 Text="{Binding TransmitBytes}" />
                                         </Grid>
-                                    </Grid>
-                                    <Grid
-                                        Grid.Row="0"
-                                        Grid.Column="1"
-                                        HorizontalAlignment="Right">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="*" />
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="80" />
-                                            <ColumnDefinition Width="80" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock
-                                            Grid.Row="0"
+
+                                        <Grid
+                                            Grid.Row="2"
                                             Grid.Column="0"
-                                            Padding="0,4,0,4"
-                                            HorizontalAlignment="Right"
-                                            VerticalAlignment="Center"
-                                            FontSize="12"
-                                            Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
-                                            Text="{Binding TransmitSpeed}" />
-                                        <TextBlock
-                                            Grid.Row="0"
-                                            Grid.Column="1"
-                                            Padding="0,4,0,4"
-                                            HorizontalAlignment="Right"
-                                            VerticalAlignment="Center"
-                                            FontSize="12"
-                                            Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
-                                            Text="{Binding ReceiveSpeed}" />
-                                        <!--<controls:RadialGauge
-                                            Grid.Row="0"
-                                            Grid.Column="2"
-                                            Width="40"
-                                            Height="40"
-                                            Margin="8,0,0,0"
-                                            HorizontalAlignment="Right"
-                                            IsInteractive="False"
-                                            MaxAngle="0"
-                                            Maximum="100"
-                                            MinAngle="0"
-                                            NeedleLength="0"
-                                            ScaleBrush="#ffd23c"
-                                            ScalePadding="0"
-                                            ScaleWidth="15"
-                                            TickLength="0"
-                                            TrailBrush="#3cbdbd"
-                                            ValueStringFormat=" "
-                                            Value="{Binding ReceivePercentage}" />-->
-                                        <!--<TextBlock
-                                            Grid.Row="0"
-                                            Grid.Column="2"
-                                            Margin="8,0,0,0"
-                                            Padding="0,4,0,4"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"
-                                            FontSize="12"
-                                            Text="{Binding ReceivePercentage}" />-->
+                                            HorizontalAlignment="Left">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="70" />
+                                                <ColumnDefinition Width="80" />
+                                                <ColumnDefinition Width="80" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="0"
+                                                Padding="0,4,0,4"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                                Text="RX/TX Speed:" />
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="1"
+                                                Padding="0,4,0,4"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                                Text="{Binding TransmitSpeed}" />
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Grid.Column="2"
+                                                Padding="0,4,0,4"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                                Text="{Binding ReceiveSpeed}" />
+                                        </Grid>
                                     </Grid>
                                 </Grid>
                             </DataTemplate>

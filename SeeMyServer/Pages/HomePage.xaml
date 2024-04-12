@@ -295,7 +295,7 @@
                                         Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}" />
                                 </Grid>
 
-                                <!--  NET Usage  -->
+                                <!--  DISK Usage  -->
                                 <Grid
                                     Grid.Row="0"
                                     Grid.Column="3"
@@ -325,7 +325,7 @@
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             FontSize="10"
-                                            Text="{Binding NETSent}" />
+                                            Text="{Binding DISKRead}" />
                                         <TextBlock
                                             Grid.Row="1"
                                             Grid.Column="0"
@@ -333,10 +333,10 @@
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             FontSize="10"
-                                            Text="{Binding NETReceived}" />
+                                            Text="{Binding DISKWrite}" />
                                     </Grid>
                                     <TextBlock
-                                        x:Uid="NETUsageText"
+                                        x:Uid="DISKUsageText"
                                         Grid.Row="1"
                                         Grid.Column="0"
                                         HorizontalAlignment="Center"

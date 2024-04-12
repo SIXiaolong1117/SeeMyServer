@@ -14,5 +14,13 @@ namespace SeeMyServer.Models
         public string Avail { get; set; }
         public string UsePercentage { get; set; }
         public string MountedOn { get; set; }
+        public decimal SectorsReadPerSecondOrigin { get; set; }
+        public decimal SectorsWrittenPerSecondOrigin { get; set; }
+        public string SectorsReadPerSecond { get; set; }
+        public string SectorsWrittenPerSecond { get; set; }
+        public long SectorsRead { get; set; }
+        public long SectorsWritten { get; set; }
+        public string SectorsReadBytes { get; set; }
+        public string SectorsWrittenBytes { get; set; }
     }
 }

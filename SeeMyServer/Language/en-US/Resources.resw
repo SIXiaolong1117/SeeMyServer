@@ -213,6 +213,9 @@
   <data name="DialogClose" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="DISKUsageText.Text" xml:space="preserve">
+    <value>Disk</value>
+  </data>
   <data name="DisplayName.Header" xml:space="preserve">
     <value>Name</value>
   </data>
@@ -265,7 +268,7 @@
     <value>Used </value>
   </data>
   <data name="NETUsageText.Text" xml:space="preserve">
-    <value>NET</value>
+    <value>Net</value>
   </data>
   <data name="NetworkInfosRXBytes.Text" xml:space="preserve">
     <value>RX</value>

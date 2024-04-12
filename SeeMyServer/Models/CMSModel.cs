@@ -21,6 +21,8 @@ namespace SeeMyServer.Models
         private string _memAvailable;
         private string _netReceived;
         private string _netSent;
+        private string _diskRead;
+        private string _diskWrite;
         private string _hostName;
         private string _upTime;
         private string _totalMEM;
@@ -232,6 +234,32 @@ namespace SeeMyServer.Models
                 {
                     _netSent = value;
                     OnPropertyChanged(nameof(NETSent));
+                }
+            }
+        }
+        
+        public string DISKRead
+        {
+            get { return _diskRead; }
+            set
+            {
+                if (_diskRead != value)
+                {
+                    _diskRead = value;
+                    OnPropertyChanged(nameof(DISKRead));
+                }
+            }
+        }
+
+        public string DISKWrite
+        {
+            get { return _diskWrite; }
+            set
+            {
+                if (_diskWrite != value)
+                {
+                    _diskWrite = value;
+                    OnPropertyChanged(nameof(DISKWrite));
                 }
             }
         }

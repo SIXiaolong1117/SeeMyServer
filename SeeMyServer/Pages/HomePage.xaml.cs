@@ -76,14 +76,14 @@ namespace SeeMyServer.Pages
             // 解析排序序列字符串为整数列表
             List<int> sortOrder = new List<int>();
             string sortOrderString = null;
-            if (localSettings.Values["DataListOrder"] != null)
+            try
             {
                 sortOrderString = localSettings.Values["DataListOrder"] as string;
                 sortOrder = sortOrderString.Split(',')
                                                      .Select(str => int.Parse(str.Trim()))
                                                      .ToList();
             }
-            else
+            catch (Exception ex)
             {
                 // 获取当前排序序列
                 sortOrder = dataList.Select(item => item.Id).ToList();
@@ -113,6 +113,8 @@ namespace SeeMyServer.Pages
                 cmsModel.MEMUsage = "0%";
                 cmsModel.NETSent = "0 B/s ↑";
                 cmsModel.NETReceived = "0 B/s ↓";
+                cmsModel.DISKRead = "0 B/s R";
+                cmsModel.DISKWrite = "0 B/s W";
             }
         }
         private void DataList_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -184,6 +186,8 @@ namespace SeeMyServer.Pages
             cmsModel.MEMUsage = "0%";
             cmsModel.NETSent = "0 B/s ↑";
             cmsModel.NETReceived = "0 B/s ↓";
+            cmsModel.DISKRead = "0 B/s R";
+            cmsModel.DISKWrite = "0 B/s W";
 
             // 手动通知 dataListView 更新
             RefreshListView();
@@ -197,6 +201,8 @@ namespace SeeMyServer.Pages
             cmsModel.MEMUsage = "0%";
             cmsModel.NETSent = "0 B/s ↑";
             cmsModel.NETReceived = "0 B/s ↓";
+            cmsModel.DISKRead = "0 B/s R";
+            cmsModel.DISKWrite = "0 B/s W";
 
             // 手动通知 dataListView 更新
             RefreshListView();
@@ -245,7 +251,8 @@ namespace SeeMyServer.Pages
                 var cpuUsages = Usages.Result.Item1;
                 var memUsages = Usages.Result.Item2;
                 var NetworkInterfaceInfos = Usages.Result.Item3;
-                var MountInfos = Usages.Result.Item4;
+                var MountInfos = Usages.Result.Item4[0];
+                var DiskStatus = Usages.Result.Item4[1];
                 var UpTime = Usages.Result.Item5[0];
                 var HostName = Usages.Result.Item5[1];
                 var CPUCoreNum = Usages.Result.Item5[2];
@@ -271,8 +278,11 @@ namespace SeeMyServer.Pages
                 catch (Exception ex) { }
 
                 cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
-                cmsModel.NETReceived = cmsModel.NetworkInterfaceInfos.OrderByDescending(iface => iface.ReceiveSpeedByte).FirstOrDefault().ReceiveSpeed;
-                cmsModel.NETSent = cmsModel.NetworkInterfaceInfos.OrderByDescending(iface => iface.TransmitSpeedByte).FirstOrDefault().TransmitSpeed;
+                cmsModel.NETSent = $"{Method.NetUnitConversion(cmsModel.NetworkInterfaceInfos.Sum(iface => iface.TransmitSpeedByte))}/s ↑";
+                cmsModel.NETReceived = $"{Method.NetUnitConversion(cmsModel.NetworkInterfaceInfos.Sum(iface => iface.ReceiveSpeedByte))}/s ↓";
+
+                cmsModel.DISKRead = $"{Method.NetUnitConversion(DiskStatus.Sum(dstatus => dstatus.SectorsReadPerSecondOrigin))}/s R";
+                cmsModel.DISKWrite = $"{Method.NetUnitConversion(DiskStatus.Sum(dstatus => dstatus.SectorsWrittenPerSecondOrigin))}/s W";
 
                 // 获取结果失败不更新
                 if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
