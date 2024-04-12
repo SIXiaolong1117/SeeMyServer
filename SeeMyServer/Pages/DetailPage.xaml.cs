@@ -296,16 +296,21 @@ namespace SeeMyServer.Pages
                 }
 
                 // 挂载和网络信息
-                if (cmsModel.MountInfos == null)
+                if (cmsModel.MountInfos != null)
                 {
-                    cmsModel.MountInfos = MountInfos;
-                    MountInfosListView.ItemsSource = cmsModel.MountInfos;
+                    // 禁用过渡动画
+                    MountInfosListView.ItemContainerTransitions = null;
                 }
-                if (cmsModel.NetworkInterfaceInfos == null)
+                if (cmsModel.NetworkInterfaceInfos != null)
                 {
-                    cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
-                    NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
+                    // 禁用过渡动画
+                    NetworkInfosListView.ItemContainerTransitions = null;
                 }
+                cmsModel.MountInfos = MountInfos;
+                MountInfosListView.ItemsSource = cmsModel.MountInfos;
+                cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
+                NetworkInfosListView.ItemsSource = cmsModel.NetworkInterfaceInfos;
+
 
                 cmsModel.NETReceived = NetworkInterfaceInfos.OrderByDescending(iface => iface.ReceiveSpeedByte).FirstOrDefault().ReceiveSpeed;
                 cmsModel.NETSent = NetworkInterfaceInfos.OrderByDescending(iface => iface.TransmitSpeedByte).FirstOrDefault().TransmitSpeed;
