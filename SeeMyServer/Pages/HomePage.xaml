@@ -78,22 +78,37 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock
                                     Grid.Row="0"
                                     Grid.Column="0"
                                     Padding="0,4,0,4"
-                                    HorizontalAlignment="Center"
+                                    HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
                                     Text="{Binding Name}" />
-                                <!--<TextBlock
+                                <TextBlock
                                     Grid.Row="0"
                                     Grid.Column="1"
+                                    Margin="8,0,0,0"
                                     Padding="0,4,0,4"
-                                    HorizontalAlignment="Center"
+                                    HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
-                                    Text="{Binding OSType}" />-->
+                                    FontSize="12"
+                                    Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                    Text="{Binding OSRelease}" />
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="2"
+                                    Margin="8,0,0,0"
+                                    Padding="0,4,0,4"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    FontSize="12"
+                                    Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                    Text="{Binding NumberOfFailuresStr}" />
                             </Grid>
 
                             <Grid Grid.Row="1" Grid.Column="0">

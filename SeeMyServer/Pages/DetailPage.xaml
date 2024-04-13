@@ -10,7 +10,10 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     mc:Ignorable="d">
 
-    <Grid x:Name="dataGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid
+        x:Name="dataGrid"
+        Padding="24,24,0,0"
+        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -27,26 +30,37 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <TextBlock
                 Grid.Row="0"
                 Grid.Column="0"
-                Margin="24,24,0,8"
+                Margin="0,0,0,8"
                 HorizontalAlignment="Left"
                 FontSize="24"
                 Text="{Binding Name}" />
             <TextBlock
                 Grid.Row="0"
                 Grid.Column="1"
-                Margin="8,24,0,8"
+                Margin="8,0,0,8"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
                 Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
                 Text="{Binding OSRelease}" />
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="2"
+                Margin="8,0,24,0"
+                Padding="0,4,0,4"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                FontSize="12"
+                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                Text="{Binding NumberOfFailuresStr}" />
         </Grid>
 
-        <ScrollViewer Grid.Row="1" Padding="24,24,24,0">
+        <ScrollViewer Grid.Row="1" Padding="0,24,24,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />

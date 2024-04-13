@@ -5,6 +5,8 @@ namespace SeeMyServer.Models
 {
     public class CMSModel : INotifyPropertyChanged
     {
+        private int _numberOfFailures;
+        private string _numberOfFailuresStr;
         private string _osRelease;
         private string _cpuUsage;
         private string _cpuCoreNum;
@@ -38,6 +40,31 @@ namespace SeeMyServer.Models
         public string SSHKey { get; set; }
         public string OSType { get; set; }
         public string SSHKeyIsOpen { get; set; }
+
+        public int NumberOfFailures
+        {
+            get { return _numberOfFailures; }
+            set
+            {
+                if (_numberOfFailures != value)
+                {
+                    _numberOfFailures = value;
+                    OnPropertyChanged(nameof(NumberOfFailures));
+                }
+            }
+        }
+        public string NumberOfFailuresStr
+        {
+            get { return _numberOfFailuresStr; }
+            set
+            {
+                if (_numberOfFailuresStr != value)
+                {
+                    _numberOfFailuresStr = value;
+                    OnPropertyChanged(nameof(NumberOfFailuresStr));
+                }
+            }
+        }
 
         public string OSRelease
         {

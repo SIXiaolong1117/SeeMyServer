@@ -56,7 +56,7 @@ namespace SeeMyServer.Methods
             }
             catch (Exception ex)
             {
-                logger.LogError("SSH 操作失败：" + ex.Message);
+                logger.LogError($"{sshHost}:{sshPort} SSH 操作失败：" + ex.Message);
                 return "";
             }
         }
