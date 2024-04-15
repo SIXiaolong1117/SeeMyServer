@@ -47,22 +47,20 @@ namespace SeeMyServer.Pages
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
             // 页面初始化后，加载数据
-            LoadData();
             LoadString();
+            LoadData();
         }
-        private void LoadString()
+        private async void LoadString()
         {
-            // 在子线程中执行任务
-            Thread subThread = new Thread(new ThreadStart(() =>
+            // 在异步方法中执行任务
+            await Task.Run(() =>
             {
                 _dispatcherQueue.TryEnqueue(() =>
                 {
                     ConfirmDelete.Content = resourceLoader.GetString("Confirm");
-
                     CancelDelete.Content = resourceLoader.GetString("Cancel");
                 });
-            }));
-            subThread.Start();
+            });
         }
 
         private ObservableCollection<CMSModel> dataList;
@@ -110,12 +108,7 @@ namespace SeeMyServer.Pages
             // 初始化占用
             foreach (CMSModel cmsModel in dataList)
             {
-                cmsModel.CPUUsage = "0%";
-                cmsModel.MEMUsage = "0%";
-                cmsModel.NETSent = "0 B/s ↑";
-                cmsModel.NETReceived = "0 B/s ↓";
-                cmsModel.DISKRead = "0 B/s R";
-                cmsModel.DISKWrite = "0 B/s W";
+                InitItemDisplay(cmsModel);
             }
         }
         private void DataList_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -178,17 +171,21 @@ namespace SeeMyServer.Pages
             // 查询数据
             return dbHelper.QueryData();
         }
-
-        // 在某处添加新项
-        private void AddItem(CMSModel cmsModel)
+        // 初始化显示
+        private void InitItemDisplay(CMSModel cmsModel)
         {
-            dataList.Add(cmsModel);
             cmsModel.CPUUsage = "0%";
             cmsModel.MEMUsage = "0%";
             cmsModel.NETSent = "0 B/s ↑";
             cmsModel.NETReceived = "0 B/s ↓";
             cmsModel.DISKRead = "0 B/s R";
             cmsModel.DISKWrite = "0 B/s W";
+        }
+        // 在某处添加新项
+        private void AddItem(CMSModel cmsModel)
+        {
+            dataList.Add(cmsModel);
+            InitItemDisplay(cmsModel);
 
             // 手动通知 dataListView 更新
             RefreshListView();
@@ -198,12 +195,7 @@ namespace SeeMyServer.Pages
         private void RemoveItem(CMSModel cmsModel)
         {
             dataList.Remove(cmsModel);
-            cmsModel.CPUUsage = "0%";
-            cmsModel.MEMUsage = "0%";
-            cmsModel.NETSent = "0 B/s ↑";
-            cmsModel.NETReceived = "0 B/s ↓";
-            cmsModel.DISKRead = "0 B/s R";
-            cmsModel.DISKWrite = "0 B/s W";
+            InitItemDisplay(cmsModel);
 
             // 手动通知 dataListView 更新
             RefreshListView();

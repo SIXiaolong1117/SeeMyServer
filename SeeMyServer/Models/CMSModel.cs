@@ -21,6 +21,10 @@ namespace SeeMyServer.Models
         private string _memUsagePageCache;
         private string _memFree;
         private string _memAvailable;
+        private string _swapUsage;
+        private string _swapCached;
+        private string _swapFree;
+        private string _swapCachedDisplay;
         private string _netReceived;
         private string _netSent;
         private string _diskRead;
@@ -28,6 +32,7 @@ namespace SeeMyServer.Models
         private string _hostName;
         private string _upTime;
         private string _totalMEM;
+        private string _totalSwap;
         private List<MountInfo> _mountInfos;
         private List<NetworkInterfaceInfo> _networkInterfaceInfos;
 
@@ -239,6 +244,58 @@ namespace SeeMyServer.Models
             }
         }
 
+        public string SwapUsage
+        {
+            get { return _swapUsage; }
+            set
+            {
+                if (_swapUsage != value)
+                {
+                    _swapUsage = value;
+                    OnPropertyChanged(nameof(SwapUsage));
+                }
+            }
+        }
+
+        public string SwapCached
+        {
+            get { return _swapCached; }
+            set
+            {
+                if (_swapCached != value)
+                {
+                    _swapCached = value;
+                    OnPropertyChanged(nameof(SwapCached));
+                }
+            }
+        }
+
+        public string SwapFree
+        {
+            get { return _swapFree; }
+            set
+            {
+                if (_swapFree != value)
+                {
+                    _swapFree = value;
+                    OnPropertyChanged(nameof(SwapFree));
+                }
+            }
+        }
+
+        public string SwapCachedDisplay
+        {
+            get { return _swapCachedDisplay; }
+            set
+            {
+                if (_swapCachedDisplay != value)
+                {
+                    _swapCachedDisplay = value;
+                    OnPropertyChanged(nameof(SwapCachedDisplay));
+                }
+            }
+        }
+
         public string NETReceived
         {
             get { return _netReceived; }
@@ -264,7 +321,7 @@ namespace SeeMyServer.Models
                 }
             }
         }
-        
+
         public string DISKRead
         {
             get { return _diskRead; }
@@ -329,7 +386,18 @@ namespace SeeMyServer.Models
                 }
             }
         }
-
+        public string TotalSwap
+        {
+            get { return _totalSwap; }
+            set
+            {
+                if (_totalSwap != value)
+                {
+                    _totalSwap = value;
+                    OnPropertyChanged(nameof(TotalSwap));
+                }
+            }
+        }
         public List<MountInfo> MountInfos
         {
             get { return _mountInfos; }

@@ -364,6 +364,8 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -374,6 +376,7 @@
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="30" />
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
@@ -386,83 +389,22 @@
                             Grid.Row="0"
                             Grid.Column="1"
                             Margin="0,0,0,4"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Bottom"
+                            FontSize="20"
+                            Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                            Text="of" />
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="2"
+                            Margin="0,0,0,4"
                             VerticalAlignment="Bottom"
                             FontSize="20"
                             Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
                             Text="{Binding TotalMEM}" />
                         <Grid
                             Grid.Row="0"
-                            Grid.Column="2"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Bottom">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80" />
-                                <ColumnDefinition Width="80" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel
-                                Grid.Column="0"
-                                HorizontalAlignment="Right"
-                                Orientation="Horizontal">
-                                <FontIcon
-                                    Margin="0,0,4,0"
-                                    HorizontalAlignment="Right"
-                                    FontSize="12"
-                                    Foreground="#849aff"
-                                    Glyph="&#xE938;" />
-                                <TextBlock HorizontalAlignment="Right" Text="Mem" />
-                            </StackPanel>
-                            <StackPanel
-                                Grid.Column="1"
-                                HorizontalAlignment="Right"
-                                Orientation="Horizontal">
-                                <FontIcon
-                                    Margin="0,0,4,0"
-                                    HorizontalAlignment="Right"
-                                    FontSize="12"
-                                    Foreground="#FDBF60"
-                                    Glyph="&#xE938;" />
-                                <TextBlock HorizontalAlignment="Right" Text="Cache" />
-                            </StackPanel>
-                        </Grid>
-                    </Grid>
-                    <Grid Grid.Row="1">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="50" />
-                            <ColumnDefinition Width="65" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock
-                            Grid.Column="0"
-                            Margin="0,4,8,6"
-                            HorizontalAlignment="Left"
-                            Text="Mem" />
-                        <TextBlock
-                            Grid.Column="1"
-                            Margin="0,4,8,6"
-                            HorizontalAlignment="Right"
-                            Text="{Binding MEMUsage}" />
-                        <ProgressBar
-                            Grid.Column="2"
-                            Margin="0,4,0,4"
-                            Foreground="#FDBF60"
-                            Value="{Binding MEMUsagePageCache}" />
-                        <ProgressBar
-                            Grid.Column="2"
-                            Margin="0,4,0,4"
-                            Background="Transparent"
-                            Foreground="#849aff"
-                            Value="{Binding MEMUsage}" />
-
-                        <Grid
-                            Grid.Row="1"
-                            Grid.Column="2"
+                            Grid.Column="3"
                             HorizontalAlignment="Right">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -476,11 +418,13 @@
                             <TextBlock
                                 Grid.Column="0"
                                 HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
                                 Text="{Binding MEMFree}" />
                             <TextBlock
                                 Grid.Row="1"
                                 Grid.Column="0"
                                 HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
                                 FontSize="12"
                                 Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
                                 Text="Free" />
@@ -497,32 +441,218 @@
                                 Text="Avail" />
                         </Grid>
                     </Grid>
-                    <!--<Grid Grid.Row="2">
+                    <Grid Grid.Row="1" Margin="0,8,0,0">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="40" />
+                            <ColumnDefinition Width="50" />
                             <ColumnDefinition Width="65" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock
                             Grid.Column="0"
-                            Margin="0,4,8,6"
-                            HorizontalAlignment="Right"
-                            Text="Swap" />
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Text="Mem" />
                         <TextBlock
                             Grid.Column="1"
-                            Margin="0,4,8,6"
+                            Margin="0,0,8,0"
                             HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
                             Text="{Binding MEMUsage}" />
                         <ProgressBar
                             Grid.Column="2"
-                            Margin="0,4,0,4"
+                            VerticalAlignment="Center"
+                            Foreground="#FDBF60"
+                            Value="{Binding MEMUsagePageCache}" />
+                        <ProgressBar
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
                             Foreground="#849aff"
                             Value="{Binding MEMUsage}" />
-                    </Grid>-->
+                        <TextBlock
+                            Grid.Column="3"
+                            Margin="8,0,0,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="{Binding TotalMEM}" />
+                    </Grid>
+
+                    <Grid Grid.Row="2" Margin="0,8,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50" />
+                            <ColumnDefinition Width="65" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid
+                            Grid.Row="1"
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MaxWidth="80" />
+                                <ColumnDefinition Width="Auto" MaxWidth="80" />
+                                <ColumnDefinition Width="Auto" MaxWidth="80" />
+                                <ColumnDefinition Width="Auto" MaxWidth="80" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel
+                                Grid.Column="0"
+                                Margin="16,0,0,0"
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal">
+                                <FontIcon
+                                    Margin="0,0,4,0"
+                                    HorizontalAlignment="Right"
+                                    FontSize="12"
+                                    Foreground="#849aff"
+                                    Glyph="&#xE938;" />
+                                <TextBlock HorizontalAlignment="Right" Text="Mem" />
+                            </StackPanel>
+                            <StackPanel
+                                Grid.Column="1"
+                                Margin="16,0,0,0"
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal">
+                                <FontIcon
+                                    Margin="0,0,4,0"
+                                    HorizontalAlignment="Right"
+                                    FontSize="12"
+                                    Foreground="#FDBF60"
+                                    Glyph="&#xE938;" />
+                                <TextBlock HorizontalAlignment="Right" Text="Cache" />
+                            </StackPanel>
+                            <StackPanel
+                                x:Name="SwapTips1"
+                                Grid.Column="2"
+                                Margin="16,0,0,0"
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal">
+                                <FontIcon
+                                    Margin="0,0,4,0"
+                                    HorizontalAlignment="Right"
+                                    FontSize="12"
+                                    Foreground="#00FF00"
+                                    Glyph="&#xE938;" />
+                                <TextBlock HorizontalAlignment="Right" Text="Swap" />
+                            </StackPanel>
+                            <StackPanel
+                                x:Name="SwapTips2"
+                                Grid.Column="3"
+                                Margin="16,0,0,0"
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal">
+                                <FontIcon
+                                    Margin="0,0,4,0"
+                                    HorizontalAlignment="Right"
+                                    FontSize="12"
+                                    Foreground="#FFB6C1"
+                                    Glyph="&#xE938;" />
+                                <TextBlock HorizontalAlignment="Right" Text="Cached" />
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+
+
+                    <Grid
+                        x:Name="SwapCase1"
+                        Grid.Row="3"
+                        Margin="0,8,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50" />
+                            <ColumnDefinition Width="65" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Column="0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Text="Swap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            Margin="0,0,8,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="{Binding SwapUsage}" />
+                        <ProgressBar
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Foreground="#FFB6C1"
+                            Value="{Binding SwapCachedDisplay}" />
+                        <ProgressBar
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            Foreground="#00FF00"
+                            Value="{Binding SwapUsage}" />
+                        <TextBlock
+                            Grid.Column="3"
+                            Margin="8,0,0,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="{Binding TotalSwap}" />
+                    </Grid>
+
+                    <Grid
+                        x:Name="SwapCase2"
+                        Grid.Row="4"
+                        Margin="0,8,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50" />
+                            <ColumnDefinition Width="65" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid
+                            Grid.Row="1"
+                            Grid.Column="3"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="80" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                Text="{Binding SwapCached}" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                FontSize="12"
+                                Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}"
+                                Text="Cached" />
+                        </Grid>
+                    </Grid>
                 </Grid>
+
 
 
 
