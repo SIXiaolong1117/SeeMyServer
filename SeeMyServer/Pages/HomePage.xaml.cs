@@ -416,22 +416,6 @@ namespace SeeMyServer.Pages
 
             await Task.WhenAll(tasks);
         }
-        //private async void Timer_Tick(object sender, object e)
-        //{
-        //    foreach (CMSModel cmsModel in dataList)
-        //    {
-        //        switch (cmsModel.OSType)
-        //        {
-        //            case "Linux":
-        //                await UpdateLinuxCMSModelAsync(cmsModel);
-        //                break;
-        //            default:
-        //                break;
-        //        }
-        //    }
-        //}
-
-
         // 添加/修改配置按钮点击
         private async void AddConfigButton_Click(object sender, RoutedEventArgs e)
         {
@@ -554,12 +538,12 @@ namespace SeeMyServer.Pages
 
             if (selectedItem != null)
             {
-
                 // 将右键点击的项设置为选中项
                 dataListView.SelectedItem = selectedItem;
                 // 创建ContextMenu
                 MenuFlyout menuFlyout = new MenuFlyout();
 
+                // 打开终端
                 MenuFlyoutItem terminalMenuItem = new MenuFlyoutItem
                 {
                     Text = resourceLoader.GetString("terminalMenuItemText")
@@ -574,6 +558,7 @@ namespace SeeMyServer.Pages
                 MenuFlyoutSeparator separator = new MenuFlyoutSeparator();
                 menuFlyout.Items.Add(separator);
 
+                // 编辑
                 MenuFlyoutItem editMenuItem = new MenuFlyoutItem
                 {
                     Text = resourceLoader.GetString("editMenuItemText")
@@ -584,6 +569,7 @@ namespace SeeMyServer.Pages
                 };
                 menuFlyout.Items.Add(editMenuItem);
 
+                // 删除
                 MenuFlyoutItem deleteMenuItem = new MenuFlyoutItem
                 {
                     Text = resourceLoader.GetString("deleteMenuItemText")
@@ -599,6 +585,7 @@ namespace SeeMyServer.Pages
                 MenuFlyoutSeparator separator2 = new MenuFlyoutSeparator();
                 menuFlyout.Items.Add(separator2);
 
+                // 导出
                 MenuFlyoutItem exportMenuItem = new MenuFlyoutItem
                 {
                     Text = resourceLoader.GetString("exportMenuItemText")
@@ -613,15 +600,13 @@ namespace SeeMyServer.Pages
                 menuFlyout.ShowAt(listViewItem, e.GetPosition(listViewItem));
             }
         }
-        // 处理左键单击事件的代码
-        private void OnListViewTapped(object sender, TappedRoutedEventArgs e)
+        // 处理单击事件的代码
+        private void ContentGridView_ItemClick(object sender, ItemClickEventArgs e)
         {
-            FrameworkElement listViewItem = (sender as FrameworkElement);
-
-            if (listViewItem != null)
+            if (e.ClickedItem != null)
             {
                 // 获取右键点击的数据对象（WoLModel）
-                CMSModel selectedItem = listViewItem?.DataContext as CMSModel;
+                CMSModel selectedItem = e.ClickedItem as CMSModel;
 
                 // 导航到页面
                 App.m_window.NavigateToPage(typeof(DetailPage), selectedItem);

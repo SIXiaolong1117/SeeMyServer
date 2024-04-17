@@ -88,7 +88,8 @@
                     x:Name="AboutServer"
                     x:Uid="AboutServer"
                     Grid.Row="1"
-                    Margin="0,0,0,8" />
+                    Margin="0,0,0,8"
+                    IsTabStop="True" />
 
                 <Grid
                     Grid.Row="2"
@@ -243,6 +244,7 @@
                                 Width="50"
                                 HorizontalAlignment="Right"
                                 IsInteractive="False"
+                                IsTabStop="False"
                                 MaxAngle="0"
                                 Maximum="100"
                                 MinAngle="0"
@@ -258,6 +260,7 @@
                                 Width="50"
                                 HorizontalAlignment="Right"
                                 IsInteractive="False"
+                                IsTabStop="False"
                                 MaxAngle="0"
                                 Maximum="100"
                                 MinAngle="0"
@@ -273,6 +276,7 @@
                                 Width="50"
                                 HorizontalAlignment="Right"
                                 IsInteractive="False"
+                                IsTabStop="False"
                                 MaxAngle="0"
                                 Maximum="100"
                                 MinAngle="0"
@@ -700,6 +704,12 @@
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         SelectionMode="None">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="IsTabStop" Value="False" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid
@@ -885,6 +895,7 @@
                                             Margin="8,0,0,0"
                                             HorizontalAlignment="Right"
                                             IsInteractive="False"
+                                            IsTabStop="False"
                                             MaxAngle="0"
                                             Maximum="100"
                                             MinAngle="0"
@@ -951,6 +962,12 @@
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         SelectionMode="None">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="IsTabStop" Value="False" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid
@@ -1084,7 +1101,10 @@
                         BorderThickness="0"
                         CornerRadius="4,4,4,4">
                         <ScrollViewer MaxHeight="400">
-                            <TextBlock x:Name="TopRec" FontFamily="Consolas" />
+                            <TextBlock
+                                x:Name="TopRec"
+                                FontFamily="Consolas"
+                                IsTabStop="True" />
                         </ScrollViewer>
                     </Grid>
                 </Grid>

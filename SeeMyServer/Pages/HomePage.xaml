@@ -54,15 +54,16 @@
             <GridView
                 x:Name="dataListView"
                 AllowDrop="True"
-                CanReorderItems="True">
+                CanReorderItems="True"
+                IsItemClickEnabled="True"
+                ItemClick="ContentGridView_ItemClick">
                 <GridView.ItemTemplate>
                     <DataTemplate>
                         <!--  Background="Transparent"之后，整个Grid才算是一个“区域”。DoubleTapped和RightTapped就可以在整个Gird中使用了。  -->
                         <Grid
                             Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
                             DoubleTapped="OnListViewDoubleTapped"
-                            RightTapped="OnListViewRightTapped"
-                            Tapped="OnListViewTapped">
+                            RightTapped="OnListViewRightTapped">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
@@ -137,6 +138,7 @@
                                     <controls:RadialGauge
                                         Width="60"
                                         IsInteractive="False"
+                                        IsTabStop="False"
                                         MaxAngle="0"
                                         Maximum="100"
                                         MinAngle="0"
@@ -149,6 +151,7 @@
                                     <controls:RadialGauge
                                         Width="60"
                                         IsInteractive="False"
+                                        IsTabStop="False"
                                         MaxAngle="0"
                                         Maximum="100"
                                         MinAngle="0"
@@ -162,6 +165,7 @@
                                     <controls:RadialGauge
                                         Width="60"
                                         IsInteractive="False"
+                                        IsTabStop="False"
                                         MaxAngle="0"
                                         Maximum="100"
                                         MinAngle="0"
@@ -175,6 +179,7 @@
                                     <controls:RadialGauge
                                         Width="60"
                                         IsInteractive="False"
+                                        IsTabStop="False"
                                         MaxAngle="0"
                                         Maximum="100"
                                         MinAngle="0"
@@ -226,6 +231,7 @@
                                     <controls:RadialGauge
                                         Width="60"
                                         IsInteractive="False"
+                                        IsTabStop="False"
                                         MaxAngle="0"
                                         Maximum="100"
                                         MinAngle="0"
