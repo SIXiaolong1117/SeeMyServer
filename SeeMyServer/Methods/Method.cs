@@ -121,21 +121,24 @@ namespace SeeMyServer.Methods
             string passwd = "";
             if (cmsModel.SSHKeyIsOpen != "True")
             {
-                // 检查是否已经存在密钥和初始化向量，如果不存在则生成新的
-                string key = Method.LoadKeyFromLocalSettings() ?? Method.GenerateRandomKey();
-                string iv = Method.LoadIVFromLocalSettings() ?? Method.GenerateRandomIV();
+                if (cmsModel.SSHPasswd != "" && cmsModel.SSHPasswd != null)
+                {
+                    // 检查是否已经存在密钥和初始化向量，如果不存在则生成新的
+                    string key = Method.LoadKeyFromLocalSettings() ?? Method.GenerateRandomKey();
+                    string iv = Method.LoadIVFromLocalSettings() ?? Method.GenerateRandomIV();
 
-                // 将密钥和初始化向量保存到 localSettings 中
-                Method.SaveKeyToLocalSettings(key);
-                Method.SaveIVToLocalSettings(iv);
+                    // 将密钥和初始化向量保存到 localSettings 中
+                    Method.SaveKeyToLocalSettings(key);
+                    Method.SaveIVToLocalSettings(iv);
 
-                // 使用的对称加密算法
-                SymmetricAlgorithm symmetricAlgorithm = new AesManaged();
+                    // 使用的对称加密算法
+                    SymmetricAlgorithm symmetricAlgorithm = new AesManaged();
 
-                // 设置加密密钥和初始化向量
-                symmetricAlgorithm.Key = Convert.FromBase64String(key);
-                symmetricAlgorithm.IV = Convert.FromBase64String(iv);
-                passwd = Method.DecryptString(cmsModel.SSHPasswd, symmetricAlgorithm);
+                    // 设置加密密钥和初始化向量
+                    symmetricAlgorithm.Key = Convert.FromBase64String(key);
+                    symmetricAlgorithm.IV = Convert.FromBase64String(iv);
+                    passwd = Method.DecryptString(cmsModel.SSHPasswd, symmetricAlgorithm);
+                }
             }
             return await Task.Run(() =>
             {

@@ -186,7 +186,7 @@ namespace SeeMyServer.Pages
 
             try
             {
-                if (dataList.SwapUsage != "0%")
+                if (dataList.SwapUsage != "0%" && dataList.SwapUsage != null)
                 {
                     SwapCase1.Visibility = Visibility.Visible;
                     SwapCase2.Visibility = Visibility.Visible;
@@ -483,7 +483,9 @@ namespace SeeMyServer.Pages
 
         private async void ReloadPage_Click(object sender, RoutedEventArgs e)
         {
-            //App.m_window.NavigateToPage(typeof(DetailPage));
+            dataList.NumberOfFailuresStr = null;
+            dataList.NumberOfFailures = 0;
+            App.m_window.NavigateToPage(typeof(DetailPage), dataList);
         }
         private async void EditThisConfig(CMSModel cmsModel)
         {

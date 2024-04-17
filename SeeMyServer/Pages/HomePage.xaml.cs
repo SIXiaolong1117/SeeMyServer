@@ -21,6 +21,7 @@ using PInvoke;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Collections.Specialized;
+using Microsoft.UI.Xaml.Navigation;
 
 namespace SeeMyServer.Pages
 {
@@ -49,6 +50,10 @@ namespace SeeMyServer.Pages
             // 页面初始化后，加载数据
             LoadString();
             LoadData();
+        }
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            dataListView.SelectedItem = null;
         }
         private async void LoadString()
         {

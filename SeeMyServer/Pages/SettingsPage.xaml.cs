@@ -41,8 +41,6 @@ namespace SeeMyServer.Pages
             {
                 // 未设置
                 localSettings.Values["languageChange"] = Windows.Globalization.Language.CurrentInputMethodLanguageTag;
-                // 非法输入，扔出警报
-                //throw new Exception(Windows.Globalization.Language.CurrentInputMethodLanguageTag);
                 languageStatusSetList();
             }
         }
@@ -85,8 +83,6 @@ namespace SeeMyServer.Pages
                 // 非法输入，设置默认材料为Mica Alt
                 localSettings.Values["materialStatus"] = "Mica Alt";
                 backgroundMaterial.SelectedItem = material[1];
-                // 非法输入，扔出警报
-                //throw new Exception($"Wrong material type: {localSettings.Values["materialStatus"]}");
             }
         }
 
@@ -97,6 +93,7 @@ namespace SeeMyServer.Pages
             switch (materialStatus)
             {
                 case "Mica":
+                default:
                     if (localSettings.Values["materialStatus"] as string != "Mica")
                     {
                         localSettings.Values["materialStatus"] = "Mica";
@@ -129,8 +126,6 @@ namespace SeeMyServer.Pages
                         localSettings.Values["materialStatus"] = "Acrylic";
                     }
                     break;
-                default:
-                    throw new Exception($"Invalid argument: {materialStatus}");
             }
         }
 
@@ -153,6 +148,7 @@ namespace SeeMyServer.Pages
                     }
                     break;
                 case "English":
+                default:
                     if (localSettings.Values["languageChange"] as string != "en-US")
                     {
                         localSettings.Values["languageChange"] = "en-US";
@@ -165,8 +161,6 @@ namespace SeeMyServer.Pages
                         localSettings.Values["languageChange"] = "en-US";
                     }
                     break;
-                default:
-                    throw new Exception($"Invalid argument: {languageChange}");
             }
         }
     }
