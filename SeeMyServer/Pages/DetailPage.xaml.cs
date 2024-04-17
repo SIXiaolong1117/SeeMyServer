@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
 using Newtonsoft.Json.Linq;
 using SeeMyServer.Datas;
 using SeeMyServer.Helper;
@@ -33,23 +34,25 @@ namespace SeeMyServer.Pages
         ResourceLoader resourceLoader = new ResourceLoader();
         private DispatcherTimer timer;
         private Logger logger;
+        CMSModel dataList;
 
         public DetailPage()
         {
             this.InitializeComponent();
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            dataList = (CMSModel)e.Parameter;
+            base.OnNavigatedTo(e);
+
+            LoadData();
 
             this.Loaded += Page_Loaded;
             this.Unloaded += Page_Unloaded;
 
             // 设置日志，最大1MB
             logger = new Logger(1);
-
-            LoadData();
-
-            SwapCase1.Visibility = Visibility.Collapsed;
-            SwapCase2.Visibility = Visibility.Collapsed;
-            SwapTips1.Visibility = Visibility.Collapsed;
-            SwapTips2.Visibility = Visibility.Collapsed;
         }
 
         public static List<ProgressBar> CreateProgressBars(Grid container, string[] CPUCoreUsageTokens, string CPUCoreNum)
@@ -71,7 +74,7 @@ namespace SeeMyServer.Pages
 
                 // 将ColumnDefinition添加到Grid的ColumnDefinitions集合中
                 container.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(50) });
-                container.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(65) });
+                container.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(45) });
                 container.ColumnDefinitions.Add(columnDefinition);
             }
 
@@ -98,13 +101,13 @@ namespace SeeMyServer.Pages
                 // 创建 TextBlock 来显示与 ProgressBar 同步的值
                 TextBlock textBlock = new TextBlock();
                 TextBlock textCPUBlock = new TextBlock();
-                textBlock.Text = $"{progressBar.Value:F2}%";
+                textBlock.Text = $"{progressBar.Value:F0}%";
                 textCPUBlock.Text = $"CPU{i}";
                 textCPUBlock.Margin = new Thickness(0, 4, 8, 6);
                 // 监听 ProgressBar 的值改变事件，更新 TextBlock 的内容
                 progressBar.ValueChanged += (sender, e) =>
                 {
-                    textBlock.Text = $"{progressBar.Value:F2}%";
+                    textBlock.Text = $"{progressBar.Value:F0}%";
                 };
                 textBlock.Margin = new Thickness(0, 4, 8, 6);
                 textBlock.HorizontalAlignment = HorizontalAlignment.Right;
@@ -145,40 +148,67 @@ namespace SeeMyServer.Pages
             }
             catch { }
         }
-
-
-
-
-        CMSModel dataList;
         private void LoadData()
         {
-            // 实例化SQLiteHelper
-            SQLiteHelper dbHelper = new SQLiteHelper();
+            try
+            {
+                if (dataList.CPUCoreTokens != new string[] { "0" })
+                {
+                    if (progressBarsGrid.ColumnDefinitions.Count == 0)
+                    {
+                        progressBars = CreateProgressBars(progressBarsGrid, dataList.CPUCoreTokens, dataList.CPUCoreNum);
+                    }
+                    else if (progressBars != null)
+                    {
+                        UpdateProgressBars(progressBars, dataList.CPUCoreTokens, dataList.CPUCoreNum);
+                    }
+                }
+            }
+            catch { }
 
-            // 查询数据
-            dataList = dbHelper.GetDataById(Convert.ToInt32(localSettings.Values["ServerID"]));
+            try
+            {
+                // 挂载和网络信息
+                if (dataList.MountInfos != null)
+                {
+                    // 禁用过渡动画
+                    MountInfosListView.ItemContainerTransitions = null;
+                }
+                if (dataList.NetworkInterfaceInfos != null)
+                {
+                    // 禁用过渡动画
+                    NetworkInfosListView.ItemContainerTransitions = null;
+                }
+                MountInfosListView.ItemsSource = dataList.MountInfos;
+                NetworkInfosListView.ItemsSource = dataList.NetworkInterfaceInfos;
+            }
+            catch { }
+
+            try
+            {
+                if (dataList.SwapUsage != "0%")
+                {
+                    SwapCase1.Visibility = Visibility.Visible;
+                    SwapCase2.Visibility = Visibility.Visible;
+                    SwapTips1.Visibility = Visibility.Visible;
+                    SwapTips2.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    SwapCase1.Visibility = Visibility.Collapsed;
+                    SwapCase2.Visibility = Visibility.Collapsed;
+                    SwapTips1.Visibility = Visibility.Collapsed;
+                    SwapTips2.Visibility = Visibility.Collapsed;
+
+                    dataList.SwapUsage = $"0%";
+                    dataList.SwapCached = $"0%";
+                    dataList.SwapCachedDisplay = $"0%";
+                }
+            }
+            catch (Exception ex) { }
 
             // 将数据列表绑定
             dataGrid.DataContext = dataList;
-
-            // 初始化占用（即便失败也没关系）
-            try
-            {
-                dataList.CPUUsage = "0%";
-                dataList.MEMUsage = "0%";
-                dataList.NETSent = "0 B/s ↑";
-                dataList.NETReceived = "0 B/s ↓";
-                dataList.CPUUserUsage = "0.00%";
-                dataList.CPUSysUsage = "0.00%";
-                dataList.CPUIdleUsage = "0.00%";
-                dataList.CPUIOUsage = "0.00%";
-                dataList.MEMFree = "0.00%";
-                dataList.MEMAvailable = "0.00%";
-                CPULoadAverage1.Text = $"0.00";
-                CPULoadAverage5.Text = $"0.00";
-                CPULoadAverage15.Text = $"0.00";
-            }
-            catch { }
         }
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
@@ -200,7 +230,6 @@ namespace SeeMyServer.Pages
                 timer = null;
             }
         }
-
         // Linux 信息更新
         List<ProgressBar> progressBars = new List<ProgressBar>();
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
@@ -242,6 +271,10 @@ namespace SeeMyServer.Pages
                     {
                         cmsModel.OSRelease = PRETTY_NAME;
                     }
+                    if (cmsModel.CPUCoreNum == null)
+                    {
+                        cmsModel.CPUCoreNum = CPUCoreNum;
+                    }
                     TopRec.Text = TOPRec;
 
                     // 处理获取到的数据
@@ -272,7 +305,7 @@ namespace SeeMyServer.Pages
 
                         // 计算内存占用百分比
                         double memUsagesValue = (memTotal - memAvailable) * 100 / memTotal;
-                        cmsModel.MEMUsage = $"{memUsagesValue:F2}%";
+                        cmsModel.MEMUsage = $"{memUsagesValue:F0}%";
                         // Free 百分比
                         double memFreeValue = memFree * 100 / memTotal;
                         cmsModel.MEMFree = $"{memFreeValue:F2}%";
@@ -299,7 +332,7 @@ namespace SeeMyServer.Pages
 
                             // Swap 占用百分比
                             double swapUsagesValue = (swapTotal - swapFree) * 100 / swapTotal;
-                            cmsModel.SwapUsage = $"{swapUsagesValue:F2}%";
+                            cmsModel.SwapUsage = $"{swapUsagesValue:F0}%";
                             // Swap Cached 百分比
                             double swapCachedValue = swapCached * 100 / swapTotal;
                             cmsModel.SwapCached = $"{swapCachedValue:F2}%";
@@ -326,22 +359,21 @@ namespace SeeMyServer.Pages
                     }
                     catch (Exception ex) { }
 
-                    string[] tokens = new string[] { "0" };
                     try
                     {
-                        tokens = cpuUsages.Skip(1).Select(cpuUsage => cpuUsage[0]).ToArray();
+                        cmsModel.CPUCoreTokens = cpuUsages.Skip(1).Select(cpuUsage => cpuUsage[0]).ToArray();
                     }
                     catch (Exception ex) { }
 
-                    if (tokens != new string[] { "0" })
+                    if (cmsModel.CPUCoreTokens != new string[] { "0" })
                     {
                         if (progressBarsGrid.ColumnDefinitions.Count == 0)
                         {
-                            progressBars = CreateProgressBars(progressBarsGrid, tokens, CPUCoreNum);
+                            progressBars = CreateProgressBars(progressBarsGrid, cmsModel.CPUCoreTokens, cmsModel.CPUCoreNum);
                         }
                         else if (progressBars != null)
                         {
-                            UpdateProgressBars(progressBars, tokens, CPUCoreNum);
+                            UpdateProgressBars(progressBars, cmsModel.CPUCoreTokens, cmsModel.CPUCoreNum);
                         }
                     }
 
@@ -390,12 +422,12 @@ namespace SeeMyServer.Pages
                     // 获取结果失败不更新
                     if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
                     {
+                        cmsModel.Average1 = loadAverage[0];
+                        cmsModel.Average5 = loadAverage[1];
+                        cmsModel.Average15 = loadAverage[2];
                         cmsModel.Average1Percentage = loadAverage[3];
                         cmsModel.Average5Percentage = loadAverage[4];
                         cmsModel.Average15Percentage = loadAverage[5];
-                        CPULoadAverage1.Text = $"{loadAverage[0]}";
-                        CPULoadAverage5.Text = $"{loadAverage[1]}";
-                        CPULoadAverage15.Text = $"{loadAverage[2]}";
                     }
                 }
                 else
@@ -451,7 +483,7 @@ namespace SeeMyServer.Pages
 
         private async void ReloadPage_Click(object sender, RoutedEventArgs e)
         {
-            App.m_window.NavigateToPage(typeof(DetailPage));
+            //App.m_window.NavigateToPage(typeof(DetailPage));
         }
         private async void EditThisConfig(CMSModel cmsModel)
         {

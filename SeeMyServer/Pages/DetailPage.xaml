@@ -203,23 +203,23 @@
                                         <ColumnDefinition Width="40" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock
-                                        x:Name="CPULoadAverage1"
                                         Grid.Row="0"
                                         Grid.Column="0"
                                         HorizontalAlignment="Right"
-                                        VerticalAlignment="Center" />
+                                        VerticalAlignment="Center"
+                                        Text="{Binding Average1}" />
                                     <TextBlock
-                                        x:Name="CPULoadAverage5"
                                         Grid.Row="0"
                                         Grid.Column="1"
                                         HorizontalAlignment="Right"
-                                        VerticalAlignment="Center" />
+                                        VerticalAlignment="Center"
+                                        Text="{Binding Average5}" />
                                     <TextBlock
-                                        x:Name="CPULoadAverage15"
                                         Grid.Row="0"
                                         Grid.Column="2"
                                         HorizontalAlignment="Right"
-                                        VerticalAlignment="Center" />
+                                        VerticalAlignment="Center"
+                                        Text="{Binding Average15}" />
                                 </Grid>
                                 <TextBlock
                                     x:Uid="CPULoadAverageText"
@@ -448,7 +448,7 @@
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="50" />
-                            <ColumnDefinition Width="65" />
+                            <ColumnDefinition Width="45" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
@@ -575,7 +575,7 @@
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="50" />
-                            <ColumnDefinition Width="65" />
+                            <ColumnDefinition Width="45" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>

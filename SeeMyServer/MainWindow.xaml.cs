@@ -10,6 +10,7 @@ using Microsoft.UI.Xaml.Navigation;
 using SeeMyServer.Pages;
 using System.Security.Cryptography;
 using SeeMyServer.Methods;
+using SeeMyServer.Models;
 
 namespace SeeMyServer
 {
@@ -179,9 +180,9 @@ namespace SeeMyServer
                 }
             }
         }
-        public void NavigateToPage(Type pageType)
+        public void NavigateToPage(Type pageType, CMSModel cmsModel)
         {
-            contentFrame.Navigate(pageType);
+            contentFrame.Navigate(pageType, cmsModel);
             // 更新选中的导航项
             var selectedItem = FindSelectedItemByTag(contentFrame.CurrentSourcePageType.Name);
             if (selectedItem != null)
@@ -195,22 +196,17 @@ namespace SeeMyServer
         }
         private void BackButton_Click(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {
-            NavigateToPage(typeof(HomePage));
-            //if (contentFrame.CanGoBack)
-            //{
-            //    contentFrame.GoBack();
-
-            //    // 更新选中的导航项
-            //    var selectedItem = FindSelectedItemByTag(contentFrame.CurrentSourcePageType.Name);
-            //    if (selectedItem != null)
-            //    {
-            //        NavView.SelectedItem = selectedItem;
-            //    }
-            //    else
-            //    {
-            //        NavView.SelectedItem = null;
-            //    }
-            //}
+            contentFrame.Navigate(typeof(HomePage));
+            // 更新选中的导航项
+            var selectedItem = FindSelectedItemByTag(contentFrame.CurrentSourcePageType.Name);
+            if (selectedItem != null)
+            {
+                NavView.SelectedItem = selectedItem;
+            }
+            else
+            {
+                NavView.SelectedItem = null;
+            }
         }
         private NavigationViewItem FindSelectedItemByTag(string tag)
         {

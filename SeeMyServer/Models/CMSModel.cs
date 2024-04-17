@@ -14,6 +14,9 @@ namespace SeeMyServer.Models
         private string _cpuSysUsage;
         private string _cpuIdleUsage;
         private string _cpuIOUsage;
+        private string _average1;
+        private string _average5;
+        private string _average15;
         private string _average1Percentage;
         private string _average5Percentage;
         private string _average15Percentage;
@@ -33,6 +36,7 @@ namespace SeeMyServer.Models
         private string _upTime;
         private string _totalMEM;
         private string _totalSwap;
+        private string[] _cpuCoreTokens;
         private List<MountInfo> _mountInfos;
         private List<NetworkInterfaceInfo> _networkInterfaceInfos;
 
@@ -45,7 +49,6 @@ namespace SeeMyServer.Models
         public string SSHKey { get; set; }
         public string OSType { get; set; }
         public string SSHKeyIsOpen { get; set; }
-
         public int NumberOfFailures
         {
             get { return _numberOfFailures; }
@@ -70,7 +73,6 @@ namespace SeeMyServer.Models
                 }
             }
         }
-
         public string OSRelease
         {
             get { return _osRelease; }
@@ -83,7 +85,6 @@ namespace SeeMyServer.Models
                 }
             }
         }
-
         public string CPUUsage
         {
             get { return _cpuUsage; }
@@ -153,6 +154,42 @@ namespace SeeMyServer.Models
                 {
                     _cpuCoreNum = value;
                     OnPropertyChanged(nameof(CPUCoreNum));
+                }
+            }
+        }
+        public string Average1
+        {
+            get { return _average1; }
+            set
+            {
+                if (_average1 != value)
+                {
+                    _average1 = value;
+                    OnPropertyChanged(nameof(Average1));
+                }
+            }
+        }
+        public string Average5
+        {
+            get { return _average5; }
+            set
+            {
+                if (_average5 != value)
+                {
+                    _average5 = value;
+                    OnPropertyChanged(nameof(Average5));
+                }
+            }
+        }
+        public string Average15
+        {
+            get { return _average15; }
+            set
+            {
+                if (_average15 != value)
+                {
+                    _average15 = value;
+                    OnPropertyChanged(nameof(Average15));
                 }
             }
         }
@@ -398,6 +435,18 @@ namespace SeeMyServer.Models
                 }
             }
         }
+        public string[] CPUCoreTokens
+        {
+            get { return _cpuCoreTokens; }
+            set
+            {
+                if (_cpuCoreTokens != value)
+                {
+                    _cpuCoreTokens = value;
+                    OnPropertyChanged(nameof(CPUCoreTokens));
+                }
+            }
+        }
         public List<MountInfo> MountInfos
         {
             get { return _mountInfos; }
@@ -410,7 +459,6 @@ namespace SeeMyServer.Models
                 }
             }
         }
-
         public List<NetworkInterfaceInfo> NetworkInterfaceInfos
         {
             get { return _networkInterfaceInfos; }

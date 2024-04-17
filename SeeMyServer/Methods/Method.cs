@@ -425,7 +425,7 @@ namespace SeeMyServer.Methods
                         // 保存当前 CPU 的使用情况
                         List<string> cpuUsage = new List<string>();
                         // 占用率计算
-                        cpuUsage.Add($"{100 - ((double)cpuUsageAbs[3] / (double)cpuUsageAbs[10] * 100):F2}");    //0 CPU占用率
+                        cpuUsage.Add($"{100 - ((double)cpuUsageAbs[3] / (double)cpuUsageAbs[10] * 100):F0}");    //0 CPU占用率
                         cpuUsage.Add($"{((double)cpuUsageAbs[0]) / (double)cpuUsageAbs[10] * 100:F2}");    //0 CPUUser占用率
                         cpuUsage.Add($"{((double)cpuUsageAbs[2]) / (double)cpuUsageAbs[10] * 100:F2}");    //0 CPUSys占用率
                         cpuUsage.Add($"{((double)cpuUsageAbs[3]) / (double)cpuUsageAbs[10] * 100:F2}");    //0 CPUIdle占用率

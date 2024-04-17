@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.Gaming.Preview.GamesEnumeration;
 using System.Net.Http;
+using Microsoft.UI.Xaml.Navigation;
+using SeeMyServer.Helper;
+using SeeMyServer.Models;
 
 namespace SeeMyServer.Pages
 {
@@ -19,6 +22,9 @@ namespace SeeMyServer.Pages
 
             // {version.Major}.{version.Minor}.{version.Build}.{version.Revision}
             APPVersion.Text = $"{version.Major}.{version.Minor}.{version.Build}";
+        }
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
             GetList();
         }
         private async Task<string> HTTPResponse(string http)

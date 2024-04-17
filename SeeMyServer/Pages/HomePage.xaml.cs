@@ -259,6 +259,7 @@ namespace SeeMyServer.Pages
                     var HostName = Usages.Result.Item5[1];
                     var CPUCoreNum = Usages.Result.Item5[2];
                     var PRETTY_NAME = Usages.Result.Item5[3];
+                    var TOPRec = Usages.Result.Item5[4];
                     var loadAverage = Usages.Result.Item6;
 
                     // 只有HostName和UpTime为空才更新
@@ -274,39 +275,99 @@ namespace SeeMyServer.Pages
                     {
                         cmsModel.OSRelease = PRETTY_NAME;
                     }
+                    //TopRec.Text = TOPRec;
 
                     // 处理获取到的数据
                     try
                     {
-                        // 获取结果失败不更新
-                        if (cpuUsages[0][0] != "0.00")
-                        {
-                            cmsModel.CPUUsage = $"{cpuUsages[0][0].Split(".")[0]}%";
-                        }
+                        cmsModel.CPUUsage = $"{cpuUsages[0][0]}%";
+                        cmsModel.CPUCoreNum = CPUCoreNum.Split('\n')[0];
+                        cmsModel.CPUUserUsage = $"{cpuUsages[0][1]}%";
+                        cmsModel.CPUSysUsage = $"{cpuUsages[0][2]}%";
+                        cmsModel.CPUIdleUsage = $"{cpuUsages[0][3]}%";
+                        cmsModel.CPUIOUsage = $"{cpuUsages[0][4]}%";
+                    }
+                    catch (Exception ex) { }
+
+                    // 获取结果失败不更新
+                    if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
+                    {
+                        cmsModel.Average1 = loadAverage[0];
+                        cmsModel.Average5 = loadAverage[1];
+                        cmsModel.Average15 = loadAverage[2];
+                        cmsModel.Average1Percentage = loadAverage[3];
+                        cmsModel.Average5Percentage = loadAverage[4];
+                        cmsModel.Average15Percentage = loadAverage[5];
+                    }
+
+                    try
+                    {
+                        double memTotal = double.Parse(memUsages[0]);
+                        double memFree = double.Parse(memUsages[1]);
+                        double memAvailable = double.Parse(memUsages[2]);
+
+                        // 计算内存占用百分比
+                        double memUsagesValue = (memTotal - memAvailable) * 100 / memTotal;
+                        cmsModel.MEMUsage = $"{memUsagesValue:F0}%";
+                        // Free 百分比
+                        double memFreeValue = memFree * 100 / memTotal;
+                        cmsModel.MEMFree = $"{memFreeValue:F2}%";
+                        // Available 百分比
+                        double memAvailableValue = memAvailable * 100 / memTotal;
+                        cmsModel.MEMAvailable = $"{memAvailableValue:F2}%";
+                        // 页面缓存
+                        double memUsagePageCacheValue = memUsagesValue + (memAvailableValue - memFreeValue);
+                        cmsModel.MEMUsagePageCache = $"{memUsagePageCacheValue:F2}%";
                     }
                     catch (Exception ex) { }
                     try
                     {
-                        // 计算内存占用百分比
-                        double memUsagesValue = (double.Parse(memUsages[0]) - double.Parse(memUsages[2])) * 100 / double.Parse(memUsages[0]);
-                        cmsModel.MEMUsage = $"{memUsagesValue:F0}%";
+                        double swapCached = double.Parse(memUsages[3]);
+                        double swapTotal = double.Parse(memUsages[4]);
+                        double swapFree = double.Parse(memUsages[5]);
+
+                        if (swapTotal != 0)
+                        {
+                            // Swap 占用百分比
+                            double swapUsagesValue = (swapTotal - swapFree) * 100 / swapTotal;
+                            cmsModel.SwapUsage = $"{swapUsagesValue:F0}%";
+                            // Swap Cached 百分比
+                            double swapCachedValue = swapCached * 100 / swapTotal;
+                            cmsModel.SwapCached = $"{swapCachedValue:F2}%";
+                            double swapCachedDisplay = swapUsagesValue + swapCachedValue;
+                            cmsModel.SwapCachedDisplay = $"{swapCachedDisplay:F2}%";
+                        }
+                        else
+                        {
+                            cmsModel.SwapUsage = $"0%";
+                            cmsModel.SwapCached = $"0%";
+                            cmsModel.SwapCachedDisplay = $"0%";
+                        }
                     }
                     catch (Exception ex) { }
 
+                    try
+                    {
+                        cmsModel.TotalMEM = $"{Method.NetUnitConversion(decimal.Parse(memUsages[0]) * 1024)}";
+                        cmsModel.TotalSwap = $"{Method.NetUnitConversion(decimal.Parse(memUsages[4]) * 1024)}";
+                    }
+                    catch (Exception ex) { }
+
+                    try
+                    {
+                        cmsModel.CPUCoreTokens = cpuUsages.Skip(1).Select(cpuUsage => cpuUsage[0]).ToArray();
+                    }
+                    catch (Exception ex) { }
+
+                    cmsModel.MountInfos = MountInfos;
                     cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
+
                     cmsModel.NETSent = $"{Method.NetUnitConversion(cmsModel.NetworkInterfaceInfos.Sum(iface => iface.TransmitSpeedByte))}/s ↑";
                     cmsModel.NETReceived = $"{Method.NetUnitConversion(cmsModel.NetworkInterfaceInfos.Sum(iface => iface.ReceiveSpeedByte))}/s ↓";
 
                     cmsModel.DISKRead = $"{Method.NetUnitConversion(DiskStatus.Sum(dstatus => dstatus.SectorsReadPerSecondOrigin))}/s R";
                     cmsModel.DISKWrite = $"{Method.NetUnitConversion(DiskStatus.Sum(dstatus => dstatus.SectorsWrittenPerSecondOrigin))}/s W";
 
-                    // 获取结果失败不更新
-                    if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
-                    {
-                        cmsModel.Average1Percentage = loadAverage[3];
-                        cmsModel.Average5Percentage = loadAverage[4];
-                        cmsModel.Average15Percentage = loadAverage[5];
-                    }
                 }
                 else
                 {
@@ -557,10 +618,8 @@ namespace SeeMyServer.Pages
                 // 获取右键点击的数据对象（WoLModel）
                 CMSModel selectedItem = listViewItem?.DataContext as CMSModel;
 
-                localSettings.Values["ServerID"] = selectedItem.Id.ToString();
-
                 // 导航到页面
-                App.m_window.NavigateToPage(typeof(DetailPage));
+                App.m_window.NavigateToPage(typeof(DetailPage), selectedItem);
             }
         }
     }

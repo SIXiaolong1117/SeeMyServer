@@ -18,6 +18,7 @@
 		<GenerateTestArtifacts>True</GenerateTestArtifacts>
 		<AppxBundle>Never</AppxBundle>
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+		<PackageCertificateThumbprint>9392A9FD968910C9727FF3A8E08D9A7319F121FC</PackageCertificateThumbprint>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64' or '$(Configuration)|$(Platform)' == 'Release|x64'">
 		<!-- 仅在 Debug 和 x64 配置下生效的属性 -->
