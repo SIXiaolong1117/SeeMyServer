@@ -42,48 +42,50 @@ namespace SeeMyServer
         }
         bool TrySetSystemBackdrop()
         {
-            if (Microsoft.UI.Composition.SystemBackdrops.MicaController.IsSupported())
+            // 检查是否支持 Mica 控制器
+            if (MicaController.IsSupported())
             {
+                // 创建 Windows 系统分发队列助手
                 m_wsdqHelper = new WindowsSystemDispatcherQueueHelper();
                 m_wsdqHelper.EnsureWindowsSystemDispatcherQueueController();
 
-                // Create the policy object.
+                // 创建配置对象
                 m_configurationSource = new SystemBackdropConfiguration();
+                // 窗口激活时的事件处理
                 this.Activated += Window_Activated;
+                // 窗口关闭时的事件处理
                 this.Closed += Window_Closed;
+                // 窗口主题更改时的事件处理
                 ((FrameworkElement)this.Content).ActualThemeChanged += Window_ThemeChanged;
 
-                // Initial configuration state.
+                // 初始配置状态
                 m_configurationSource.IsInputActive = true;
+                // 设置配置对象的主题
                 SetConfigurationSourceTheme();
 
+                // 根据本地设置创建相应的背景控制器
                 if (localSettings.Values["materialStatus"] as string == "Acrylic")
                 {
-                    a_backdropController = new Microsoft.UI.Composition.SystemBackdrops.DesktopAcrylicController();
+                    a_backdropController = new DesktopAcrylicController();
                 }
                 else if (localSettings.Values["materialStatus"] as string == "Mica")
                 {
-                    m_backdropController = new Microsoft.UI.Composition.SystemBackdrops.MicaController();
+                    m_backdropController = new MicaController();
                 }
                 else
                 {
-                    ma_backdropController = new Microsoft.UI.Composition.SystemBackdrops.MicaController()
+                    ma_backdropController = new MicaController()
                     {
                         Kind = MicaKind.BaseAlt
                     };
                 }
 
-                // Enable the system backdrop.
-                // Note: Be sure to have "using WinRT;" to support the Window.As<...>() call.
+                // 启用系统背景
+                // 注意：确保使用 "using WinRT;" 以支持 Window.As<...>() 调用
                 if (localSettings.Values["materialStatus"] as string == "Mica")
                 {
                     m_backdropController.AddSystemBackdropTarget(this.As<Microsoft.UI.Composition.ICompositionSupportsSystemBackdrop>());
                     m_backdropController.SetSystemBackdropConfiguration(m_configurationSource);
-                }
-                else if (localSettings.Values["materialStatus"] as string == "Mica Alt")
-                {
-                    ma_backdropController.AddSystemBackdropTarget(this.As<Microsoft.UI.Composition.ICompositionSupportsSystemBackdrop>());
-                    ma_backdropController.SetSystemBackdropConfiguration(m_configurationSource);
                 }
                 else if (localSettings.Values["materialStatus"] as string == "Acrylic")
                 {
@@ -91,26 +93,26 @@ namespace SeeMyServer
                     a_backdropController.SetSystemBackdropConfiguration(m_configurationSource);
                 }
                 else
-                //throw new Exception($"Invalid argument: {localSettings.Values["materialStatus"] as string}");
                 {
                     localSettings.Values["materialStatus"] = "Mica Alt";
                     ma_backdropController.AddSystemBackdropTarget(this.As<Microsoft.UI.Composition.ICompositionSupportsSystemBackdrop>());
                     ma_backdropController.SetSystemBackdropConfiguration(m_configurationSource);
                 }
-                return true; // succeeded
+                return true;
             }
 
-            return false; // Mica is not supported on this system
+            return false;
         }
         private void Window_Activated(object sender, WindowActivatedEventArgs args)
         {
+            // 设置配置源的输入活动状态，如果窗口激活状态不是被停用，则为true
             m_configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
         }
 
         private void Window_Closed(object sender, WindowEventArgs args)
         {
-            // Make sure any Mica/Acrylic controller is disposed
-            // so it doesn't try to use this closed window.
+            // 确保任何 Mica/Acrylic 控制器都被释放
+            // 这样它就不会尝试使用已关闭的窗口。
             if (localSettings.Values["materialStatus"] as string == "Acrylic")
             {
                 if (a_backdropController != null)
@@ -135,7 +137,9 @@ namespace SeeMyServer
                     ma_backdropController = null;
                 }
             }
+            // 移除窗口激活事件处理程序
             this.Activated -= Window_Activated;
+            // 清空配置源
             m_configurationSource = null;
         }
 
@@ -151,9 +155,9 @@ namespace SeeMyServer
         {
             switch (((FrameworkElement)this.Content).ActualTheme)
             {
-                case ElementTheme.Dark: m_configurationSource.Theme = Microsoft.UI.Composition.SystemBackdrops.SystemBackdropTheme.Dark; break;
-                case ElementTheme.Light: m_configurationSource.Theme = Microsoft.UI.Composition.SystemBackdrops.SystemBackdropTheme.Light; break;
-                case ElementTheme.Default: m_configurationSource.Theme = Microsoft.UI.Composition.SystemBackdrops.SystemBackdropTheme.Default; break;
+                case ElementTheme.Dark: m_configurationSource.Theme = SystemBackdropTheme.Dark; break;
+                case ElementTheme.Light: m_configurationSource.Theme = SystemBackdropTheme.Light; break;
+                case ElementTheme.Default: m_configurationSource.Theme = SystemBackdropTheme.Default; break;
             }
         }
 

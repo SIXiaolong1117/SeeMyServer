@@ -47,44 +47,42 @@ namespace SeeMyServer.Pages
         private bool languageStatusSetList()
         {
             // 读取本地设置数据，调整ComboBox状态
-            if (localSettings.Values["languageChange"] as string == "zh-Hans-CN")
+            string languageChangeValue = localSettings.Values["languageChange"] as string;
+
+            switch (languageChangeValue)
             {
-                languageChange.SelectedItem = language[0];
-                return true;
-            }
-            else if (localSettings.Values["languageChange"] as string == "en-US")
-            {
-                languageChange.SelectedItem = language[1];
-                return true;
-            }
-            else
-            {
-                return false;
+                case "zh-Hans-CN":
+                    languageChange.SelectedItem = language[0];
+                    return true;
+                case "en-US":
+                    languageChange.SelectedItem = language[1];
+                    return true;
+                default:
+                    return false;
             }
         }
-
         private void materialStatusSet()
         {
             // 读取本地设置数据，调整ComboBox状态
-            if (localSettings.Values["materialStatus"] as string == "Mica")
+            string materialStatus = localSettings.Values["materialStatus"] as string;
+            switch (materialStatus)
             {
-                backgroundMaterial.SelectedItem = material[0];
-            }
-            else if (localSettings.Values["materialStatus"] as string == "Mica Alt")
-            {
-                backgroundMaterial.SelectedItem = material[1];
-            }
-            else if (localSettings.Values["materialStatus"] as string == "Acrylic")
-            {
-                backgroundMaterial.SelectedItem = material[2];
-            }
-            else
-            {
-                // 非法输入，设置默认材料为Mica Alt
-                localSettings.Values["materialStatus"] = "Mica Alt";
-                backgroundMaterial.SelectedItem = material[1];
+                case "Mica":
+                    localSettings.Values["materialStatus"] = "Mica";
+                    backgroundMaterial.SelectedItem = material[0];
+                    break;
+                case "Mica Alt":
+                default:
+                    localSettings.Values["materialStatus"] = "Mica Alt";
+                    backgroundMaterial.SelectedItem = material[1];
+                    break;
+                case "Acrylic":
+                    localSettings.Values["materialStatus"] = "Acrylic";
+                    backgroundMaterial.SelectedItem = material[2];
+                    break;
             }
         }
+
 
         // 背景材料设置ComboBox改动事件
         private void backgroundMaterial_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -93,7 +91,6 @@ namespace SeeMyServer.Pages
             switch (materialStatus)
             {
                 case "Mica":
-                default:
                     if (localSettings.Values["materialStatus"] as string != "Mica")
                     {
                         localSettings.Values["materialStatus"] = "Mica";
@@ -105,6 +102,7 @@ namespace SeeMyServer.Pages
                     }
                     break;
                 case "Mica Alt":
+                default:
                     if (localSettings.Values["materialStatus"] as string != "Mica Alt")
                     {
                         localSettings.Values["materialStatus"] = "Mica Alt";

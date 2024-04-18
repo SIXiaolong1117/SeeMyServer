@@ -10,7 +10,7 @@ namespace SeeMyServer
         public App()
         {
             this.InitializeComponent();
-            
+
             // 设置日志，最大1MB
             logger = new Logger(1);
         }
@@ -20,11 +20,11 @@ namespace SeeMyServer
             m_window = new MainWindow();
 
             IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(m_window);
-            SetWindowSize(hwnd, 1110, 800);
-
-            m_window.Activate();
+            //SetWindowSize(hwnd, 1110, 800);
 
             logger.LogInfo("See My Server starts.");
+
+            m_window.Activate();
         }
 
         private void SetWindowSize(IntPtr hwnd, int width, int height)
