@@ -1102,9 +1102,9 @@
                         CornerRadius="4,4,4,4">
                         <ScrollViewer MaxHeight="400">
                             <TextBlock
-                                x:Name="TopRec"
                                 FontFamily="Consolas"
-                                IsTabStop="True" />
+                                IsTabStop="True"
+                                Text="{Binding TopRes}" />
                         </ScrollViewer>
                     </Grid>
                 </Grid>

@@ -89,7 +89,7 @@ namespace SeeMyServer.Pages.Dialogs
             }
             else
             {
-                if (SSHPasswd.Password != "" && CMSData.SSHPasswd != null)
+                if (SSHPasswd.Password != "" || CMSData.SSHPasswd != null)
                 {
                     CMSData.SSHKeyIsOpen = "False";
                     // 检查是否已经存在密钥和初始化向量，如果不存在则生成新的

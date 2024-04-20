@@ -280,7 +280,7 @@ namespace SeeMyServer.Pages
                     {
                         cmsModel.OSRelease = PRETTY_NAME;
                     }
-                    //TopRec.Text = TOPRec;
+                    cmsModel.TopRes = TOPRec;
 
                     // 处理获取到的数据
                     try

@@ -435,6 +435,21 @@ namespace SeeMyServer.Models
                 }
             }
         }
+
+        private string _topRes;
+        public string TopRes
+        {
+            get { return _topRes; }
+            set
+            {
+                if (_topRes != value)
+                {
+                    _topRes = value;
+                    OnPropertyChanged(nameof(TopRes));
+                }
+            }
+        }
+
         public string[] CPUCoreTokens
         {
             get { return _cpuCoreTokens; }

@@ -41,7 +41,7 @@ namespace SeeMyServer.Pages
             this.InitializeComponent();
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             dataList = (CMSModel)e.Parameter;
             base.OnNavigatedTo(e);
@@ -168,17 +168,6 @@ namespace SeeMyServer.Pages
 
             try
             {
-                // 挂载和网络信息
-                if (dataList.MountInfos != null)
-                {
-                    // 禁用过渡动画
-                    MountInfosListView.ItemContainerTransitions = null;
-                }
-                if (dataList.NetworkInterfaceInfos != null)
-                {
-                    // 禁用过渡动画
-                    NetworkInfosListView.ItemContainerTransitions = null;
-                }
                 MountInfosListView.ItemsSource = dataList.MountInfos;
                 NetworkInfosListView.ItemsSource = dataList.NetworkInterfaceInfos;
             }
@@ -275,7 +264,7 @@ namespace SeeMyServer.Pages
                     {
                         cmsModel.CPUCoreNum = CPUCoreNum;
                     }
-                    TopRec.Text = TOPRec;
+                    cmsModel.TopRes = TOPRec;
 
                     // 处理获取到的数据
                     try
