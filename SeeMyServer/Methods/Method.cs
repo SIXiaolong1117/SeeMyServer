@@ -945,11 +945,11 @@ namespace SeeMyServer.Methods
             // 命令
             if (cmsModel.SSHKeyIsOpen == "True")
             {
-                process.StartInfo.Arguments = $"ssh -i {cmsModel.SSHKey} {cmsModel.SSHUser}@{cmsModel.HostIP} -p {cmsModel.HostPort}";
+                process.StartInfo.Arguments = $"-NoExit ssh -i {cmsModel.SSHKey} {cmsModel.SSHUser}@{cmsModel.HostIP} -p {cmsModel.HostPort}";
             }
             else
             {
-                process.StartInfo.Arguments = $"ssh {cmsModel.SSHUser}@{cmsModel.HostIP} -p {cmsModel.HostPort}";
+                process.StartInfo.Arguments = $"-NoExit ssh {cmsModel.SSHUser}@{cmsModel.HostIP} -p {cmsModel.HostPort}";
             }
             // 是否使用操作系统shell启动
             process.StartInfo.UseShellExecute = false;
