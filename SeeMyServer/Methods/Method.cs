@@ -284,15 +284,15 @@ namespace SeeMyServer.Methods
 
             // OpenWRT不能用hostname，可以用"uci get system.@system[0].hostname"
             // 用户应自己设置命令别名以兼容
-            string CPUUsageCMD = "cat /proc/stat | grep cpu 2>&1 ; echo '-' ; " +
-                "cat /proc/meminfo | grep -E 'Mem|Swap' 2>&1 ; echo '-' ; " +
-                "cat /proc/net/dev 2>&1 ; echo '-' ; " +
-                "df -hP 2>&1 ; echo '-' ; " +
-                "uptime | awk '{print $3 \" \" $4}' 2>&1 ; echo '-' ; " +
-                "hostname 2>&1 ; echo '-' ; " +
-                "top -bn1 2>&1 ; echo '-' ; " +
-                "cat /proc/cpuinfo | grep processor | wc -l ; echo '-' ; " +
-                "cat /etc/*-release 2>&1 | grep PRETTY_NAME ; echo '-' ; " +
+            string CPUUsageCMD = "cat /proc/stat | grep cpu 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
+                "cat /proc/meminfo | grep -E 'Mem|Swap' 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
+                "cat /proc/net/dev 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
+                "df -hP 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
+                "uptime | awk '{print $3 \" \" $4}' 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
+                "hostname 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
+                "top -bn1 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
+                "cat /proc/cpuinfo | grep processor | wc -l ; echo '**==CMS_SSH_END==**' ; " +
+                "cat /etc/*-release 2>&1 | grep PRETTY_NAME ; echo '**==CMS_SSH_END==**' ; " +
                 "cat /proc/diskstats 2>&1";
             string CPUUsageRes = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
 
@@ -313,8 +313,8 @@ namespace SeeMyServer.Methods
                 stopwatch.Stop();
 
                 // 以 - 分割
-                string[] result = CPUUsageRes.Split("-\n");
-                string[] result2 = CPUUsageRes2.Split("-\n");
+                string[] result = CPUUsageRes.Split("**==CMS_SSH_END==**\n");
+                string[] result2 = CPUUsageRes2.Split("**==CMS_SSH_END==**\n");
                 //throw new Exception($"Invalid argument: {result[8]}");
 
                 // 用于保存结果的List
