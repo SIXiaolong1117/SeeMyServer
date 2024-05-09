@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Shapes;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Renci.SshNet;
 using Renci.SshNet.Security;
 using SeeMyServer.Helper;
@@ -292,6 +293,8 @@ namespace SeeMyServer.Methods
 
             // OpenWRT不能用hostname，可以用"uci get system.@system[0].hostname"
             // 用户应自己设置命令别名以兼容
+            // P - 防止换行
+            // 2>&1 - 将标准错误输出重定向到标准输出，这样可以在管道中处理错误消息。
             // 命令列表
             string[] CPUUsageCMD = new string[]
             {
@@ -334,6 +337,27 @@ namespace SeeMyServer.Methods
 
                 if (result.Length >= 10 && result2.Length >= 10)
                 {
+                    string CPUUsagesRev = result[0];
+                    string MEMUsagesRev = result[1];
+                    string NETUsagesRev = result[2];
+                    string DFUsagesRev = result[3];
+                    string UptimeRev = result[4];
+                    string HostnameRev = result[5];
+                    string TopRev = result[6];
+                    string CoreNumRev = result[7];
+                    string OSReleaseRev = result[8];
+                    string DiskStatsRev = result[9];
+
+                    string CPUUsagesRev2 = result2[0];
+                    string MEMUsagesRev2 = result2[1];
+                    string NETUsagesRev2 = result2[2];
+                    string DFUsagesRev2 = result2[3];
+                    string UptimeRev2 = result2[4];
+                    string HostnameRev2 = result2[5];
+                    string TopRev2 = result2[6];
+                    string CoreNumRev2 = result2[7];
+                    string OSReleaseRev2 = result2[8];
+                    string DiskStatsRev2 = result2[9];
 
                     // 第一部分是CPU占用，结果格式如下：
                     // cpu  697687 0 1332141 93898629 1722210 0 840664 0 0 0
@@ -347,7 +371,7 @@ namespace SeeMyServer.Methods
                     {
                         // 解析结果
                         // 以换行符为准，按行分割结果
-                        string[] lines = result[0].Split('\n');
+                        string[] lines = CPUUsagesRev.Split('\n');
                         List<List<string>> cpuUsageList0s = new List<List<string>>();
                         // 遍历每行
                         foreach (string line in lines)
@@ -388,7 +412,7 @@ namespace SeeMyServer.Methods
                         }
 
                         // 以换行符为准，按行分割结果
-                        string[] lines2 = result2[0].Split('\n');
+                        string[] lines2 = CPUUsagesRev2.Split('\n');
                         List<List<int>> cpuUsageListAbs = new List<List<int>>();
                         // 遍历每行
                         int index = 0;
@@ -462,7 +486,7 @@ namespace SeeMyServer.Methods
                         Regex pattern = new Regex(@"(\w+):\s+(\d+)\s+(\w+)");
 
                         // 使用正则表达式进行匹配
-                        MatchCollection matches = pattern.Matches(result[1]);
+                        MatchCollection matches = pattern.Matches(MEMUsagesRev);
 
                         // 遍历匹配结果
                         foreach (Match match in matches)
@@ -470,61 +494,56 @@ namespace SeeMyServer.Methods
                             // 检查匹配是否成功
                             if (match.Success)
                             {
-                                // 构造解析结果字符串并添加到列表中
-                                //string result = $"{match.Groups[1].Value}: {match.Groups[2].Value} {match.Groups[3].Value}";
                                 string matchResult = $"{match.Groups[2].Value}";
                                 parsedResults.Add(matchResult);
                             }
+                            else
+                            {
+                                logger.LogError("MEMUsagesRev pattern match failed.");
+                            }
                         }
-                        //return parsedResults;
                     }
 
                     // 网卡信息
                     {
-                        networkInterfaceInfos = NetworkInterfaceInfoParse(result[2], result2[2], stopwatch.ElapsedMilliseconds);
+                        networkInterfaceInfos = NetworkInterfaceInfoParse(NETUsagesRev, NETUsagesRev2, stopwatch.ElapsedMilliseconds);
                     }
 
                     // 挂载信息
                     {
-                        // P - 防止换行
-                        // 2>&1 - 将标准错误输出重定向到标准输出，这样可以在管道中处理错误消息。
-                        //string CMD = "df -hP 2>&1";
-                        //CMD = await SendSSHCommandAsync(CMD, cmsModel);
 
-                        mountInfos = MountInfoParse(result[3], result[9], result2[9], stopwatch.ElapsedMilliseconds);
-
-                        //return mountInfos;
+                        mountInfos = MountInfoParse(DFUsagesRev, DiskStatsRev, DiskStatsRev2, stopwatch.ElapsedMilliseconds);
                     }
 
                     // 启动时长、主机名、CPU核心数量、系统版本、top
                     {
-                        // 启动时长
-                        //result[4].Split(',')[0]
-
-                        // 主机名
-                        //result[5].Split('\n')[0];
                         // 单独处理OpenWRT的情况
-                        if (result[5].Split('\n')[0] == "ash: hostname: not found")
+                        if (HostnameRev.Split('\n')[0] == "ash: hostname: not found")
                         {
+                            logger.LogError("HostName acquisition failed, try to use 'uci get system.@system[0].hostname'.");
                             string[] CMD = new string[]
                             {
                             "uci get system.@system[0].hostname"
                             };
-                            result[5] = (await SendSSHCommandAsync(CMD, cmsModel)).FirstOrDefault();
+                            HostnameRev = (await SendSSHCommandAsync(CMD, cmsModel)).FirstOrDefault();
                         }
-                        aboutInfo.Add(result[4].Split(',')[0]);
-                        aboutInfo.Add(result[5].Split('\n')[0]);
-                        aboutInfo.Add(result[7]);   // 核心数量
-                        if (result[8] != "" && result[8] != null)
+
+                        // 启动时长
+                        aboutInfo.Add(UptimeRev.Split(',')[0]);
+                        // 主机名
+                        aboutInfo.Add(HostnameRev.Split('\n')[0]);
+                        aboutInfo.Add(CoreNumRev);   // 核心数量
+                        if (OSReleaseRev != "" && OSReleaseRev != null)
                         {
-                            aboutInfo.Add(result[8].Split('\"')[1]); // 系统版本
+                            aboutInfo.Add(OSReleaseRev.Split('\"')[1]); // 系统版本
                         }
                         else
                         {
                             aboutInfo.Add(""); // 系统版本
+                            logger.LogError("OSRelease acquisition failed.");
                         }
 
-                        aboutInfo.Add(result[6]); // top
+                        aboutInfo.Add(TopRev); // top
                     }
 
                     // 负载信息
@@ -536,15 +555,16 @@ namespace SeeMyServer.Methods
                         double average1Percentage = .0;
                         double average5Percentage = .0;
                         double average15Percentage = .0;
-                        string CPUCoreRes = result[7];
+                        string CPUCoreRes = CoreNumRev;
 
                         // OpenWRT单独适配
-                        if (result[6].StartsWith("Mem"))
+                        if (TopRev.StartsWith("Mem"))
                         {
+                            logger.LogInfo("Load average (OpenWRT).");
                             // 使用正则取出负载信息
                             Regex loadRegex = new Regex(@"Load average: (\d+\.\d+) (\d+\.\d+) (\d+\.\d+) (\d+)/(\d+) (\d+)");
 
-                            Match loadMatch = loadRegex.Match(result[6]);
+                            Match loadMatch = loadRegex.Match(TopRev);
                             try
                             {
                                 // 获取1分钟内负载
@@ -574,7 +594,7 @@ namespace SeeMyServer.Methods
                             // 使用正则取出负载信息
                             Regex loadRegex = new Regex(@"load average: (\d+\.\d+), (\d+\.\d+), (\d+\.\d+)");
 
-                            Match loadMatch = loadRegex.Match(result[6]);
+                            Match loadMatch = loadRegex.Match(TopRev);
 
                             try
                             {
@@ -606,6 +626,11 @@ namespace SeeMyServer.Methods
                         loadResults.Add($"{average5Percentage:F2}");
                         loadResults.Add($"{average15Percentage:F2}");
                     }
+                }
+                else
+                {
+                    logger.LogError("The number of elements in the SSH result array is incorrect.");
+                    logger.LogError(string.Join("\n\n", result));
                 }
 
                 return Tuple.Create(cpuUsageList, parsedResults, networkInterfaceInfos, mountInfos, aboutInfo, loadResults);
