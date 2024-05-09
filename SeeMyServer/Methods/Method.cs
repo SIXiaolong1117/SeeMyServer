@@ -31,7 +31,7 @@ namespace SeeMyServer.Methods
     {
         // 设置日志，最大1MB
         private static Logger logger = new Logger(1);
-        public static string SendSSHCommand(string sshCommand, string sshHost, string sshPort, string sshUser, string sshPasswd, string sshKey, string privateKeyIsOpen)
+        public static string[] SendSSHCommands(string[] sshCommands, string sshHost, string sshPort, string sshUser, string sshPasswd, string sshKey, string privateKeyIsOpen)
         {
             try
             {
@@ -39,7 +39,7 @@ namespace SeeMyServer.Methods
                 if (!int.TryParse(sshPort, out port))
                 {
                     logger.LogError($"{sshHost}:{sshPort} 使用了无效的 SSH 端口号：{sshPort}");
-                    return "";
+                    return new string[0]; // 返回空数组表示参数错误
                 }
 
                 bool usePrivateKey = string.Equals(privateKeyIsOpen, "True", StringComparison.OrdinalIgnoreCase);
@@ -48,18 +48,20 @@ namespace SeeMyServer.Methods
                     if (sshClient == null)
                     {
                         logger.LogError($"{sshHost}:{sshPort} SSH 客户端初始化失败。");
-                        return "";
+                        return new string[0]; // 返回空数组表示SSH客户端初始化失败
                     }
 
-                    return ExecuteSshCommand(sshClient, sshCommand);
+                    return ExecuteSshCommands(sshClient, sshCommands);
                 }
             }
             catch (Exception ex)
             {
                 logger.LogError($"{sshHost}:{sshPort} SSH 操作失败：" + ex.Message);
-                return "";
+                return new string[0]; // 返回空数组表示SSH操作失败
             }
         }
+
+
         private static SshClient InitializeSshClient(string sshHost, int sshPort, string sshUser, string sshPasswd, string sshKey, bool usePrivateKey)
         {
             try
@@ -87,36 +89,42 @@ namespace SeeMyServer.Methods
             }
         }
 
-        private static string ExecuteSshCommand(SshClient sshClient, string sshCommand)
+        private static string[] ExecuteSshCommands(SshClient sshClient, string[] sshCommands)
         {
+            List<string> results = new List<string>();
+
             try
             {
                 sshClient.Connect();
                 if (sshClient.IsConnected)
                 {
-                    SshCommand SSHCommand = sshClient.RunCommand(sshCommand);
-                    if (!string.IsNullOrEmpty(SSHCommand.Error))
+                    foreach (var sshCommand in sshCommands)
                     {
-                        // 后文的实现会导致这里疯狂写入日志
-                        //logger.LogError($"{sshCommand} SSH 命令执行错误：{SSHCommand.Error}");
-                        //return "";
-                        return SSHCommand.Result;
-                    }
-                    else
-                    {
-                        return SSHCommand.Result;
+                        SshCommand SSHCommand = sshClient.RunCommand(sshCommand);
+                        if (!string.IsNullOrEmpty(SSHCommand.Error))
+                        {
+                            results.Add($"Error executing command \"{sshCommand}\": {SSHCommand.Error}");
+                        }
+                        else
+                        {
+                            results.Add(SSHCommand.Result);
+                        }
                     }
                 }
-                logger.LogError($"{sshCommand} SSH 命令执行失败。");
-                return "";
+                else
+                {
+                    results.Add("SSH connection failed.");
+                }
             }
             finally
             {
                 sshClient.Disconnect();
             }
+
+            return results.ToArray();
         }
 
-        private static async Task<string> SendSSHCommandAsync(string command, CMSModel cmsModel)
+        private static async Task<string[]> SendSSHCommandAsync(string[] commands, CMSModel cmsModel)
         {
             string passwd = "";
             if (cmsModel.SSHKeyIsOpen != "True")
@@ -142,7 +150,7 @@ namespace SeeMyServer.Methods
             }
             return await Task.Run(() =>
             {
-                return SendSSHCommand(command, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, passwd, cmsModel.SSHKey, cmsModel.SSHKeyIsOpen);
+                return SendSSHCommands(commands, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, passwd, cmsModel.SSHKey, cmsModel.SSHKeyIsOpen);
             });
         }
 
@@ -284,22 +292,26 @@ namespace SeeMyServer.Methods
 
             // OpenWRT不能用hostname，可以用"uci get system.@system[0].hostname"
             // 用户应自己设置命令别名以兼容
-            string CPUUsageCMD = "cat /proc/stat | grep cpu 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
-                "cat /proc/meminfo | grep -E 'Mem|Swap' 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
-                "cat /proc/net/dev 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
-                "df -hP 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
-                "uptime | awk '{print $3 \" \" $4}' 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
-                "hostname 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
-                "top -bn1 2>&1 ; echo '**==CMS_SSH_END==**' ; " +
-                "cat /proc/cpuinfo | grep processor | wc -l ; echo '**==CMS_SSH_END==**' ; " +
-                "cat /etc/*-release 2>&1 | grep PRETTY_NAME ; echo '**==CMS_SSH_END==**' ; " +
-                "cat /proc/diskstats 2>&1";
-            string CPUUsageRes = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
+            // 命令列表
+            string[] CPUUsageCMD = new string[]
+            {
+            "cat /proc/stat | grep cpu 2>&1",
+            "cat /proc/meminfo | grep -E 'Mem|Swap' 2>&1",
+            "cat /proc/net/dev 2>&1",
+            "df -hP 2>&1",
+            "uptime | awk '{print $3 \" \" $4}' 2>&1",
+            "hostname 2>&1",
+            "top -bn1 2>&1",
+            "cat /proc/cpuinfo | grep processor | wc -l",
+            "cat /etc/*-release 2>&1 | grep PRETTY_NAME",
+            "cat /proc/diskstats 2>&1"
+            };
+            string[] result = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
 
             // 开始计时
             stopwatch.Start();
 
-            if (CPUUsageRes != "" && CPUUsageRes != null)
+            if (result != null)
             {
 
                 // 为了加快第一次更新的速度，代价是第一次的结果误差极大
@@ -308,14 +320,9 @@ namespace SeeMyServer.Methods
                     await Task.Delay(1000);
                 }
 
-                string CPUUsageRes2 = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
+                string[] result2 = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
                 // 停止计时
                 stopwatch.Stop();
-
-                // 以 - 分割
-                string[] result = CPUUsageRes.Split("**==CMS_SSH_END==**\n");
-                string[] result2 = CPUUsageRes2.Split("**==CMS_SSH_END==**\n");
-                //throw new Exception($"Invalid argument: {result[8]}");
 
                 // 用于保存结果的List
                 List<List<string>> cpuUsageList = new List<List<string>>();
@@ -499,8 +506,11 @@ namespace SeeMyServer.Methods
                         // 单独处理OpenWRT的情况
                         if (result[5].Split('\n')[0] == "ash: hostname: not found")
                         {
-                            string CMD = "uci get system.@system[0].hostname";
-                            result[5] = await SendSSHCommandAsync(CMD, cmsModel);
+                            string[] CMD = new string[]
+                            {
+                            "uci get system.@system[0].hostname"
+                            };
+                            result[5] = (await SendSSHCommandAsync(CMD, cmsModel)).FirstOrDefault();
                         }
                         aboutInfo.Add(result[4].Split(',')[0]);
                         aboutInfo.Add(result[5].Split('\n')[0]);
