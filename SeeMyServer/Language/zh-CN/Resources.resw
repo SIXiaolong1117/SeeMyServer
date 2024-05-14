@@ -148,7 +148,10 @@
     <value>CPU 占用</value>
   </data>
   <data name="AboutServerHostName.Text" xml:space="preserve">
-    <value>主机名</value>
+    <value>主机名称</value>
+  </data>
+  <data name="AboutServerLinuxKernelVersionRes.Text" xml:space="preserve">
+    <value>内核版本</value>
   </data>
   <data name="AboutServerMEMUsage.Text" xml:space="preserve">
     <value>内存占用</value>

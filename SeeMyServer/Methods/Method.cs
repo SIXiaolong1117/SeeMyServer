@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Shapes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PInvoke;
 using Renci.SshNet;
 using Renci.SshNet.Security;
 using SeeMyServer.Helper;
@@ -316,12 +317,13 @@ namespace SeeMyServer.Methods
             "cat /proc/meminfo | grep -E 'Mem|Swap' 2>&1",
             "cat /proc/net/dev 2>&1",
             "df -hP 2>&1",
-            "uptime",
+            "uptime | awk '{print $3 \" \" $4}' 2>&1",
             "hostname 2>&1",
             "top -bn1 2>&1",
             "cat /proc/cpuinfo | grep processor | wc -l",
             "cat /etc/*-release 2>&1 | grep PRETTY_NAME",
-            "cat /proc/diskstats 2>&1"
+            "cat /proc/diskstats 2>&1",
+            "uname -r"
             };
             string[] result = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
 
@@ -349,7 +351,7 @@ namespace SeeMyServer.Methods
                 List<string> loadResults = new List<string>();
                 List<string> aboutInfo = new List<string>();
 
-                if (result.Length >= 10 && result2.Length >= 10)
+                if (result.Length >= 11 && result2.Length >= 11)
                 {
                     string CPUUsagesRev = result[0];
                     string MEMUsagesRev = result[1];
@@ -361,6 +363,7 @@ namespace SeeMyServer.Methods
                     string CoreNumRev = result[7];
                     string OSReleaseRev = result[8];
                     string DiskStatsRev = result[9];
+                    string LinuxKernelVersion = result[10];
 
                     string CPUUsagesRev2 = result2[0];
                     string MEMUsagesRev2 = result2[1];
@@ -372,6 +375,7 @@ namespace SeeMyServer.Methods
                     string CoreNumRev2 = result2[7];
                     string OSReleaseRev2 = result2[8];
                     string DiskStatsRev2 = result2[9];
+                    string LinuxKernelVersion2 = result2[10];
 
                     // 第一部分是CPU占用，结果格式如下：
                     // cpu  697687 0 1332141 93898629 1722210 0 840664 0 0 0
@@ -546,18 +550,24 @@ namespace SeeMyServer.Methods
                         aboutInfo.Add(UptimeRev.Split(',')[0]);
                         // 主机名
                         aboutInfo.Add(HostnameRev.Split('\n')[0]);
-                        aboutInfo.Add(CoreNumRev);   // 核心数量
+                        // 核心数量
+                        aboutInfo.Add(CoreNumRev);
                         if (OSReleaseRev != "" && OSReleaseRev != null)
                         {
-                            aboutInfo.Add(OSReleaseRev.Split('\"')[1]); // 系统版本
+                            // 系统版本
+                            aboutInfo.Add(OSReleaseRev.Split('\"')[1]);
                         }
                         else
                         {
-                            aboutInfo.Add(""); // 系统版本
+                            // 检索不到系统版本
+                            aboutInfo.Add("");
                             logger.LogError("OSRelease acquisition failed.");
                         }
-
-                        aboutInfo.Add(TopRev); // top
+                        // top
+                        aboutInfo.Add(TopRev);
+                        // 内核版本
+                        LinuxKernelVersion = LinuxKernelVersion.TrimEnd('\n', '\r');
+                        aboutInfo.Add(LinuxKernelVersion);
                     }
 
                     // 负载信息

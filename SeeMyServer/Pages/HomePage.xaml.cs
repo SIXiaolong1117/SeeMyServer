@@ -265,6 +265,7 @@ namespace SeeMyServer.Pages
                     var CPUCoreNum = Usages.Result.Item5[2];
                     var PRETTY_NAME = Usages.Result.Item5[3];
                     var TOPRec = Usages.Result.Item5[4];
+                    var LinuxKernelVersion = Usages.Result.Item5[5];
                     var loadAverage = Usages.Result.Item6;
 
                     // 只有HostName和UpTime为空才更新
@@ -272,15 +273,13 @@ namespace SeeMyServer.Pages
                     {
                         cmsModel.HostName = HostName;
                     }
-                    if (cmsModel.UpTime == null)
-                    {
-                        cmsModel.UpTime = UpTime;
-                    }
+                    cmsModel.UpTime = UpTime;
                     if (cmsModel.OSRelease == null)
                     {
                         cmsModel.OSRelease = PRETTY_NAME;
                     }
                     cmsModel.TopRes = TOPRec;
+                    cmsModel.LinuxKernelVersionRes = LinuxKernelVersion;
 
                     // 处理获取到的数据
                     try

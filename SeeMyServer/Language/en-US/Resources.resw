@@ -150,6 +150,9 @@
   <data name="AboutServerHostName.Text" xml:space="preserve">
     <value>Host Name</value>
   </data>
+  <data name="AboutServerLinuxKernelVersionRes.Text" xml:space="preserve">
+    <value>Kernel Version</value>
+  </data>
   <data name="AboutServerMEMUsage.Text" xml:space="preserve">
     <value>Mem Usage</value>
   </data>

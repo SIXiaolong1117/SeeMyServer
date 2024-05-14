@@ -135,6 +135,20 @@
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
                         Text="{Binding UpTime}" />
+                    <TextBlock
+                        x:Uid="AboutServerLinuxKernelVersionRes"
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Margin="0,4,0,4"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Margin="0,4,0,4"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Text="{Binding LinuxKernelVersionRes}" />
                 </Grid>
 
                 <TextBlock

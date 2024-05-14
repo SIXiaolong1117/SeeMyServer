@@ -450,6 +450,20 @@ namespace SeeMyServer.Models
             }
         }
 
+        private string _linuxKernelVersionRes;
+        public string LinuxKernelVersionRes
+        {
+            get { return _linuxKernelVersionRes; }
+            set
+            {
+                if (_linuxKernelVersionRes != value)
+                {
+                    _linuxKernelVersionRes = value;
+                    OnPropertyChanged(nameof(LinuxKernelVersionRes));
+                }
+            }
+        }
+
         public string[] CPUCoreTokens
         {
             get { return _cpuCoreTokens; }
