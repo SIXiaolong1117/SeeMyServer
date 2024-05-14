@@ -132,23 +132,37 @@ namespace SeeMyServer.Methods
             {
                 if (cmsModel.SSHPasswd != "" && cmsModel.SSHPasswd != null)
                 {
-                    // 检查是否已经存在密钥和初始化向量，如果不存在则生成新的
-                    string key = Method.LoadKeyFromLocalSettings() ?? Method.GenerateRandomKey();
-                    string iv = Method.LoadIVFromLocalSettings() ?? Method.GenerateRandomIV();
+                    logger.LogInfo("SSH using Password.");
+                    // 检查是否已经存在密钥和初始化向量，如果不存在则抛出异常
+                    string key = Method.LoadKeyFromLocalSettings();
+                    string iv = Method.LoadIVFromLocalSettings();
 
-                    // 将密钥和初始化向量保存到 localSettings 中
-                    Method.SaveKeyToLocalSettings(key);
-                    Method.SaveIVToLocalSettings(iv);
+                    if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(iv))
+                    {
+                        //throw new InvalidOperationException("密钥和/或初始化向量不存在，请先设置密钥和初始化向量。");
+                        logger.LogError("The key and/or initialization vector do not exist, please set the key and initialization vector first.");
+                    }
+                    else
+                    {
+                        // 使用的对称加密算法
+                        SymmetricAlgorithm symmetricAlgorithm = new AesManaged();
 
-                    // 使用的对称加密算法
-                    SymmetricAlgorithm symmetricAlgorithm = new AesManaged();
-
-                    // 设置加密密钥和初始化向量
-                    symmetricAlgorithm.Key = Convert.FromBase64String(key);
-                    symmetricAlgorithm.IV = Convert.FromBase64String(iv);
-                    passwd = Method.DecryptString(cmsModel.SSHPasswd, symmetricAlgorithm);
+                        // 设置加密密钥和初始化向量
+                        symmetricAlgorithm.Key = Convert.FromBase64String(key);
+                        symmetricAlgorithm.IV = Convert.FromBase64String(iv);
+                        passwd = Method.DecryptString(cmsModel.SSHPasswd, symmetricAlgorithm);
+                    }
                 }
             }
+            else if (cmsModel.SSHKeyIsOpen == "True")
+            {
+                logger.LogInfo("SSH using Key authentication.");
+            }
+            else
+            {
+                logger.LogError("Unknown SSH login solution.");
+            }
+
             return await Task.Run(() =>
             {
                 return SendSSHCommands(commands, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, passwd, cmsModel.SSHKey, cmsModel.SSHKeyIsOpen);
@@ -302,7 +316,7 @@ namespace SeeMyServer.Methods
             "cat /proc/meminfo | grep -E 'Mem|Swap' 2>&1",
             "cat /proc/net/dev 2>&1",
             "df -hP 2>&1",
-            "uptime | awk '{print $3 \" \" $4}' 2>&1",
+            "uptime",
             "hostname 2>&1",
             "top -bn1 2>&1",
             "cat /proc/cpuinfo | grep processor | wc -l",

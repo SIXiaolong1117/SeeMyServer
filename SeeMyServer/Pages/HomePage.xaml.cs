@@ -605,7 +605,7 @@ namespace SeeMyServer.Pages
         {
             if (e.ClickedItem != null)
             {
-                // 获取右键点击的数据对象（WoLModel）
+                // 获取点击的数据对象
                 CMSModel selectedItem = e.ClickedItem as CMSModel;
 
                 // 导航到页面

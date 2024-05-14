@@ -306,6 +306,9 @@
   <data name="SSHUser.PlaceholderText" xml:space="preserve">
     <value>例如：root</value>
   </data>
+  <data name="terminalMenuItemText" xml:space="preserve">
+    <value>打开终端</value>
+  </data>
   <data name="ThemeSetting.Text" xml:space="preserve">
     <value>应用主题</value>
   </data>

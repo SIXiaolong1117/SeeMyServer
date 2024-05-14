@@ -38,8 +38,18 @@ namespace SeeMyServer.Pages.Dialogs
             HostIPTextBox.Text = cmsModel.HostIP;
             HostPortTextBox.Text = cmsModel.HostPort;
             SSHUserTextBox.Text = cmsModel.SSHUser;
-            SSHKeyOrPasswdToggleSwitch.IsOn = cmsModel.SSHKeyIsOpen == "True";
-            SSHPasswd.PlaceholderText = cmsModel.SSHPasswd != null ? "<Not Changed>" : SSHPasswd.PlaceholderText;
+            if (cmsModel.SSHKeyIsOpen == "True")
+            {
+                SSHKeyOrPasswdToggleSwitch.IsOn = true;
+            }
+            else
+            {
+                SSHKeyOrPasswdToggleSwitch.IsOn = false;
+            }
+            if (cmsModel.SSHPasswd != null && cmsModel.SSHPasswd != "")
+            {
+                SSHPasswd.PlaceholderText = "<Not Changed>";
+            }
             logger.LogInfo("Dialog field initialization completed.");
 
             if (cmsModel.SSHKey == "" || cmsModel.SSHKey == null)
@@ -55,9 +65,8 @@ namespace SeeMyServer.Pages.Dialogs
             }
 
             // 添加操作系统类型
-            //OSTypeComboBox.Items.Add("Windows");
             OSTypeComboBox.Items.Add("Linux");
-            //OSTypeComboBox.Items.Add("OpenWRT");
+
             if (cmsModel.OSType == null)
             {
                 OSTypeComboBox.SelectedItem = "Linux";
@@ -89,16 +98,24 @@ namespace SeeMyServer.Pages.Dialogs
             }
             else
             {
-                if (SSHPasswd.Password != "" && CMSData.SSHPasswd != null)
+                if (SSHPasswd.Password != "" && SSHPasswd.Password != null)
                 {
                     CMSData.SSHKeyIsOpen = "False";
-                    // 检查是否已经存在密钥和初始化向量，如果不存在则生成新的
-                    string key = Method.LoadKeyFromLocalSettings() ?? Method.GenerateRandomKey();
-                    string iv = Method.LoadIVFromLocalSettings() ?? Method.GenerateRandomIV();
 
-                    // 将密钥和初始化向量保存到 localSettings 中
-                    Method.SaveKeyToLocalSettings(key);
-                    Method.SaveIVToLocalSettings(iv);
+                    // 检查是否已经存在密钥和初始化向量，如果不存在则生成新的
+                    string key = Method.LoadKeyFromLocalSettings();
+                    string iv = Method.LoadIVFromLocalSettings();
+
+                    // 如果不存在密钥和初始化向量，则生成新的
+                    if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(iv))
+                    {
+                        key = Method.GenerateRandomKey();
+                        iv = Method.GenerateRandomIV();
+
+                        // 将新生成的密钥和初始化向量保存到 localSettings 中
+                        Method.SaveKeyToLocalSettings(key);
+                        Method.SaveIVToLocalSettings(iv);
+                    }
 
                     // 使用的对称加密算法
                     SymmetricAlgorithm symmetricAlgorithm = new AesManaged();
