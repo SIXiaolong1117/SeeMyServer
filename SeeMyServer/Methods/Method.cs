@@ -33,24 +33,25 @@ namespace SeeMyServer.Methods
     {
         // 设置日志，最大1MB
         private static Logger logger = new Logger(1);
-        public static string[] SendSSHCommands(string[] sshCommands, string sshHost, string sshPort, string sshUser, string sshPasswd, string sshKey, string privateKeyIsOpen)
+        public static string[] SendSSHCommands(string[] sshCommands, CMSModel cmsModel, string passwd)
         {
             try
             {
                 int port;
-                if (!int.TryParse(sshPort, out port))
+                if (!int.TryParse(cmsModel.HostPort, out port))
                 {
-                    logger.LogError($"{sshHost}:{sshPort} 使用了无效的 SSH 端口号：{sshPort}");
-                    return new string[0]; // 返回空数组表示参数错误
+                    logger.LogError($"{cmsModel.HostIP}:{cmsModel.HostPort} Invalid SSH port number used: {cmsModel.HostPort}");
+                    return null;
                 }
 
-                bool usePrivateKey = string.Equals(privateKeyIsOpen, "True", StringComparison.OrdinalIgnoreCase);
-                using (SshClient sshClient = InitializeSshClient(sshHost, port, sshUser, sshPasswd, sshKey, usePrivateKey))
+                bool usePrivateKey = string.Equals(cmsModel.SSHKeyIsOpen, "True", StringComparison.OrdinalIgnoreCase);
+                // 注意使用传入的passwd，Model中的Passwd是加密后的结果
+                using (SshClient sshClient = InitializeSshClient(cmsModel.HostIP, port, cmsModel.SSHUser, passwd, cmsModel.SSHKey, usePrivateKey))
                 {
                     if (sshClient == null)
                     {
-                        logger.LogError($"{sshHost}:{sshPort} SSH 客户端初始化失败。");
-                        return new string[0]; // 返回空数组表示SSH客户端初始化失败
+                        logger.LogError($"{cmsModel.HostIP}:{cmsModel.HostPort} SSH client initialization failed.");
+                        return null;
                     }
 
                     return ExecuteSshCommands(sshClient, sshCommands);
@@ -58,8 +59,8 @@ namespace SeeMyServer.Methods
             }
             catch (Exception ex)
             {
-                logger.LogError($"{sshHost}:{sshPort} SSH 操作失败：" + ex.Message);
-                return new string[0]; // 返回空数组表示SSH操作失败
+                logger.LogError($"{cmsModel.HostIP}:{cmsModel.HostPort} SSH operation failed: " + ex.Message);
+                return null;
             }
         }
 
@@ -86,13 +87,17 @@ namespace SeeMyServer.Methods
             }
             catch (Exception ex)
             {
-                logger.LogError($"{sshHost} SSH 连接失败：" + ex.Message);
+                logger.LogError($"{sshHost}:{sshPort} SSH 连接失败：" + ex.Message);
                 return null;
             }
         }
 
         private static string[] ExecuteSshCommands(SshClient sshClient, string[] sshCommands)
         {
+            // 获取 IP 和端口信息
+            string host = sshClient.ConnectionInfo.Host;
+            int port = sshClient.ConnectionInfo.Port;
+
             List<string> results = new List<string>();
 
             try
@@ -105,8 +110,8 @@ namespace SeeMyServer.Methods
                         SshCommand SSHCommand = sshClient.RunCommand(sshCommand);
                         if (!string.IsNullOrEmpty(SSHCommand.Error))
                         {
-                            results.Add($"[CMSError]: executing command \"{sshCommand}\": {SSHCommand.Error}");
-                            logger.LogError($"[CMSError]: executing command \"{sshCommand}\": {SSHCommand.Error}");
+                            results.Add($"[CMSError]: {host}:{port} executing command \"{sshCommand}\": {SSHCommand.Error}");
+                            logger.LogError($"[CMSError]: {host}:{port} executing command \"{sshCommand}\": {SSHCommand.Error}");
                         }
                         else
                         {
@@ -116,7 +121,8 @@ namespace SeeMyServer.Methods
                 }
                 else
                 {
-                    results.Add("SSH connection failed.");
+                    logger.LogError($"{host}:{port} SSH connection failed.");
+                    results.Add($"{host}:{port} SSH connection failed.");
                 }
             }
             finally
@@ -130,20 +136,24 @@ namespace SeeMyServer.Methods
         private static async Task<string[]> SendSSHCommandAsync(string[] commands, CMSModel cmsModel)
         {
             string passwd = "";
+            // 没有打开Key认证
             if (cmsModel.SSHKeyIsOpen != "True")
             {
+                // 如果SSH密码不为空
                 if (cmsModel.SSHPasswd != "" && cmsModel.SSHPasswd != null)
                 {
-                    logger.LogInfo("SSH using Password.");
+                    logger.LogInfo($"{cmsModel.HostIP}:{cmsModel.HostPort} SSH using Password.");
                     // 检查是否已经存在密钥和初始化向量，如果不存在则抛出异常
                     string key = Method.LoadKeyFromLocalSettings();
                     string iv = Method.LoadIVFromLocalSettings();
 
+                    // 如果密钥和初始化向量为空
                     if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(iv))
                     {
-                        //throw new InvalidOperationException("密钥和/或初始化向量不存在，请先设置密钥和初始化向量。");
-                        logger.LogError("The key and/or initialization vector do not exist, please set the key and initialization vector first.");
+                        // 错误：密钥和/或初始化向量不存在
+                        logger.LogError($"{cmsModel.HostIP}:{cmsModel.HostPort} The key and/or initialization vector do not exist, please set the key and initialization vector first.");
                     }
+                    // 如果密钥和初始化向量存在
                     else
                     {
                         // 使用的对称加密算法
@@ -152,22 +162,26 @@ namespace SeeMyServer.Methods
                         // 设置加密密钥和初始化向量
                         symmetricAlgorithm.Key = Convert.FromBase64String(key);
                         symmetricAlgorithm.IV = Convert.FromBase64String(iv);
+
+                        // 解密密码
                         passwd = Method.DecryptString(cmsModel.SSHPasswd, symmetricAlgorithm);
                     }
                 }
             }
+            // 打开Key认证
             else if (cmsModel.SSHKeyIsOpen == "True")
             {
-                logger.LogInfo("SSH using Key authentication.");
+                logger.LogInfo($"{cmsModel.HostIP}:{cmsModel.HostPort} SSH using Key authentication.");
             }
+            // 其余情况
             else
             {
-                logger.LogError("Unknown SSH login solution.");
+                logger.LogError($"{cmsModel.HostIP}:{cmsModel.HostPort} Unknown SSH login solution.");
             }
-
+            // 异步执行命令
             return await Task.Run(() =>
             {
-                return SendSSHCommands(commands, cmsModel.HostIP, cmsModel.HostPort, cmsModel.SSHUser, passwd, cmsModel.SSHKey, cmsModel.SSHKeyIsOpen);
+                return SendSSHCommands(commands, cmsModel, passwd);
             });
         }
 
@@ -203,7 +217,7 @@ namespace SeeMyServer.Methods
                 catch
                 {
                     // 当您保存至OneDrive等同步盘目录时，在Windows11上可能引起DeferUpdates错误，备份文件不一定写入正确。
-                    logger.LogWarning("保存行为完成，但当您保存至OneDrive等同步盘目录时，在Windows11上可能引起DeferUpdates错误，备份文件不一定写入正确。");
+                    logger.LogWarning($"{cmsModel.Name} 保存行为完成，但当您保存至OneDrive等同步盘目录时，在Windows11上可能引起DeferUpdates错误，备份文件不一定写入正确。");
                     return "保存行为完成，但当您保存至OneDrive等同步盘目录时，在Windows11上可能引起DeferUpdates错误，备份文件不一定写入正确。";
                 }
 
@@ -233,23 +247,24 @@ namespace SeeMyServer.Methods
                 if (status == FileUpdateStatus.Complete)
                 {
                     // 保存成功
-                    logger.LogInfo("保存成功");
-                    return "保存成功";
+                    logger.LogInfo($"{cmsModel.Name} 保存成功");
+                    return $"{cmsModel.Name} 保存成功";
                 }
                 else if (status == FileUpdateStatus.CompleteAndRenamed)
                 {
                     // 重命名并保存成功
-                    logger.LogInfo("重命名并保存成功");
-                    return "重命名并保存成功";
+                    logger.LogInfo($"{cmsModel.Name} 重命名并保存成功");
+                    return $"{cmsModel.Name} 重命名并保存成功";
                 }
                 else
                 {
                     // 文件无法保存！
-                    logger.LogError("无法保存！");
-                    return "无法保存！";
+                    logger.LogError($"{cmsModel.Name} 无法保存！");
+                    return $"{cmsModel.Name} 无法保存！";
                 }
             }
-            return "错误！";
+            logger.LogError($"{cmsModel.Name} 错误！");
+            return $"{cmsModel.Name} 错误！";
         }
         // 导入配置
         public static async Task<CMSModel> ImportConfig()
@@ -305,90 +320,97 @@ namespace SeeMyServer.Methods
         public static List<List<string>> CPUUsageResult(string CPUUsagesRev, string CPUUsagesRev2)
         {
             List<List<string>> cpuUsageList = new List<List<string>>();
-            // 解析结果
-            // 以换行符为准，按行分割结果
-            string[] lines = CPUUsagesRev.Split('\n');
             List<List<string>> cpuUsageList0s = new List<List<string>>();
-            // 遍历每行
-            foreach (string line in lines)
+            List<List<int>> cpuUsageListAbs = new List<List<int>>();
+
+            // 解析结果
+            if (CPUUsagesRev.StartsWith("cpu"))
             {
-                // 检查是否以 cpu 开头
-                if (line.StartsWith("cpu"))
+                // 以换行符为准，按行分割结果
+                string[] lines = CPUUsagesRev.Split('\n');
+                // 遍历每行
+                foreach (string line in lines)
                 {
-                    // 以空格分割，并去除空白项
-                    string[] fields = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    // 保存当前 CPU 的使用情况
-                    List<string> cpuUsage = new List<string>();
-
-                    // 计算CPU总事件（单行之和）
-                    long totalCpuTime = 0;
-                    for (int i = 1; i < fields.Length; i++)
+                    // 检查是否以 cpu 开头
+                    if (line.StartsWith("cpu"))
                     {
-                        if (long.TryParse(fields[i], out long cpuTime))
+                        // 以空格分割，并去除空白项
+                        string[] fields = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        // 保存当前 CPU 的使用情况
+                        List<string> cpuUsage = new List<string>();
+
+                        // 计算CPU总事件（单行之和）
+                        long totalCpuTime = 0;
+                        for (int i = 1; i < fields.Length; i++)
                         {
-                            totalCpuTime += cpuTime;
+                            if (long.TryParse(fields[i], out long cpuTime))
+                            {
+                                totalCpuTime += cpuTime;
+                            }
                         }
+
+                        cpuUsage.Add(fields[1]);    //0 用户态
+                        cpuUsage.Add(fields[2]);    //1 用户态低优先级
+                        cpuUsage.Add(fields[3]);    //2 系统态
+                        cpuUsage.Add(fields[4]);    //3 空闲
+                        cpuUsage.Add(fields[5]);    //4 I/O等待
+                        cpuUsage.Add(fields[6]);    //5 无意义
+                        cpuUsage.Add(fields[7]);    //6 硬件中断
+                        cpuUsage.Add(fields[8]);    //7 软件中断
+                        cpuUsage.Add(fields[9]);    //8 steal_time
+                        cpuUsage.Add(fields[10]);   //9 guest_nice进程
+                        cpuUsage.Add($"{totalCpuTime}"); //10 总时间
+
+                        cpuUsageList0s.Add(cpuUsage);
                     }
-
-                    cpuUsage.Add(fields[1]);    //0 用户态
-                    cpuUsage.Add(fields[2]);    //1 用户态低优先级
-                    cpuUsage.Add(fields[3]);    //2 系统态
-                    cpuUsage.Add(fields[4]);    //3 空闲
-                    cpuUsage.Add(fields[5]);    //4 I/O等待
-                    cpuUsage.Add(fields[6]);    //5 无意义
-                    cpuUsage.Add(fields[7]);    //6 硬件中断
-                    cpuUsage.Add(fields[8]);    //7 软件中断
-                    cpuUsage.Add(fields[9]);    //8 steal_time
-                    cpuUsage.Add(fields[10]);   //9 guest_nice进程
-                    cpuUsage.Add($"{totalCpuTime}"); //10 总时间
-
-                    cpuUsageList0s.Add(cpuUsage);
                 }
             }
 
-            // 以换行符为准，按行分割结果
-            string[] lines2 = CPUUsagesRev2.Split('\n');
-            List<List<int>> cpuUsageListAbs = new List<List<int>>();
-            // 遍历每行
-            int index = 0;
-            foreach (string line in lines2)
+            if (CPUUsagesRev.StartsWith("cpu"))
             {
-                // 检查是否以 cpu 开头
-                if (line.StartsWith("cpu"))
+                // 以换行符为准，按行分割结果
+                string[] lines2 = CPUUsagesRev2.Split('\n');
+                // 遍历每行
+                int index = 0;
+                foreach (string line in lines2)
                 {
-                    // 以空格分割，并去除空白项
-                    string[] fields = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    // 保存当前 CPU 的使用情况
-                    List<int> cpuUsage = new List<int>();
-
-                    // 计算CPU总事件（单行之和）
-                    long totalCpuTime = 0;
-                    for (int i = 1; i < fields.Length; i++)
+                    // 检查是否以 cpu 开头
+                    if (line.StartsWith("cpu"))
                     {
-                        if (long.TryParse(fields[i], out long cpuTime))
+                        // 以空格分割，并去除空白项
+                        string[] fields = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        // 保存当前 CPU 的使用情况
+                        List<int> cpuUsage = new List<int>();
+
+                        // 计算CPU总事件（单行之和）
+                        long totalCpuTime = 0;
+                        for (int i = 1; i < fields.Length; i++)
                         {
-                            totalCpuTime += cpuTime;
+                            if (long.TryParse(fields[i], out long cpuTime))
+                            {
+                                totalCpuTime += cpuTime;
+                            }
                         }
+
+                        // 计算差值
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][0]) - int.Parse(fields[1])));    //0 用户态
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][1]) - int.Parse(fields[2])));    //1 用户态低优先级
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][2]) - int.Parse(fields[3])));    //2 系统态
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][3]) - int.Parse(fields[4])));    //3 空闲
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][4]) - int.Parse(fields[5])));    //4 I/O等待
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][5]) - int.Parse(fields[6])));    //5 无意义
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][6]) - int.Parse(fields[7])));    //6 硬件中断
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][7]) - int.Parse(fields[8])));    //7 软件中断
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][8]) - int.Parse(fields[9])));    //8 steal_time
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][9]) - int.Parse(fields[10])));   //9 guest_nice进程
+                        cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][10]) - (int)totalCpuTime));      //10 总时间
+
+                        cpuUsageListAbs.Add(cpuUsage);
+
+                        index++;
                     }
-
-                    // 计算差值
-                    cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][0]) - int.Parse(fields[1])));    //0 用户态
-                    cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][1]) - int.Parse(fields[2])));    //1 用户态低优先级
-                    cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][2]) - int.Parse(fields[3])));    //2 系统态
-                    cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][3]) - int.Parse(fields[4])));    //3 空闲
-                    cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][4]) - int.Parse(fields[5])));    //4 I/O等待
-                    cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][5]) - int.Parse(fields[6])));    //5 无意义
-                    cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][6]) - int.Parse(fields[7])));    //6 硬件中断
-                    cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][7]) - int.Parse(fields[8])));    //7 软件中断
-                    cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][8]) - int.Parse(fields[9])));    //8 steal_time
-                    cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][9]) - int.Parse(fields[10])));   //9 guest_nice进程
-                    cpuUsage.Add(Math.Abs(int.Parse(cpuUsageList0s[index][10]) - (int)totalCpuTime));      //10 总时间
-
-                    cpuUsageListAbs.Add(cpuUsage);
-
-                    index++;
                 }
             }
 
@@ -498,9 +520,10 @@ namespace SeeMyServer.Methods
                     // 15分钟内
                     average15Percentage = average15 * 100 / double.Parse(CPUCoreRes);
                 }
-                catch
+                catch (Exception ex)
                 {
                     //double.Parse(CPUCoreRes)失败
+                    logger.LogError(ex.Message);
                 }
             }
             // 负载信息
@@ -528,9 +551,10 @@ namespace SeeMyServer.Methods
                     // 15分钟内
                     average15Percentage = average15 * 100 / double.Parse(CPUCoreRes);
                 }
-                catch
+                catch (Exception ex)
                 {
                     //double.Parse(CPUCoreRes)失败
+                    logger.LogError(ex.Message);
                 }
             }
             // 将结果添加到 List<string> 中
@@ -657,7 +681,7 @@ namespace SeeMyServer.Methods
                 string DiskStatsRev = result[9];
                 string LinuxKernelVersion = result[10];
 
-                await Task.Delay(500);
+                await Task.Delay(1000);
 
                 string[] result2 = await SendSSHCommandAsync(CPUUsageCMD, cmsModel);
                 // 停止计时
@@ -697,12 +721,21 @@ namespace SeeMyServer.Methods
                     logger.LogError(string.Join("\n\n", result));
                 }
 
+
+                // 确保释放信号量
+                cmsModel.UpdateSemaphore.Release();
                 return Tuple.Create(cpuUsageList, parsedResults, networkInterfaceInfos, mountInfos, aboutInfo, loadResults);
             }
             else
             {
                 // 停止计时
                 stopwatch.Stop();
+
+                // 失败倒计时，设置为60
+                cmsModel.NumberOfFailuresSec = 60;
+                logger.LogError("SSH results array is null.");
+                // 确保释放信号量
+                cmsModel.UpdateSemaphore.Release();
                 return null;
             }
         }

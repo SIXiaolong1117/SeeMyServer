@@ -215,18 +215,28 @@ namespace SeeMyServer.Pages
             {
                 cmsModel.NumberOfFailures = 0;
                 cmsModel.NumberOfFailuresStr = null;
+                cmsModel.NumberOfFailuresSec = 0;
             }
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
+        private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
             // 创建 DispatcherTimer 并启动
             timer = new DispatcherTimer();
             // 先执行一次事件处理方法
             Timer_Tick(null, null);
-            timer.Interval = TimeSpan.FromSeconds(2);
+            timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += Timer_Tick;
             timer.Start();
+
+            foreach (CMSModel cmsModel in dataList)
+            {
+                if (await cmsModel.UpdateSemaphore.WaitAsync(0))
+                {
+                    // 确保释放信号量
+                    cmsModel.UpdateSemaphore.Release();
+                }
+            }
         }
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
@@ -242,161 +252,150 @@ namespace SeeMyServer.Pages
         // Linux 信息更新
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
         {
-            if (cmsModel.NumberOfFailures < 30)
+            // 定义异步任务
+            var Usages = Method.GetLinuxCPUUsageAsync(cmsModel);
+
+            // 同时执行异步任务
+            await Task.WhenAll(Usages);
+
+            if (Usages.Result != null)
             {
-                // 定义异步任务
-                var Usages = Method.GetLinuxCPUUsageAsync(cmsModel);
+                cmsModel.NumberOfFailures = 0;
 
-                // 同时执行异步任务
-                await Task.WhenAll(Usages);
+                // 解析结果
+                var cpuUsages = Usages.Result.Item1;
+                var memUsages = Usages.Result.Item2;
+                var NetworkInterfaceInfos = Usages.Result.Item3;
+                var MountInfos = Usages.Result.Item4[0];
+                var DiskStatus = Usages.Result.Item4[1];
+                var UpTime = Usages.Result.Item5[0];
+                var HostName = Usages.Result.Item5[1];
+                var CPUCoreNum = Usages.Result.Item5[2];
+                var PRETTY_NAME = Usages.Result.Item5[3];
+                var TOPRec = Usages.Result.Item5[4];
+                var LinuxKernelVersion = Usages.Result.Item5[5];
+                var loadAverage = Usages.Result.Item6;
 
-                if (Usages.Result != null)
+                // 只有HostName和UpTime为空才更新
+                if (cmsModel.HostName == null || cmsModel.HostName == "")
                 {
-                    cmsModel.NumberOfFailures = 0;
-
-                    // 解析结果
-                    var cpuUsages = Usages.Result.Item1;
-                    var memUsages = Usages.Result.Item2;
-                    var NetworkInterfaceInfos = Usages.Result.Item3;
-                    var MountInfos = Usages.Result.Item4[0];
-                    var DiskStatus = Usages.Result.Item4[1];
-                    var UpTime = Usages.Result.Item5[0];
-                    var HostName = Usages.Result.Item5[1];
-                    var CPUCoreNum = Usages.Result.Item5[2];
-                    var PRETTY_NAME = Usages.Result.Item5[3];
-                    var TOPRec = Usages.Result.Item5[4];
-                    var LinuxKernelVersion = Usages.Result.Item5[5];
-                    var loadAverage = Usages.Result.Item6;
-
-                    // 只有HostName和UpTime为空才更新
-                    if (cmsModel.HostName == null)
-                    {
-                        cmsModel.HostName = HostName;
-                    }
-                    cmsModel.UpTime = UpTime;
-                    if (cmsModel.OSRelease == null)
-                    {
-                        cmsModel.OSRelease = PRETTY_NAME;
-                    }
-                    cmsModel.TopRes = TOPRec;
-                    cmsModel.LinuxKernelVersionRes = LinuxKernelVersion;
-
-                    // 处理获取到的数据
-                    try
-                    {
-                        cmsModel.CPUUsage = $"{cpuUsages[0][0]}%";
-                        cmsModel.CPUCoreNum = CPUCoreNum.Split('\n')[0];
-                        cmsModel.CPUUserUsage = $"{cpuUsages[0][1]}%";
-                        cmsModel.CPUSysUsage = $"{cpuUsages[0][2]}%";
-                        cmsModel.CPUIdleUsage = $"{cpuUsages[0][3]}%";
-                        cmsModel.CPUIOUsage = $"{cpuUsages[0][4]}%";
-                    }
-                    catch (Exception ex) { }
-
-                    // 获取结果失败不更新
-                    if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
-                    {
-                        cmsModel.Average1 = loadAverage[0];
-                        cmsModel.Average5 = loadAverage[1];
-                        cmsModel.Average15 = loadAverage[2];
-                        cmsModel.Average1Percentage = loadAverage[3];
-                        cmsModel.Average5Percentage = loadAverage[4];
-                        cmsModel.Average15Percentage = loadAverage[5];
-                    }
-
-                    try
-                    {
-                        double memTotal = double.Parse(memUsages[0]);
-                        double memFree = double.Parse(memUsages[1]);
-                        double memAvailable = double.Parse(memUsages[2]);
-
-                        // 计算内存占用百分比
-                        double memUsagesValue = (memTotal - memAvailable) * 100 / memTotal;
-                        cmsModel.MEMUsage = $"{memUsagesValue:F0}%";
-                        // Free 百分比
-                        double memFreeValue = memFree * 100 / memTotal;
-                        cmsModel.MEMFree = $"{memFreeValue:F2}%";
-                        // Available 百分比
-                        double memAvailableValue = memAvailable * 100 / memTotal;
-                        cmsModel.MEMAvailable = $"{memAvailableValue:F2}%";
-                        // 页面缓存
-                        double memUsagePageCacheValue = memUsagesValue + (memAvailableValue - memFreeValue);
-                        cmsModel.MEMUsagePageCache = $"{memUsagePageCacheValue:F2}%";
-                    }
-                    catch (Exception ex) { }
-                    try
-                    {
-                        double swapCached = double.Parse(memUsages[3]);
-                        double swapTotal = double.Parse(memUsages[4]);
-                        double swapFree = double.Parse(memUsages[5]);
-
-                        if (swapTotal != 0)
-                        {
-                            // Swap 占用百分比
-                            double swapUsagesValue = (swapTotal - swapFree) * 100 / swapTotal;
-                            cmsModel.SwapUsage = $"{swapUsagesValue:F0}%";
-                            // Swap Cached 百分比
-                            double swapCachedValue = swapCached * 100 / swapTotal;
-                            cmsModel.SwapCached = $"{swapCachedValue:F2}%";
-                            double swapCachedDisplay = swapUsagesValue + swapCachedValue;
-                            cmsModel.SwapCachedDisplay = $"{swapCachedDisplay:F2}%";
-                        }
-                        else
-                        {
-                            cmsModel.SwapUsage = $"0%";
-                            cmsModel.SwapCached = $"0%";
-                            cmsModel.SwapCachedDisplay = $"0%";
-                        }
-                    }
-                    catch (Exception ex) { }
-
-                    try
-                    {
-                        cmsModel.TotalMEM = $"{Method.NetUnitConversion(decimal.Parse(memUsages[0]) * 1024)}";
-                        cmsModel.TotalSwap = $"{Method.NetUnitConversion(decimal.Parse(memUsages[4]) * 1024)}";
-                    }
-                    catch (Exception ex) { }
-
-                    try
-                    {
-                        cmsModel.CPUCoreTokens = cpuUsages.Skip(1).Select(cpuUsage => cpuUsage[0]).ToArray();
-                    }
-                    catch (Exception ex) { }
-
-                    cmsModel.MountInfos = MountInfos;
-                    cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
-
-                    cmsModel.NETSent = $"{Method.NetUnitConversion(cmsModel.NetworkInterfaceInfos.Sum(iface => iface.TransmitSpeedByte))}/s ↑";
-                    cmsModel.NETReceived = $"{Method.NetUnitConversion(cmsModel.NetworkInterfaceInfos.Sum(iface => iface.ReceiveSpeedByte))}/s ↓";
-
-                    cmsModel.DISKRead = $"{Method.NetUnitConversion(DiskStatus.Sum(dstatus => dstatus.SectorsReadPerSecondOrigin))}/s R";
-                    cmsModel.DISKWrite = $"{Method.NetUnitConversion(DiskStatus.Sum(dstatus => dstatus.SectorsWrittenPerSecondOrigin))}/s W";
-
+                    cmsModel.HostName = HostName;
                 }
-                else
+                cmsModel.UpTime = UpTime;
+                if (cmsModel.OSRelease == null || cmsModel.OSRelease == "")
                 {
-                    //logger.LogError($"The SSH result for {cmsModel.Name} is empty.");
-                    cmsModel.NumberOfFailures += 30;
+                    cmsModel.OSRelease = PRETTY_NAME;
                 }
-            }
-            else
-            {
-                cmsModel.NumberOfFailures -= 2;
+                cmsModel.TopRes = TOPRec;
+                cmsModel.LinuxKernelVersionRes = LinuxKernelVersion;
+
+                // 处理获取到的数据
+                try
+                {
+                    cmsModel.CPUUsage = $"{cpuUsages[0][0]}%";
+                    cmsModel.CPUCoreNum = CPUCoreNum.Split('\n')[0];
+                    cmsModel.CPUUserUsage = $"{cpuUsages[0][1]}%";
+                    cmsModel.CPUSysUsage = $"{cpuUsages[0][2]}%";
+                    cmsModel.CPUIdleUsage = $"{cpuUsages[0][3]}%";
+                    cmsModel.CPUIOUsage = $"{cpuUsages[0][4]}%";
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.Message);
+                }
+
+                // 获取结果失败不更新
+                if (loadAverage[3] != "0" || loadAverage[4] != "0" || loadAverage[5] != "0")
+                {
+                    cmsModel.Average1 = loadAverage[0];
+                    cmsModel.Average5 = loadAverage[1];
+                    cmsModel.Average15 = loadAverage[2];
+                    cmsModel.Average1Percentage = loadAverage[3];
+                    cmsModel.Average5Percentage = loadAverage[4];
+                    cmsModel.Average15Percentage = loadAverage[5];
+                }
+
+                try
+                {
+                    double memTotal = double.Parse(memUsages[0]);
+                    double memFree = double.Parse(memUsages[1]);
+                    double memAvailable = double.Parse(memUsages[2]);
+
+                    // 计算内存占用百分比
+                    double memUsagesValue = (memTotal - memAvailable) * 100 / memTotal;
+                    cmsModel.MEMUsage = $"{memUsagesValue:F0}%";
+                    // Free 百分比
+                    double memFreeValue = memFree * 100 / memTotal;
+                    cmsModel.MEMFree = $"{memFreeValue:F2}%";
+                    // Available 百分比
+                    double memAvailableValue = memAvailable * 100 / memTotal;
+                    cmsModel.MEMAvailable = $"{memAvailableValue:F2}%";
+                    // 页面缓存
+                    double memUsagePageCacheValue = memUsagesValue + (memAvailableValue - memFreeValue);
+                    cmsModel.MEMUsagePageCache = $"{memUsagePageCacheValue:F2}%";
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.Message);
+                }
+                try
+                {
+                    double swapCached = double.Parse(memUsages[3]);
+                    double swapTotal = double.Parse(memUsages[4]);
+                    double swapFree = double.Parse(memUsages[5]);
+
+                    if (swapTotal != 0)
+                    {
+                        // Swap 占用百分比
+                        double swapUsagesValue = (swapTotal - swapFree) * 100 / swapTotal;
+                        cmsModel.SwapUsage = $"{swapUsagesValue:F0}%";
+                        // Swap Cached 百分比
+                        double swapCachedValue = swapCached * 100 / swapTotal;
+                        cmsModel.SwapCached = $"{swapCachedValue:F2}%";
+                        double swapCachedDisplay = swapUsagesValue + swapCachedValue;
+                        cmsModel.SwapCachedDisplay = $"{swapCachedDisplay:F2}%";
+                    }
+                    else
+                    {
+                        cmsModel.SwapUsage = $"0%";
+                        cmsModel.SwapCached = $"0%";
+                        cmsModel.SwapCachedDisplay = $"0%";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.Message);
+                }
+
+                try
+                {
+                    cmsModel.TotalMEM = $"{Method.NetUnitConversion(decimal.Parse(memUsages[0]) * 1024)}";
+                    cmsModel.TotalSwap = $"{Method.NetUnitConversion(decimal.Parse(memUsages[4]) * 1024)}";
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.Message);
+                }
+
+                try
+                {
+                    cmsModel.CPUCoreTokens = cpuUsages.Skip(1).Select(cpuUsage => cpuUsage[0]).ToArray();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.Message);
+                }
+
+                cmsModel.MountInfos = MountInfos;
+                cmsModel.NetworkInterfaceInfos = NetworkInterfaceInfos;
+
+                cmsModel.NETSent = $"{Method.NetUnitConversion(cmsModel.NetworkInterfaceInfos.Sum(iface => iface.TransmitSpeedByte))}/s ↑";
+                cmsModel.NETReceived = $"{Method.NetUnitConversion(cmsModel.NetworkInterfaceInfos.Sum(iface => iface.ReceiveSpeedByte))}/s ↓";
+
+                cmsModel.DISKRead = $"{Method.NetUnitConversion(DiskStatus.Sum(dstatus => dstatus.SectorsReadPerSecondOrigin))}/s R";
+                cmsModel.DISKWrite = $"{Method.NetUnitConversion(DiskStatus.Sum(dstatus => dstatus.SectorsWrittenPerSecondOrigin))}/s W";
             }
 
-            if (cmsModel.NumberOfFailures > 30)
-            {
-                cmsModel.NumberOfFailuresStr = $"SSH failed ({cmsModel.NumberOfFailures - 30})";
-            }
-            else
-            {
-                cmsModel.NumberOfFailuresStr = null;
-            }
-
-            if (cmsModel.NumberOfFailures > 60)
-            {
-                cmsModel.NumberOfFailures = 60;
-            }
         }
         private async void Timer_Tick(object sender, object e)
         {
@@ -404,13 +403,44 @@ namespace SeeMyServer.Pages
 
             foreach (CMSModel cmsModel in dataList)
             {
-                Task updateTask = cmsModel.OSType switch
+                if (cmsModel.NumberOfFailuresSec <= 0)
                 {
-                    "Linux" => UpdateLinuxCMSModelAsync(cmsModel),
-                    _ => Task.CompletedTask
-                };
+                    cmsModel.NumberOfFailuresStr = $"";
+                    if (cmsModel.NumberOfFailures <= 5)
+                    {
+                        // 尝试立即获取信号量，如果无法获取则跳过这次更新
+                        if (await cmsModel.UpdateSemaphore.WaitAsync(0))
+                        {
+                            // 清空失败计数
+                            cmsModel.NumberOfFailures = 0;
 
-                tasks.Add(updateTask);
+                            Task updateTask = cmsModel.OSType switch
+                            {
+                                "Linux" => UpdateLinuxCMSModelAsync(cmsModel),
+                                _ => Task.CompletedTask
+                            };
+
+                            tasks.Add(updateTask);
+                        }
+                        else
+                        {
+                            // 失败计数
+                            cmsModel.NumberOfFailures += 1;
+                        }
+                    }
+                    else
+                    {
+                        // 失败倒计时，设置为60
+                        cmsModel.NumberOfFailuresSec = 60;
+                        // 清空失败计数
+                        cmsModel.NumberOfFailures = 0;
+                    }
+                }
+                else
+                {
+                    cmsModel.NumberOfFailuresSec -= 1;
+                    cmsModel.NumberOfFailuresStr = $"SSH failed ({cmsModel.NumberOfFailuresSec})";
+                }
             }
 
             await Task.WhenAll(tasks);
@@ -420,6 +450,9 @@ namespace SeeMyServer.Pages
         {
             // 创建一个初始的CMSModel对象
             CMSModel initialCMSModelData = new CMSModel();
+            // 初始化该CMSModel对象
+            initialCMSModelData.HostPort = "22";
+            initialCMSModelData.OSType = "Linux";
 
             // 创建一个新的dialog对象
             AddServer dialog = new AddServer(initialCMSModelData);
@@ -439,10 +472,9 @@ namespace SeeMyServer.Pages
             {
                 // 实例化SQLiteHelper
                 SQLiteHelper dbHelper = new SQLiteHelper();
-                // 插入新数据
+                // 插入新数据，并将Id返回。
                 int id = dbHelper.InsertData(initialCMSModelData);
                 // 加载数据
-                //LoadData();
                 initialCMSModelData.Id = id;
                 AddItem(initialCMSModelData);
                 logger.LogInfo("Add Config is completed.");

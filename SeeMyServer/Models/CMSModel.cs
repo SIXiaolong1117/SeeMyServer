@@ -1,11 +1,13 @@
 using System.ComponentModel;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace SeeMyServer.Models
 {
     public class CMSModel : INotifyPropertyChanged
     {
         private int _numberOfFailures;
+        private int _numberOfFailuresSec;
         private string _numberOfFailuresStr;
         private string _osRelease;
         private string _cpuUsage;
@@ -58,6 +60,18 @@ namespace SeeMyServer.Models
                 {
                     _numberOfFailures = value;
                     OnPropertyChanged(nameof(NumberOfFailures));
+                }
+            }
+        }
+        public int NumberOfFailuresSec
+        {
+            get { return _numberOfFailuresSec; }
+            set
+            {
+                if (_numberOfFailuresSec != value)
+                {
+                    _numberOfFailuresSec = value;
+                    OnPropertyChanged(nameof(NumberOfFailuresSec));
                 }
             }
         }
@@ -476,6 +490,10 @@ namespace SeeMyServer.Models
                 }
             }
         }
+
+        // 为每个CMSModel添加一个信号量，初始化为1，表示一次只允许一个线程进入
+        public SemaphoreSlim UpdateSemaphore { get; } = new SemaphoreSlim(1, 1);
+
         public List<MountInfo> MountInfos
         {
             get { return _mountInfos; }
