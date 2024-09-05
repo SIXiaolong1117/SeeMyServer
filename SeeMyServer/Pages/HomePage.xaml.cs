@@ -219,6 +219,7 @@ namespace SeeMyServer.Pages
             }
         }
 
+        // 加载页面
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
             // 创建 DispatcherTimer 并启动
@@ -238,6 +239,8 @@ namespace SeeMyServer.Pages
                 }
             }
         }
+
+        // 卸载页面
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             // 页面卸载时停止并销毁 DispatcherTimer
