@@ -264,6 +264,18 @@
   <data name="LanguageSetting.Text" xml:space="preserve">
     <value>Language</value>
   </data>
+  <data name="LosesFocusStopSSH.Text" xml:space="preserve">
+    <value>Stop SSH requests when</value>
+  </data>
+  <data name="LosesFocusStopSSH1" xml:space="preserve">
+    <value>Application lost focus</value>
+  </data>
+  <data name="LosesFocusStopSSH2" xml:space="preserve">
+    <value>Minimize</value>
+  </data>
+  <data name="LosesFocusStopSSH3" xml:space="preserve">
+    <value>Never stop</value>
+  </data>
   <data name="MEMUsageText.Text" xml:space="preserve">
     <value>Mem</value>
   </data>
@@ -296,6 +308,9 @@
   </data>
   <data name="SettingsHeader.Text" xml:space="preserve">
     <value>Settings</value>
+  </data>
+  <data name="SSHBehavior.Text" xml:space="preserve">
+    <value>SSH Behavior</value>
   </data>
   <data name="SSHKey.Header" xml:space="preserve">
     <value>SSH Key</value>

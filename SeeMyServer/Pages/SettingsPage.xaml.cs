@@ -12,12 +12,13 @@ namespace SeeMyServer.Pages
         // 启用本地设置数据
         ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
 
-        ResourceLoader resourceLoader = new ResourceLoader();
+        private readonly ResourceLoader resourceLoader = ResourceLoader.GetForViewIndependentUse();
 
         public SettingsPage()
         {
             this.InitializeComponent();
 
+            InitializeLosesFocus();
             materialStatusSet();
             languageStatusSet();
         }
@@ -34,6 +35,27 @@ namespace SeeMyServer.Pages
             "简体中文",
             "English"
         };
+
+        // 初始化 losesFocus 列表
+        public List<string> losesFocus { get; } = new List<string>(); 
+        private void InitializeLosesFocus()
+        {
+            losesFocus.Add(resourceLoader.GetString("LosesFocusStopSSH1"));
+            //losesFocus.Add(resourceLoader.GetString("LosesFocusStopSSH2"));
+            losesFocus.Add(resourceLoader.GetString("LosesFocusStopSSH3"));
+
+            // 读取 LocalSettings 中的选中序号
+            if (localSettings.Values.ContainsKey("LosesFocusStopSSHSelectedIndex"))
+            {
+                // 如果有保存的序号，设置为选中项
+                LosesFocusStopSSHComboBox.SelectedIndex = (int)localSettings.Values["LosesFocusStopSSHSelectedIndex"];
+            }
+            else
+            {
+                // 如果没有保存的序号，默认选择
+                LosesFocusStopSSHComboBox.SelectedIndex = 0;
+            }
+        }
 
         private void languageStatusSet()
         {
@@ -159,6 +181,15 @@ namespace SeeMyServer.Pages
                         localSettings.Values["languageChange"] = "en-US";
                     }
                     break;
+            }
+        }
+
+        private void LosesFocusStopSSHComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (LosesFocusStopSSHComboBox.SelectedIndex != -1)
+            {
+                // 保存选中的序号到 LocalSettings
+                localSettings.Values["LosesFocusStopSSHSelectedIndex"] = LosesFocusStopSSHComboBox.SelectedIndex;
             }
         }
     }

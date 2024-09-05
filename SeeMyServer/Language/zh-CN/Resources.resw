@@ -258,6 +258,18 @@
   <data name="LanguageSetting.Text" xml:space="preserve">
     <value>语言</value>
   </data>
+  <data name="LosesFocusStopSSH.Text" xml:space="preserve">
+    <value>在以下情况下停止 SSH 请求</value>
+  </data>
+  <data name="LosesFocusStopSSH1" xml:space="preserve">
+    <value>应用失焦</value>
+  </data>
+  <data name="LosesFocusStopSSH2" xml:space="preserve">
+    <value>应用最小化</value>
+  </data>
+  <data name="LosesFocusStopSSH3" xml:space="preserve">
+    <value>从不暂停</value>
+  </data>
   <data name="MEMUsageText.Text" xml:space="preserve">
     <value>内存</value>
   </data>
@@ -281,6 +293,9 @@
   </data>
   <data name="SettingsHeader.Text" xml:space="preserve">
     <value>设置</value>
+  </data>
+  <data name="SSHBehavior.Text" xml:space="preserve">
+    <value>SSH 行为</value>
   </data>
   <data name="SSHKey.Header" xml:space="preserve">
     <value>SSH 密钥</value>

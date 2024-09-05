@@ -22,6 +22,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Collections.Specialized;
 using Microsoft.UI.Xaml.Navigation;
+using Windows.UI.Core;
+using Windows.UI.ViewManagement;
+using Windows.ApplicationModel.Core;
 
 namespace SeeMyServer.Pages
 {
@@ -222,6 +225,13 @@ namespace SeeMyServer.Pages
         // 加载页面
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            // 获取当前的窗口
+            var window = App.MainWindow;
+            if (window != null)
+            {
+                window.Activated += Window_Activated;  // 监听窗口激活事件
+            }
+
             // 创建 DispatcherTimer 并启动
             timer = new DispatcherTimer();
             // 先执行一次事件处理方法
@@ -243,6 +253,12 @@ namespace SeeMyServer.Pages
         // 卸载页面
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
+            var window = Window.Current;
+            if (window != null)
+            {
+                window.Activated -= Window_Activated;  // 取消事件监听
+            }
+
             // 页面卸载时停止并销毁 DispatcherTimer
             if (timer != null)
             {
@@ -251,6 +267,28 @@ namespace SeeMyServer.Pages
                 timer = null;
             }
         }
+
+        private void Window_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs e)
+        {
+            int losesFocusStopSSHSelectedIndex = (int)localSettings.Values["LosesFocusStopSSHSelectedIndex"];
+
+            if (losesFocusStopSSHSelectedIndex == 0)
+            {
+                if (timer != null)
+                {
+                    if (e.WindowActivationState == Microsoft.UI.Xaml.WindowActivationState.Deactivated)
+                    {
+                        timer.Stop(); // 窗口失去焦点时停止计时器
+                    }
+                    else if (e.WindowActivationState == Microsoft.UI.Xaml.WindowActivationState.CodeActivated ||
+                             e.WindowActivationState == Microsoft.UI.Xaml.WindowActivationState.PointerActivated)
+                    {
+                        timer.Start(); // 窗口重新激活时启动计时器
+                    }
+                }
+            }
+        }
+
 
         // Linux 信息更新
         private async Task UpdateLinuxCMSModelAsync(CMSModel cmsModel)
