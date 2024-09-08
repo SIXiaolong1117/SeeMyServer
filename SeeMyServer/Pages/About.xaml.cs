@@ -48,13 +48,13 @@ namespace SeeMyServer.Pages
             string stringList = null;
             try
             {
-                stringList = await HTTPResponse("https://raw.githubusercontent.com/Direct5dom/Direct5dom/main/README/Text/List");
+                stringList = await HTTPResponse("https://raw.githubusercontent.com/SIXiaolong1117/SIXiaolong1117/main/README/Text/List");
             }
             catch (Exception ex)
             {
                 try
                 {
-                    stringList = await HTTPResponse("https://gitee.com/XiaolongSI/Direct5dom/raw/main/README/Text/List");
+                    stringList = await HTTPResponse("https://gitee.com/XiaolongSI/SIXiaolong1117/raw/main/README/Text/List");
                 }
                 catch (Exception ex2)
                 {

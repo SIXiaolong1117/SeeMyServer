@@ -123,7 +123,7 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         Content="Github Issues"
-                        NavigateUri="https://github.com/Direct5dom/SeeMyServer_Issues/issues" />
+                        NavigateUri="https://github.com/SIXiaolong1117/SeeMyServer_Issues/issues" />
                     <HyperlinkButton
                         x:Name="PRIVACYLink"
                         x:Uid="PRIVACYLink"
@@ -132,14 +132,14 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         Content="Github Issues"
-                        NavigateUri="https://github.com/Direct5dom/SeeMyServer_Issues/issues" />
+                        NavigateUri="https://github.com/SIXiaolong1117/SeeMyServer_Issues/issues" />
                     <!--<HyperlinkButton
-                        x:Uid="AboutHelp"
-                        Grid.Row="2"
-                        Grid.Column="0"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        NavigateUri="https://about.sixiaolong.win/Project/See-My-Server.html" />-->
+                    x:Uid="AboutHelp"
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    NavigateUri="https://about.sixiaolong.win/Project/See-My-Server.html" />-->
                 </Grid>
 
                 <TextBlock
@@ -190,7 +190,7 @@
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
                             Content="Github"
-                            NavigateUri="https://github.com/Direct5dom" />
+                            NavigateUri="https://github.sixiaolong.win/" />
                         <HyperlinkButton
                             Grid.Row="2"
                             Grid.Column="0"
