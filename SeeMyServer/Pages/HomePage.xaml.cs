@@ -268,6 +268,7 @@ namespace SeeMyServer.Pages
             }
         }
 
+        // 窗口是否活动
         private void Window_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs e)
         {
             int losesFocusStopSSHSelectedIndex = (int)localSettings.Values["LosesFocusStopSSHSelectedIndex"];
