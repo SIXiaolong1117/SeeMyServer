@@ -111,28 +111,42 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <HyperlinkButton
-                        x:Name="FeedbackBugs"
-                        x:Uid="FeedbackBugs"
+                        x:Name="PRIVACYLink"
+                        x:Uid="PRIVACYLink"
                         Grid.Row="0"
                         Grid.Column="0"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
-                        Content="Github Issues"
-                        NavigateUri="https://github.com/SIXiaolong1117/SeeMyServer_Issues/issues" />
+                        NavigateUri="https://raw.githubusercontent.com/SIXiaolong1117/SeeMyServer/refs/heads/master/PRIVACY" />
                     <HyperlinkButton
-                        x:Name="PRIVACYLink"
-                        x:Uid="PRIVACYLink"
+                        x:Name="FeedbackBugs"
+                        x:Uid="FeedbackBugs"
                         Grid.Row="1"
                         Grid.Column="0"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
-                        Content="Github Issues"
-                        NavigateUri="https://github.com/SIXiaolong1117/SeeMyServer_Issues/issues" />
+                        NavigateUri="https://github.com/SIXiaolong1117/SeeMyServer/issues" />
+                    <HyperlinkButton
+                        x:Uid="AboutRepo"
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        NavigateUri="https://github.com/SIXiaolong1117/SeeMyServer" />
+                    <HyperlinkButton
+                        x:Uid="AboutMITLicense"
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        NavigateUri="https://raw.githubusercontent.com/SIXiaolong1117/SeeMyServer/refs/heads/master/LICENSE" />
+                    
                     <!--<HyperlinkButton
                     x:Uid="AboutHelp"
                     Grid.Row="2"
@@ -143,13 +157,67 @@
                 </Grid>
 
                 <TextBlock
-                    x:Name="AboutAuthor"
-                    x:Uid="AboutAuthor"
+                    x:Uid="AboutSponsor"
                     Grid.Row="3"
                     Margin="24,18,0,8" />
 
                 <Grid
                     Grid.Row="4"
+                    Margin="24,1,24,0"
+                    Padding="16"
+                    Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
+                    BorderThickness="0"
+                    CornerRadius="4,4,4,4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="150" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ScrollViewer
+                        Grid.Column="0"
+                        HorizontalAlignment="Stretch"
+                        Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
+                        CornerRadius="4">
+                        <TextBlock
+                            x:Name="NameList"
+                            Margin="8,8,8,8"
+                            TextWrapping="Wrap" />
+                    </ScrollViewer>
+                    <Grid Grid.Column="1" Margin="8,0,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <HyperlinkButton
+                            x:Name="AboutAliPay"
+                            x:Uid="AboutAliPay"
+                            Grid.Row="0"
+                            HorizontalAlignment="Left"
+                            Click="AboutAliPay_Click"
+                            FontSize="12" />
+                        <HyperlinkButton
+                            x:Name="AboutWePay"
+                            x:Uid="AboutWePay"
+                            Grid.Row="1"
+                            HorizontalAlignment="Left"
+                            Click="AboutWePay_Click"
+                            FontSize="12" />
+                    </Grid>
+                </Grid>
+
+                <TextBlock
+                    x:Name="AboutAuthor"
+                    x:Uid="AboutAuthor"
+                    Grid.Row="5"
+                    Margin="24,18,0,8" />
+
+                <Grid
+                    Grid.Row="6"
                     Margin="24,1,24,0"
                     Padding="16"
                     Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
@@ -204,11 +272,11 @@
                 <TextBlock
                     x:Name="AboutReferences"
                     x:Uid="AboutReference"
-                    Grid.Row="5"
+                    Grid.Row="7"
                     Margin="24,18,0,8" />
 
                 <Grid
-                    Grid.Row="6"
+                    Grid.Row="8"
                     Margin="24,1,24,0"
                     Padding="16"
                     Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
@@ -279,12 +347,30 @@
                 </Grid>
                 <TextBlock
                     x:Name="TipsTips"
-                    Grid.Row="7"
+                    Grid.Row="9"
                     Grid.Column="0"
                     Margin="24,8,24,0"
                     HorizontalAlignment="Center"
                     Foreground="{ThemeResource SystemControlBackgroundBaseMediumBrush}" />
             </Grid>
         </ScrollViewer>
+        <TeachingTip x:Name="AboutAliPayTips">
+            <TeachingTip.HeroContent>
+                <Image Height="400">
+                    <Image.Source>
+                        <BitmapImage UriSource="/Assets/AliPay.jpg" />
+                    </Image.Source>
+                </Image>
+            </TeachingTip.HeroContent>
+        </TeachingTip>
+        <TeachingTip x:Name="AboutWePayTips">
+            <TeachingTip.HeroContent>
+                <Image Height="400">
+                    <Image.Source>
+                        <BitmapImage UriSource="/Assets/WePay.png" />
+                    </Image.Source>
+                </Image>
+            </TeachingTip.HeroContent>
+        </TeachingTip>
     </Grid>
 </Page>

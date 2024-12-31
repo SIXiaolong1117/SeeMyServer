@@ -130,7 +130,7 @@
     <value>See My Server</value>
   </data>
   <data name="AboutCMSRightTip.Text" xml:space="preserve">
-    <value>© 2024 SI Xiaolong. All rights reserved.</value>
+    <value>© 2024 SI Xiaolong. Under MIT License.</value>
   </data>
   <data name="AboutHeader.Text" xml:space="preserve">
     <value>About</value>
@@ -350,5 +350,20 @@
   </data>
   <data name="ThemeSettingTips.Text" xml:space="preserve">
     <value>Select which app theme to display</value>
+  </data>
+  <data name="AboutRepo.Content" xml:space="preserve">
+    <value>Repository</value>
+  </data>
+  <data name="AboutMITLicense.Content" xml:space="preserve">
+    <value>MIT License</value>
+  </data>
+  <data name="AboutSponsor.Text" xml:space="preserve">
+    <value>Sponsor</value>
+  </data>
+  <data name="AboutAliPay.Content" xml:space="preserve">
+    <value>Alipay</value>
+  </data>
+  <data name="AboutWePay.Content" xml:space="preserve">
+    <value>WeChat</value>
   </data>
 </root>

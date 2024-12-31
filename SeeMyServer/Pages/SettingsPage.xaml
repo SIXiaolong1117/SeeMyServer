@@ -164,7 +164,7 @@
                     Grid.Column="0"
                     VerticalAlignment="Center"
                     FontFamily="Segoe Fluent Icons"
-                    Glyph="&#xE790;" />
+                    Glyph="&#xF8AE;" />
                 <TextBlock
                     x:Name="LosesFocusStopSSH"
                     x:Uid="LosesFocusStopSSH"

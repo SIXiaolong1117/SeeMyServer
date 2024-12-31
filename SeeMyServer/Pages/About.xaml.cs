@@ -7,6 +7,7 @@ using System.Net.Http;
 using Microsoft.UI.Xaml.Navigation;
 using SeeMyServer.Helper;
 using SeeMyServer.Models;
+using Microsoft.UI.Xaml;
 
 namespace SeeMyServer.Pages
 {
@@ -23,6 +24,15 @@ namespace SeeMyServer.Pages
             // {version.Major}.{version.Minor}.{version.Build}.{version.Revision}
             APPVersion.Text = $"{version.Major}.{version.Minor}.{version.Build}";
         }
+        private void AboutAliPay_Click(object sender, RoutedEventArgs e)
+        {
+            AboutAliPayTips.IsOpen = true;
+        }
+        private void AboutWePay_Click(object sender, RoutedEventArgs e)
+        {
+            AboutWePayTips.IsOpen = true;
+        }
+
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             GetList();
@@ -45,7 +55,23 @@ namespace SeeMyServer.Pages
         }
         private async void GetList()
         {
+            string nameList = null;
             string stringList = null;
+            try
+            {
+                nameList = await HTTPResponse("https://raw.githubusercontent.com/SIXiaolong1117/SIXiaolong1117/main/README/Sponsor/List");
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    nameList = await HTTPResponse("https://gitee.com/XiaolongSI/SIXiaolong1117/raw/main/README/Sponsor/List");
+                }
+                catch (Exception ex2)
+                {
+                    nameList = "无法连接至 Github 或 Gitee。";
+                }
+            }
             try
             {
                 stringList = await HTTPResponse("https://raw.githubusercontent.com/SIXiaolong1117/SIXiaolong1117/main/README/Text/List");
@@ -77,6 +103,7 @@ namespace SeeMyServer.Pages
             }
             catch (Exception ex) { }
 
+            NameList.Text = nameList;
             TipsTips.Text = randomLine;
         }
     }

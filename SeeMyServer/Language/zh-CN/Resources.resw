@@ -130,7 +130,7 @@
     <value>See My Server</value>
   </data>
   <data name="AboutCMSRightTip.Text" xml:space="preserve">
-    <value>© 2024 SI Xiaolong。保留所有权利。</value>
+    <value>© 2024 司晓龙. 使用 MIT License.</value>
   </data>
   <data name="AboutHeader.Text" xml:space="preserve">
     <value>关于</value>
@@ -332,5 +332,20 @@
   </data>
   <data name="ThemeSettingTips.Text" xml:space="preserve">
     <value>选择要显示的应用主题</value>
+  </data>
+  <data name="AboutRepo.Content" xml:space="preserve">
+    <value>开源仓库</value>
+  </data>
+  <data name="AboutMITLicense.Content" xml:space="preserve">
+    <value>MIT License</value>
+  </data>
+  <data name="AboutSponsor.Text" xml:space="preserve">
+    <value>赞助者</value>
+  </data>
+  <data name="AboutWePay.Content" xml:space="preserve">
+    <value>微信</value>
+  </data>
+  <data name="AboutAliPay.Content" xml:space="preserve">
+    <value>支付宝</value>
   </data>
 </root>
