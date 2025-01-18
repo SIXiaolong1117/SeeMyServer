@@ -5,9 +5,9 @@
     <a href="https://github.com/SIXiaolong1117/SeeMyServer/blob/master/LICENSE">
       <img src="https://img.shields.io/github/license/SIXiaolong1117/SeeMyServer"/>
     </a>
-    <a href="https://github.com/SIXiaolong1117/SeeMyServer/releases">
+    <!-- <a href="https://github.com/SIXiaolong1117/SeeMyServer/releases">
       <img src="https://img.shields.io/github/v/release/SIXiaolong1117/SeeMyServer?display_name=tag"/>
-    </a>
+    </a> -->
   </p>
   <p align="center">
     <a href="https://twitter.com/SI_Xiaolong">
